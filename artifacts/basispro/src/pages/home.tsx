@@ -1,9 +1,10 @@
 import React, { useEffect, useRef } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Server, Database, Cloud, Shield, Activity, RefreshCw, MoveRight, BarChart3, ChevronRight } from "lucide-react";
 
 export default function Home() {
+  const [, navigate] = useLocation();
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
@@ -102,8 +103,8 @@ export default function Home() {
             <a href="#pricing" className="hover:text-primary transition-colors">Pricing</a>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" className="text-sm font-medium text-foreground hover:text-primary">Sign In</Button>
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-semibold px-5">
+            <Button variant="ghost" className="text-sm font-medium text-foreground hover:text-primary" onClick={() => navigate("/dashboard")}>Sign In</Button>
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-semibold px-5" onClick={() => navigate("/dashboard")}>
               Subscribe
             </Button>
           </div>
@@ -126,7 +127,7 @@ export default function Home() {
                 The authoritative platform for SAP Basis engineers, consultants, and architects. Deep, precise, and built for professionals who run mission-critical landscapes.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-white text-primary hover:bg-white/90 h-12 px-8 text-base font-semibold group">
+                <Button size="lg" className="bg-white text-primary hover:bg-white/90 h-12 px-8 text-base font-semibold group" onClick={() => navigate("/dashboard")}>
                   Get Started Free
                   <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
@@ -330,7 +331,7 @@ export default function Home() {
             Join the network of SAP Basis professionals. Get unlimited access to advanced playbooks, configuration guides, and architecture blueprints.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-primary hover:bg-white/90 h-12 px-10 text-base font-semibold">
+            <Button size="lg" className="bg-white text-primary hover:bg-white/90 h-12 px-10 text-base font-semibold" onClick={() => navigate("/dashboard")}>
               Subscribe Now
             </Button>
             <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 h-12 px-10 text-base font-semibold bg-transparent">
