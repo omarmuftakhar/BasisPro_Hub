@@ -1,21 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+  AreaChart, Area, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import {
-  Server, Database, Cloud, Shield, Activity, RefreshCw,
-  BookOpen, FileText, Map, Terminal, LayoutGrid, Plug,
-  Settings, BarChart3, Brain, Bell, Search, User,
-  ChevronRight, ChevronDown, TrendingUp, Users, BookMarked,
-  Cpu, Globe, Bot, LogOut, Home, HardDrive, Layers,
-  MonitorDot, Workflow, FolderOpen, Key, Zap
+  Server, Database, Cloud, Shield, Activity, BookOpen,
+  FileText, Map, Terminal, LayoutGrid, Plug, BarChart3,
+  Brain, Bell, Search, User, ChevronRight, ChevronDown,
+  TrendingUp, Users, BookMarked, Cpu, Globe, Bot, LogOut,
+  Home, HardDrive, Layers, MonitorDot, Workflow, FolderOpen,
+  Key, Zap, Menu, X, RefreshCw, ArrowUpRight,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import ModuleView from "@/components/ModuleView";
 import { moduleRegistry } from "@/data/moduleContent";
 
+// ─── Data ──────────────────────────────────────────────────────────────
 const activityData = [
   { day: "Mon", sessions: 42, guides: 18, ai: 12 },
   { day: "Tue", sessions: 58, guides: 24, ai: 19 },
@@ -27,33 +27,40 @@ const activityData = [
 ];
 
 const moduleUsageData = [
-  { name: "S/4 HANA", value: 28 },
-  { name: "HANA DB", value: 20 },
-  { name: "Cloud ALM", value: 15 },
-  { name: "BTP", value: 13 },
-  { name: "AWS/Azure", value: 12 },
-  { name: "Others", value: 12 },
+  { name: "HANA Database", value: 26 },
+  { name: "Oracle", value: 22 },
+  { name: "Sybase ASE", value: 18 },
+  { name: "MaxDB", value: 14 },
+  { name: "Cloud ALM", value: 12 },
+  { name: "Others", value: 8 },
 ];
-
 const PIE_COLORS = ["#1565C0", "#1976D2", "#2196F3", "#42A5F5", "#90CAF9", "#BBDEFB"];
 
 const recentActivity = [
-  { user: "Rahul M.", action: "Opened HANA Scale-out Blueprint", time: "2 min ago", cat: "HANA Database" },
-  { user: "Sarah K.", action: "Completed Linux Runbook: Kernel Params", time: "11 min ago", cat: "Linux" },
-  { user: "James T.", action: "Used AI Assistant — BTP Integration query", time: "18 min ago", cat: "AI Assistant" },
-  { user: "Priya S.", action: "Viewed SolMan Focused Run Setup Guide", time: "34 min ago", cat: "Solution Manager" },
-  { user: "Chen W.", action: "Downloaded SAP S/4 HANA Sizing Blueprint", time: "52 min ago", cat: "SAP on AWS" },
-  { user: "Amir N.", action: "Reviewed Cloud ALM Operations Guide", time: "1h ago", cat: "Cloud ALM" },
+  { user: "Rahul M.", action: "Opened HANA System Replication setup guide", time: "2 min ago", cat: "HANA Database" },
+  { user: "Sarah K.", action: "Reviewed Oracle brbackup Runbook", time: "11 min ago", cat: "Oracle" },
+  { user: "James T.", action: "Studied Sybase ASE Always-On warm standby", time: "22 min ago", cat: "Sybase ASE" },
+  { user: "Priya S.", action: "Opened MaxDB Hot Standby Architecture node", time: "38 min ago", cat: "MaxDB" },
+  { user: "Chen W.", action: "Used AI Assistant — HANA HSR failover query", time: "55 min ago", cat: "AI Assistant" },
+  { user: "Amir N.", action: "Reviewed Oracle RAC Cache Fusion guide", time: "1h ago", cat: "Oracle" },
 ];
 
 const topContent = [
-  { title: "HANA Scale-out Architecture Blueprint", category: "HANA Database", views: 1240, trend: "+12%" },
-  { title: "S/4 HANA System Conversion Runbook", category: "Guides", views: 980, trend: "+8%" },
-  { title: "SAP on AWS — Instance Sizing Guide", category: "SAP on AWS", views: 872, trend: "+21%" },
-  { title: "BTP Cloud Connector Setup", category: "Cloud Connectors", views: 754, trend: "+5%" },
-  { title: "Fiori Launchpad Configuration TCodes", category: "SAP Basis TCodes", views: 631, trend: "+3%" },
+  { title: "HANA System Replication (HSR) Setup", category: "HANA Database", views: 1_540, trend: "+18%" },
+  { title: "Oracle 19c Upgrade with SAP Bundle Patch", category: "Oracle", views: 1_210, trend: "+14%" },
+  { title: "Sybase ASE Backup & Recovery Procedure", category: "Sybase ASE", views: 980, trend: "+9%" },
+  { title: "MaxDB Hot Standby Architecture", category: "MaxDB", views: 754, trend: "+22%" },
+  { title: "Oracle brbackup — Online Backup Guide", category: "Oracle", views: 631, trend: "+6%" },
 ];
 
+const moduleProgress = [
+  { label: "HANA Database", nodes: 7, total: 7, color: "#0070F2" },
+  { label: "Oracle", nodes: 10, total: 10, color: "#C62828" },
+  { label: "Sybase ASE", nodes: 10, total: 10, color: "#E53935" },
+  { label: "MaxDB", nodes: 9, total: 9, color: "#E65100" },
+];
+
+// ─── Nav definition ────────────────────────────────────────────────────
 type NavItem = { label: string; icon: React.ReactNode; id: string; badge?: number };
 type NavGroup = { group: string; items: NavItem[] };
 
@@ -121,16 +128,77 @@ const navGroups: NavGroup[] = [
   },
 ];
 
+const allNavItems = navGroups.flatMap((g) => g.items);
+
 const kpis = [
-  { label: "Active Users", value: "1,284", change: "+14%", icon: <Users className="w-5 h-5 text-primary" />, color: "bg-blue-50 border-blue-100" },
-  { label: "Modules Covered", value: "22", change: "All live", icon: <Zap className="w-5 h-5 text-indigo-500" />, color: "bg-indigo-50 border-indigo-100" },
-  { label: "Guides & Runbooks", value: "205", change: "+8 this week", icon: <BookMarked className="w-5 h-5 text-green-600" />, color: "bg-green-50 border-green-100" },
-  { label: "AI Sessions Today", value: "342", change: "+28%", icon: <Brain className="w-5 h-5 text-purple-600" />, color: "bg-purple-50 border-purple-100" },
+  {
+    label: "Active Users",
+    value: "1,284",
+    change: "+14%",
+    up: true,
+    icon: <Users className="w-5 h-5" />,
+    gradient: "from-blue-500 to-blue-600",
+    bg: "bg-blue-50",
+    ring: "ring-blue-100",
+    text: "text-blue-600",
+  },
+  {
+    label: "DB Modules Live",
+    value: "4",
+    change: "All loaded",
+    up: true,
+    icon: <Database className="w-5 h-5" />,
+    gradient: "from-indigo-500 to-indigo-600",
+    bg: "bg-indigo-50",
+    ring: "ring-indigo-100",
+    text: "text-indigo-600",
+  },
+  {
+    label: "Guides & Runbooks",
+    value: "205",
+    change: "+8 this week",
+    up: true,
+    icon: <BookMarked className="w-5 h-5" />,
+    gradient: "from-emerald-500 to-emerald-600",
+    bg: "bg-emerald-50",
+    ring: "ring-emerald-100",
+    text: "text-emerald-600",
+  },
+  {
+    label: "AI Sessions Today",
+    value: "342",
+    change: "+28%",
+    up: true,
+    icon: <Brain className="w-5 h-5" />,
+    gradient: "from-purple-500 to-purple-600",
+    bg: "bg-purple-50",
+    ring: "ring-purple-100",
+    text: "text-purple-600",
+  },
 ];
 
+// ─── Custom tooltip ─────────────────────────────────────────────────────
+const ChartTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-white border border-border rounded-xl shadow-lg px-4 py-3 text-xs">
+      <p className="font-bold text-foreground mb-1">{label}</p>
+      {payload.map((p: any) => (
+        <div key={p.name} className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+          <span className="text-muted-foreground capitalize">{p.name}:</span>
+          <span className="font-semibold text-foreground">{p.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ─── Component ──────────────────────────────────────────────────────────
 export default function Dashboard() {
   const [, navigate] = useLocation();
   const [activeId, setActiveId] = useState("overview");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     "Operating Systems": true,
     "Cloud Platforms": true,
@@ -142,361 +210,418 @@ export default function Dashboard() {
     "AI": true,
   });
 
-  const toggleGroup = (group: string) => {
+  const toggleGroup = (group: string) =>
     setExpandedGroups((prev) => ({ ...prev, [group]: !prev[group] }));
+
+  const handleNav = (id: string) => {
+    setActiveId(id);
+    setSidebarOpen(false);
   };
 
-  return (
-    <div className="flex h-screen bg-[#F5F7FA] text-foreground overflow-hidden font-sans">
+  // Close sidebar on resize to desktop
+  useEffect(() => {
+    const handler = () => { if (window.innerWidth >= 768) setSidebarOpen(false); };
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
 
-      {/* Sidebar */}
-      <aside className="w-64 flex-shrink-0 bg-white border-r border-border flex flex-col h-full overflow-hidden">
-        {/* Logo */}
-        <div className="px-5 py-4 border-b border-border flex items-center gap-2.5 flex-shrink-0">
-          <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
-            <span className="text-white font-bold text-sm">B</span>
-          </div>
-          <span className="font-bold text-lg text-foreground tracking-tight">BasisPro</span>
+  const activeLabel =
+    activeId === "overview"
+      ? "Dashboard Overview"
+      : allNavItems.find((i) => i.id === activeId)?.label ?? "Overview";
+
+  // ── Sidebar content (shared between overlay and desktop) ──────────────
+  const SidebarContent = () => (
+    <>
+      {/* Logo */}
+      <div className="px-5 py-4 border-b border-border flex items-center gap-3 flex-shrink-0"
+        style={{ background: "linear-gradient(135deg, #0070F2 0%, #1565C0 100%)" }}>
+        <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center ring-1 ring-white/30">
+          <span className="text-white font-bold text-sm">B</span>
         </div>
-
-        {/* Overview link */}
-        <div className="px-3 pt-3 pb-1 flex-shrink-0">
-          <button
-            onClick={() => setActiveId("overview")}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${activeId === "overview" ? "bg-primary text-white" : "text-foreground hover:bg-[#F0F4FF]"}`}
-          >
-            <Home className="w-4 h-4" />
-            Overview
-          </button>
+        <div>
+          <span className="font-bold text-base text-white tracking-tight">BasisPro</span>
+          <div className="text-[10px] text-white/60 font-medium">SAP Basis Platform</div>
         </div>
+        {/* Mobile close button */}
+        <button
+          className="ml-auto md:hidden text-white/70 hover:text-white"
+          onClick={() => setSidebarOpen(false)}
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
-        {/* Nav Groups */}
-        <nav className="flex-1 overflow-y-auto px-3 pb-3 space-y-1 scrollbar-thin">
-          {navGroups.map((group) => (
-            <div key={group.group} className="pt-1">
-              <button
-                onClick={() => toggleGroup(group.group)}
-                className="w-full flex items-center justify-between px-2 py-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
-              >
-                <span>{group.group}</span>
-                {expandedGroups[group.group]
-                  ? <ChevronDown className="w-3 h-3" />
-                  : <ChevronRight className="w-3 h-3" />}
-              </button>
-              {expandedGroups[group.group] && (
-                <div className="space-y-0.5 mt-0.5">
-                  {group.items.map((item) => (
+      {/* Overview */}
+      <div className="px-3 pt-3 pb-1 flex-shrink-0">
+        <button
+          onClick={() => handleNav("overview")}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+            activeId === "overview"
+              ? "bg-primary text-white shadow-md shadow-primary/25"
+              : "text-foreground hover:bg-[#F0F4FF]"
+          }`}
+        >
+          <Home className="w-4 h-4" />
+          Overview
+        </button>
+      </div>
+
+      {/* Nav groups */}
+      <nav className="flex-1 overflow-y-auto px-3 pb-3 space-y-0.5 scrollbar-thin">
+        {navGroups.map((group) => (
+          <div key={group.group} className="pt-2">
+            <button
+              onClick={() => toggleGroup(group.group)}
+              className="w-full flex items-center justify-between px-2 py-1.5 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest hover:text-foreground transition-colors"
+            >
+              <span>{group.group}</span>
+              {expandedGroups[group.group]
+                ? <ChevronDown className="w-3 h-3" />
+                : <ChevronRight className="w-3 h-3" />}
+            </button>
+            {expandedGroups[group.group] && (
+              <div className="space-y-0.5 mt-0.5">
+                {group.items.map((item) => {
+                  const isActive = activeId === item.id;
+                  const hasContent = !!moduleRegistry[item.id];
+                  return (
                     <button
                       key={item.id}
-                      onClick={() => setActiveId(item.id)}
-                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
-                        activeId === item.id
+                      onClick={() => handleNav(item.id)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-all ${
+                        isActive
                           ? "bg-[#EBF3FD] text-primary font-semibold"
-                          : "text-muted-foreground hover:bg-[#F0F4FF] hover:text-foreground"
+                          : "text-muted-foreground hover:bg-[#F5F7FA] hover:text-foreground"
                       }`}
                     >
                       {item.icon}
                       <span className="flex-1 text-left truncate">{item.label}</span>
+                      {hasContent && !isActive && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" title="Content available" />
+                      )}
                       {item.badge !== undefined && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 bg-primary/10 text-primary rounded-full">
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${
+                          isActive ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
+                        }`}>
                           {item.badge}
                         </span>
                       )}
                     </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </nav>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ))}
+      </nav>
 
-        {/* User profile */}
-        <div className="border-t border-border px-4 py-3 flex items-center gap-3 flex-shrink-0">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <User className="w-4 h-4 text-primary" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold text-foreground truncate">SAP Professional</div>
-            <div className="text-xs text-muted-foreground">Premium Member</div>
-          </div>
-          <button
-            onClick={() => navigate("/")}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            title="Sign out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+      {/* User profile */}
+      <div className="border-t border-border px-4 py-3 flex items-center gap-3 flex-shrink-0 bg-[#FAFBFC]">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center flex-shrink-0">
+          <span className="text-white text-xs font-bold">SP</span>
         </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-semibold text-foreground truncate">SAP Professional</div>
+          <div className="text-xs text-emerald-600 font-medium">● Premium Member</div>
+        </div>
+        <button
+          onClick={() => navigate("/")}
+          className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-[#F0F4FF]"
+          title="Sign out"
+        >
+          <LogOut className="w-4 h-4" />
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="flex h-screen bg-[#F5F7FA] text-foreground overflow-hidden font-sans">
+
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-20 bg-black/40 backdrop-blur-sm md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar — fixed drawer on mobile, static on desktop */}
+      <aside
+        className={`
+          fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-border flex flex-col h-full overflow-hidden
+          transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          md:relative md:translate-x-0 md:flex-shrink-0
+        `}
+      >
+        <SidebarContent />
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto min-w-0">
 
         {/* Top bar */}
-        <header className="sticky top-0 z-20 bg-white border-b border-border px-8 h-16 flex items-center justify-between flex-shrink-0">
-          <div>
-            <h1 className="text-lg font-bold text-foreground">
-              {activeId === "overview"
-                ? "Dashboard Overview"
-                : navGroups.flatMap((g) => g.items).find((i) => i.id === activeId)?.label ?? "Overview"}
-            </h1>
-            <p className="text-xs text-muted-foreground">Monday, April 21, 2026</p>
+        <header className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-border px-4 md:px-6 h-16 flex items-center justify-between flex-shrink-0 shadow-sm">
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Hamburger — mobile only */}
+            <button
+              className="md:hidden p-2 -ml-1 rounded-xl hover:bg-[#F5F7FA] text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <div className="min-w-0">
+              <h1 className="text-base md:text-lg font-bold text-foreground truncate">{activeLabel}</h1>
+              <p className="text-xs text-muted-foreground hidden sm:block">Monday, April 21, 2026</p>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
+          <div className="flex items-center gap-2">
+            <div className="relative hidden sm:block">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="search"
                 placeholder="Search modules, guides..."
-                className="pl-9 pr-4 py-2 text-sm border border-border rounded-lg bg-[#F5F7FA] focus:outline-none focus:ring-2 focus:ring-primary/30 w-60"
+                className="pl-9 pr-4 py-2 text-sm border border-border rounded-xl bg-[#F5F7FA] focus:outline-none focus:ring-2 focus:ring-primary/30 w-48 lg:w-60 transition-all"
               />
             </div>
-            <button className="relative p-2 rounded-lg hover:bg-[#F5F7FA] text-muted-foreground hover:text-foreground transition-colors">
+            <button className="relative p-2 rounded-xl hover:bg-[#F5F7FA] text-muted-foreground hover:text-foreground transition-colors">
               <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
             </button>
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center flex-shrink-0">
               <span className="text-white text-xs font-bold">SP</span>
             </div>
           </div>
         </header>
 
         {/* Page body */}
-        <div className="p-8 space-y-8">
+        <div className="p-4 md:p-6 space-y-6">
 
-          {/* Module content when a known module is selected */}
+          {/* ── Module content ─────────────────────────── */}
           {moduleRegistry[activeId] ? (
             <ModuleView module={moduleRegistry[activeId]} />
           ) : activeId !== "overview" ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center mb-4">
+              <div className="w-16 h-16 rounded-2xl bg-[#EBF3FD] flex items-center justify-center mb-4">
                 <BookOpen className="w-8 h-8 text-primary" />
               </div>
               <h2 className="text-xl font-bold text-foreground mb-2">Content Coming Soon</h2>
               <p className="text-muted-foreground text-sm max-w-sm">
-                We are building expert-level content for this module. It will be available in the next update.
+                Expert-level content for this module is being prepared. Check back in the next update.
               </p>
             </div>
           ) : null}
 
-          {/* Overview dashboard — only shown on 'overview' tab */}
-          {activeId === "overview" && (<>
-
-          {/* KPI cards */}
-          <div className="grid grid-cols-2 xl:grid-cols-4 gap-5">
-            {kpis.map((kpi, i) => (
-              <div key={i} className={`bg-white rounded-2xl border p-5 flex flex-col gap-3 shadow-sm ${kpi.color}`}>
-                <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center">
-                    {kpi.icon}
-                  </div>
-                  <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">{kpi.change}</span>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-foreground">{kpi.value}</div>
-                  <div className="text-xs text-muted-foreground font-medium mt-0.5">{kpi.label}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Charts row */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-
-            {/* Activity chart */}
-            <div className="xl:col-span-2 bg-white rounded-2xl border border-border p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="font-bold text-foreground text-base">Weekly Platform Activity</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Sessions, guide views & AI queries this week</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" />Sessions
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <span className="w-2.5 h-2.5 rounded-full bg-blue-300 inline-block" />Guides
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <span className="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block" />AI
-                  </div>
-                </div>
-              </div>
-              <ResponsiveContainer width="100%" height={220}>
-                <AreaChart data={activityData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="gSessions" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#1565C0" stopOpacity={0.15}/>
-                      <stop offset="95%" stopColor="#1565C0" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="gGuides" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#90CAF9" stopOpacity={0.15}/>
-                      <stop offset="95%" stopColor="#90CAF9" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="gAi" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#AB47BC" stopOpacity={0.15}/>
-                      <stop offset="95%" stopColor="#AB47BC" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F0F4FF" vertical={false} />
-                  <XAxis dataKey="day" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                  <Tooltip
-                    contentStyle={{ border: "1px solid #E2E8F0", borderRadius: "10px", fontSize: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}
-                    labelStyle={{ fontWeight: 700, color: "#1e293b" }}
-                  />
-                  <Area type="monotone" dataKey="sessions" stroke="#1565C0" strokeWidth={2} fill="url(#gSessions)" />
-                  <Area type="monotone" dataKey="guides" stroke="#90CAF9" strokeWidth={2} fill="url(#gGuides)" />
-                  <Area type="monotone" dataKey="ai" stroke="#AB47BC" strokeWidth={2} fill="url(#gAi)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Module usage pie */}
-            <div className="bg-white rounded-2xl border border-border p-6 shadow-sm">
-              <div className="mb-4">
-                <h3 className="font-bold text-foreground text-base">Module Popularity</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Content views by module</p>
-              </div>
-              <ResponsiveContainer width="100%" height={160}>
-                <PieChart>
-                  <Pie data={moduleUsageData} cx="50%" cy="50%" innerRadius={45} outerRadius={72} paddingAngle={3} dataKey="value">
-                    {moduleUsageData.map((_, idx) => (
-                      <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{ border: "1px solid #E2E8F0", borderRadius: "10px", fontSize: "12px" }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="space-y-2 mt-2">
-                {moduleUsageData.map((d, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i] }} />
-                      <span className="text-muted-foreground">{d.name}</span>
-                    </div>
-                    <span className="font-semibold text-foreground">{d.value}%</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom row */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-
-            {/* Recent Activity */}
-            <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-foreground text-base">Recent Activity</h3>
-                  <p className="text-xs text-muted-foreground">Live feed across all members</p>
-                </div>
-                <Button variant="ghost" size="sm" className="text-primary text-xs font-semibold hover:bg-accent">
-                  View all
-                </Button>
-              </div>
-              <div className="divide-y divide-border">
-                {recentActivity.map((item, i) => (
-                  <div key={i} className="flex items-start gap-3 px-6 py-3.5 hover:bg-[#F9FBFF] transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-primary text-xs font-bold">{item.user.charAt(0)}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-semibold text-foreground">{item.user}</span>
-                        <span className="text-[10px] font-semibold px-2 py-0.5 bg-accent text-accent-foreground rounded-full">{item.cat}</span>
+          {/* ── Overview dashboard ──────────────────────── */}
+          {activeId === "overview" && (
+            <>
+              {/* KPI cards */}
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+                {kpis.map((kpi, i) => (
+                  <div key={i} className={`bg-white rounded-2xl border ring-1 ${kpi.ring} p-4 md:p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow`}>
+                    <div className="flex items-center justify-between">
+                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${kpi.gradient} flex items-center justify-center text-white shadow-md`}>
+                        {kpi.icon}
                       </div>
-                      <div className="text-xs text-muted-foreground mt-0.5 truncate">{item.action}</div>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${kpi.bg} ${kpi.text}`}>
+                        {kpi.change}
+                      </span>
                     </div>
-                    <span className="text-[11px] text-muted-foreground flex-shrink-0 mt-0.5">{item.time}</span>
+                    <div>
+                      <div className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">{kpi.value}</div>
+                      <div className="text-xs text-muted-foreground font-medium mt-0.5">{kpi.label}</div>
+                    </div>
                   </div>
                 ))}
               </div>
-            </div>
 
-            {/* Top Content */}
-            <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-foreground text-base">Top Content This Week</h3>
-                  <p className="text-xs text-muted-foreground">Most viewed guides & blueprints</p>
-                </div>
-                <TrendingUp className="w-4 h-4 text-green-500" />
-              </div>
-              <div className="divide-y divide-border">
-                {topContent.map((item, i) => (
-                  <div key={i} className="flex items-center gap-4 px-6 py-3.5 hover:bg-[#F9FBFF] transition-colors cursor-pointer group">
-                    <div className="w-7 h-7 rounded-lg bg-[#F0F4FF] flex items-center justify-center flex-shrink-0 text-xs font-bold text-primary">
-                      {i + 1}
+              {/* Charts row */}
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+                {/* Activity area chart */}
+                <div className="lg:col-span-3 bg-white rounded-2xl border border-border shadow-sm p-5">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h2 className="font-bold text-foreground">Weekly Platform Activity</h2>
+                      <p className="text-xs text-muted-foreground mt-0.5">Sessions, guide views & AI queries this week</p>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">{item.title}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">{item.category} · {item.views.toLocaleString()} views</div>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" />Sessions</span>
+                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block" />Guides</span>
+                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block" />AI</span>
                     </div>
-                    <span className="text-xs font-bold text-green-600 flex-shrink-0">{item.trend}</span>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
+                  <ResponsiveContainer width="100%" height={220}>
+                    <AreaChart data={activityData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="gSessions" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#0070F2" stopOpacity={0.15} />
+                          <stop offset="95%" stopColor="#0070F2" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="gGuides" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#34D399" stopOpacity={0.15} />
+                          <stop offset="95%" stopColor="#34D399" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="gAI" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#A78BFA" stopOpacity={0.15} />
+                          <stop offset="95%" stopColor="#A78BFA" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
+                      <XAxis dataKey="day" tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={false} tickLine={false} />
+                      <Tooltip content={<ChartTooltip />} />
+                      <Area type="monotone" dataKey="sessions" stroke="#0070F2" strokeWidth={2} fill="url(#gSessions)" />
+                      <Area type="monotone" dataKey="guides" stroke="#34D399" strokeWidth={2} fill="url(#gGuides)" />
+                      <Area type="monotone" dataKey="ai" stroke="#A78BFA" strokeWidth={2} fill="url(#gAI)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
 
-          {/* User Status Bar */}
-          <div className="bg-white rounded-2xl border border-border shadow-sm p-6">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h3 className="font-bold text-foreground text-base">Your Learning Progress</h3>
-                <p className="text-xs text-muted-foreground">Modules explored across the platform</p>
-              </div>
-              <span className="text-xs font-semibold text-primary bg-accent px-3 py-1 rounded-full">Premium Plan</span>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { label: "Guides Read", val: 28, max: 120, color: "#1565C0" },
-                { label: "Blueprints Saved", val: 9, max: 38, color: "#7B1FA2" },
-                { label: "Runbooks Completed", val: 14, max: 47, color: "#2E7D32" },
-                { label: "AI Sessions Used", val: 52, max: 100, color: "#E65100" },
-              ].map((bar, i) => (
-                <div key={i}>
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span className="font-medium text-muted-foreground">{bar.label}</span>
-                    <span className="font-bold text-foreground">{bar.val}/{bar.max}</span>
-                  </div>
-                  <div className="h-2 bg-[#F0F4FF] rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{ width: `${(bar.val / bar.max) * 100}%`, background: bar.color }}
-                    />
+                {/* Module popularity pie */}
+                <div className="lg:col-span-2 bg-white rounded-2xl border border-border shadow-sm p-5">
+                  <h2 className="font-bold text-foreground">Module Popularity</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5 mb-3">Content views by module</p>
+                  <ResponsiveContainer width="100%" height={140}>
+                    <PieChart>
+                      <Pie data={moduleUsageData} cx="50%" cy="50%" innerRadius={42} outerRadius={66} paddingAngle={2} dataKey="value">
+                        {moduleUsageData.map((_, idx) => (
+                          <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(v: any) => `${v}%`} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="space-y-1.5 mt-2">
+                    {moduleUsageData.map((m, i) => (
+                      <div key={m.name} className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i] }} />
+                          <span className="text-muted-foreground">{m.name}</span>
+                        </div>
+                        <span className="font-semibold text-foreground">{m.value}%</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* AI Assistant Banner */}
-          <div className="rounded-2xl overflow-hidden" style={{ background: "linear-gradient(135deg, #1565C0, #0D47A1)" }}>
-            <div className="px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-5">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-7 h-7 text-white" />
+              {/* DB Module progress */}
+              <div className="bg-white rounded-2xl border border-border shadow-sm p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="font-bold text-foreground">Live Database Modules</h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">Content nodes loaded per database module</p>
+                  </div>
+                  <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full ring-1 ring-emerald-100">
+                    4 / 4 Complete
+                  </span>
                 </div>
-                <div>
-                  <div className="text-white font-bold text-lg">AI Assistant — All Modules</div>
-                  <div className="text-white/70 text-sm mt-0.5">Ask anything about SAP Basis — HANA, Cloud ALM, BTP, SolMan, migrations, TCodes, and more.</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {moduleProgress.map((mod) => {
+                    const pct = Math.round((mod.nodes / mod.total) * 100);
+                    return (
+                      <div key={mod.label} className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium text-foreground">{mod.label}</span>
+                          <span className="text-xs text-muted-foreground">{mod.nodes} nodes</span>
+                        </div>
+                        <div className="h-2 bg-[#F0F4FF] rounded-full overflow-hidden">
+                          <div
+                            className="h-2 rounded-full transition-all duration-700"
+                            style={{ width: `${pct}%`, background: mod.color }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-              <button
-                onClick={() => setActiveId("ai")}
-                className="flex-shrink-0 bg-white text-primary font-bold px-6 py-2.5 rounded-xl hover:bg-white/90 transition-colors text-sm"
+
+              {/* Activity + Top content */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Recent Activity */}
+                <div className="bg-white rounded-2xl border border-border shadow-sm p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="font-bold text-foreground">Recent Activity</h2>
+                    <button className="text-xs text-primary hover:underline font-medium flex items-center gap-1">
+                      View all <ArrowUpRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {recentActivity.map((item, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0 text-primary font-bold text-xs mt-0.5">
+                          {item.user.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-foreground font-medium truncate">{item.action}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[11px] text-primary bg-[#EBF3FD] px-1.5 py-0.5 rounded-full font-medium">{item.cat}</span>
+                            <span className="text-[11px] text-muted-foreground">{item.time}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Top content */}
+                <div className="bg-white rounded-2xl border border-border shadow-sm p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="font-bold text-foreground">Top Viewed Content</h2>
+                    <button className="text-xs text-primary hover:underline font-medium flex items-center gap-1">
+                      View all <ArrowUpRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {topContent.map((item, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#F5F7FA] transition-colors cursor-pointer group">
+                        <div className="w-7 h-7 rounded-lg bg-[#EBF3FD] flex items-center justify-center flex-shrink-0 text-primary text-xs font-bold">
+                          {i + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{item.title}</p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">{item.category}</p>
+                        </div>
+                        <div className="flex flex-col items-end flex-shrink-0">
+                          <span className="text-xs font-semibold text-emerald-600">{item.trend}</span>
+                          <span className="text-[11px] text-muted-foreground">{item.views.toLocaleString()} views</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Assistant Banner */}
+              <div
+                className="rounded-2xl overflow-hidden shadow-lg"
+                style={{ background: "linear-gradient(135deg, #0D47A1 0%, #1565C0 50%, #0070F2 100%)" }}
               >
-                Open AI Assistant
-              </button>
-            </div>
-          </div>
-
-          </>)}
+                <div className="px-6 md:px-8 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0 ring-1 ring-white/20">
+                      <Bot className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-white font-bold text-lg">AI Assistant — All Modules</div>
+                      <div className="text-white/70 text-sm mt-0.5">
+                        Ask anything about SAP Basis — HANA, Oracle, Sybase, Cloud ALM, BTP, SolMan, TCodes, and more.
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setActiveId("ai")}
+                    className="flex-shrink-0 bg-white text-primary font-bold px-6 py-2.5 rounded-xl hover:bg-white/90 transition-all shadow-md hover:shadow-lg text-sm"
+                  >
+                    Open AI Assistant
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
 
         </div>
       </main>

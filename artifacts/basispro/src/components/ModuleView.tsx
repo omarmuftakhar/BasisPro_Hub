@@ -4,7 +4,9 @@ import {
   Lightbulb, BookOpen, Link2, Hash, CheckCircle2, Star,
   Database, Server, Cloud, Activity, Archive, Settings,
   Users, Monitor, Package, Power, TrendingUp, HelpCircle,
-  GraduationCap, GitFork, GitBranch, Shuffle, ArrowUpCircle
+  GraduationCap, GitFork, GitBranch, Shuffle, ArrowUpCircle,
+  Wrench, Shield, Layers, BarChart3, RefreshCw, RotateCcw,
+  HardDrive, Bell, Zap, Globe,
 } from "lucide-react";
 import type { ModuleData, ContentNode, ModuleSection } from "@/data/moduleContent";
 
@@ -27,6 +29,16 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   Shuffle: <Shuffle className="w-5 h-5" />,
   ArrowUpCircle: <ArrowUpCircle className="w-5 h-5" />,
   BookOpen: <BookOpen className="w-5 h-5" />,
+  Wrench: <Wrench className="w-5 h-5" />,
+  Shield: <Shield className="w-5 h-5" />,
+  Layers: <Layers className="w-5 h-5" />,
+  BarChart3: <BarChart3 className="w-5 h-5" />,
+  RefreshCw: <RefreshCw className="w-5 h-5" />,
+  RotateCcw: <RotateCcw className="w-5 h-5" />,
+  HardDrive: <HardDrive className="w-5 h-5" />,
+  Bell: <Bell className="w-5 h-5" />,
+  Zap: <Zap className="w-5 h-5" />,
+  Globe: <Globe className="w-5 h-5" />,
 };
 
 function NodeCard({ node, color }: { node: ContentNode; color: string }) {
