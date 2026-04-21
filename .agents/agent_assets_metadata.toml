@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "XCI3EXn9YtGIczOKoc8Ne"
+uri = "file://artifacts/basispro/public/hero-bg.png"
+type = "image"
+title = "Hero data flow background"
+
+[[generated]]
+id = "-plkP9-Pc3lihEl767iQF"
+uri = "file://artifacts/basispro/public/migration-bg.png"
+type = "image"
+title = "Cloud migration abstract visualization"
+
+[[generated]]
+id = "rOG3B6p5y6giDYu9kcyiO"
+uri = "file://artifacts/basispro/public/dashboard-abstract.png"
+type = "image"
+title = "Dashboard abstract elements"
