@@ -13,6 +13,8 @@ import {
   MonitorDot, Workflow, FolderOpen, Key, Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ModuleView from "@/components/ModuleView";
+import { moduleRegistry } from "@/data/moduleContent";
 
 const activityData = [
   { day: "Mon", sessions: 42, guides: 18, ai: 12 },
@@ -262,6 +264,24 @@ export default function Dashboard() {
         {/* Page body */}
         <div className="p-8 space-y-8">
 
+          {/* Module content when a known module is selected */}
+          {moduleRegistry[activeId] ? (
+            <ModuleView module={moduleRegistry[activeId]} />
+          ) : activeId !== "overview" ? (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center mb-4">
+                <BookOpen className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-xl font-bold text-foreground mb-2">Content Coming Soon</h2>
+              <p className="text-muted-foreground text-sm max-w-sm">
+                We are building expert-level content for this module. It will be available in the next update.
+              </p>
+            </div>
+          ) : null}
+
+          {/* Overview dashboard — only shown on 'overview' tab */}
+          {activeId === "overview" && (<>
+
           {/* KPI cards */}
           <div className="grid grid-cols-2 xl:grid-cols-4 gap-5">
             {kpis.map((kpi, i) => (
@@ -475,6 +495,8 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
+
+          </>)}
 
         </div>
       </main>
