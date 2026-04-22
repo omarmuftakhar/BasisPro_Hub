@@ -1778,10 +1778,3 @@ export const oracleModule: ModuleData = {
   ],
 };
 
-// Master registry
-export const moduleRegistry: Record<string, ModuleData> = {
-  hana: hanaModule,
-  maxdb: maxdbModule,
-  sybase: sybaseModule,
-  oracle: oracleModule,
-};

@@ -13,7 +13,7 @@ import {
   Key, Zap, Menu, X, RefreshCw, ArrowUpRight,
 } from "lucide-react";
 import ModuleView from "@/components/ModuleView";
-import { moduleRegistry } from "@/data/moduleContent";
+import { moduleRegistry } from "@/data/moduleRegistry";
 
 // ─── Data ──────────────────────────────────────────────────────────────
 const activityData = [
@@ -92,9 +92,6 @@ const navGroups: NavGroup[] = [
   {
     group: "Resources",
     items: [
-      { label: "All Runbooks", icon: <BookOpen className="w-4 h-4" />, id: "runbooks", badge: 47 },
-      { label: "Guides", icon: <FileText className="w-4 h-4" />, id: "guides", badge: 120 },
-      { label: "Blueprints", icon: <Map className="w-4 h-4" />, id: "blueprints", badge: 38 },
       { label: "SAP Basis TCodes", icon: <Key className="w-4 h-4" />, id: "tcodes" },
     ],
   },
