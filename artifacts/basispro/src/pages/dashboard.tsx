@@ -11,9 +11,14 @@ import {
   TrendingUp, Users, BookMarked, Cpu, Globe, Bot, LogOut,
   Home, HardDrive, Layers, MonitorDot, Workflow, FolderOpen,
   Key, Zap, Menu, X, RefreshCw, ArrowUpRight,
+  Award, MessageSquare,
 } from "lucide-react";
 import ModuleView from "@/components/ModuleView";
 import { moduleRegistry } from "@/data/moduleRegistry";
+import TCodeLibrary from "@/components/TCodeLibrary";
+import CareerRoadmap from "@/components/CareerRoadmap";
+import CloudCertifications from "@/components/CloudCertifications";
+import InterviewPrep from "@/components/InterviewPrep";
 
 // ─── Data ──────────────────────────────────────────────────────────────
 const activityData = [
@@ -115,6 +120,14 @@ const navGroups: NavGroup[] = [
     items: [
       { label: "SAC Configuration", icon: <BarChart3 className="w-4 h-4" />, id: "sac" },
       { label: "Cloud Connectors", icon: <Shield className="w-4 h-4" />, id: "connectors" },
+    ],
+  },
+  {
+    group: "Career",
+    items: [
+      { label: "Roadmap", icon: <TrendingUp className="w-4 h-4" />, id: "roadmap" },
+      { label: "Cloud Certifications", icon: <Award className="w-4 h-4" />, id: "certifications" },
+      { label: "Interview Prep", icon: <MessageSquare className="w-4 h-4" />, id: "interviewPrep" },
     ],
   },
   {
@@ -396,20 +409,28 @@ export default function Dashboard() {
         {/* Page body */}
         <div className="p-4 md:p-6 space-y-6">
 
+          {/* ── Special views ─────────────────────────── */}
+          {activeId === "tcodes" && <TCodeLibrary />}
+          {activeId === "roadmap" && <CareerRoadmap />}
+          {activeId === "certifications" && <CloudCertifications />}
+          {activeId === "interviewPrep" && <InterviewPrep />}
+
           {/* ── Module content ─────────────────────────── */}
-          {moduleRegistry[activeId] ? (
-            <ModuleView module={moduleRegistry[activeId]} />
-          ) : activeId !== "overview" ? (
-            <div className="flex flex-col items-center justify-center py-24 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-[#EBF3FD] flex items-center justify-center mb-4">
-                <BookOpen className="w-8 h-8 text-primary" />
+          {!["tcodes","roadmap","certifications","interviewPrep","overview"].includes(activeId) && (
+            moduleRegistry[activeId] ? (
+              <ModuleView module={moduleRegistry[activeId]} />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-24 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-[#EBF3FD] flex items-center justify-center mb-4">
+                  <BookOpen className="w-8 h-8 text-primary" />
+                </div>
+                <h2 className="text-xl font-bold text-foreground mb-2">Content Coming Soon</h2>
+                <p className="text-muted-foreground text-sm max-w-sm">
+                  Expert-level content for this module is being prepared. Check back in the next update.
+                </p>
               </div>
-              <h2 className="text-xl font-bold text-foreground mb-2">Content Coming Soon</h2>
-              <p className="text-muted-foreground text-sm max-w-sm">
-                Expert-level content for this module is being prepared. Check back in the next update.
-              </p>
-            </div>
-          ) : null}
+            )
+          )}
 
           {/* ── Overview dashboard ──────────────────────── */}
           {activeId === "overview" && (
