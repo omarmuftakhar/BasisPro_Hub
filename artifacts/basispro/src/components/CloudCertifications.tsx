@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Award, ExternalLink, ChevronDown, ChevronRight, Star, Clock, Layers, Globe, Shield, Database, Cloud, BookOpen, CheckCircle2 } from "lucide-react";
+import { Award, ExternalLink, ChevronDown, ChevronRight, Star, Clock, BookOpen, CheckCircle2, Layers, Cloud, Database, Shield } from "lucide-react";
 
 interface Cert {
   id: string;
   code: string;
   title: string;
-  vendor: "SAP" | "AWS" | "Azure" | "GCP" | "Generic";
-  level: "Associate" | "Professional" | "Specialty" | "Expert" | "Foundational";
+  vendor: "SAP" | "AWS" | "Azure" | "GCP";
+  level: "Foundational" | "Associate" | "Professional" | "Specialty" | "Expert";
   duration: string;
   questions: number;
   passMark: number;
@@ -18,11 +18,11 @@ interface Cert {
   examUrl: string;
   studyUrl?: string;
   relevance: "critical" | "high" | "useful";
-  color: string;
-  icon: React.ReactNode;
+  gradient: string;
 }
 
 const CERTS: Cert[] = [
+  // ── SAP ────────────────────────────────────────────────────────────────────
   {
     id: "c_s4adm",
     code: "C_S4ADM_2404",
@@ -32,137 +32,202 @@ const CERTS: Cert[] = [
     duration: "180 min",
     questions: 80,
     passMark: 65,
-    price: "$575 USD",
+    price: "$575",
     validity: "2 years",
-    description: "The primary SAP Basis certification for S/4HANA system administrators. Covers system monitoring, client administration, transport management, profile parameters, background jobs, and HANA integration.",
+    description: "The primary SAP Basis certification for S/4HANA administrators. Covers system monitoring, client administration, transport management, profile parameters, background jobs, HANA integration, and Fiori basics.",
     topics: [
-      "S/4HANA system architecture and components",
-      "Client administration and client copy",
-      "Transport Management System (STMS)",
-      "System monitoring and CCMS (RZ20/AL01)",
-      "User administration and authorizations (SU01/PFCG)",
-      "Background job management (SM36/SM37)",
-      "Profile parameter management (RZ10/RZ11)",
-      "Support package installation (SPAM/SAINT)",
-      "SAP HANA administration basics",
-      "Fiori Launchpad configuration",
+      "S/4HANA architecture, installation, and landscape",
+      "Client administration (SCC4, SCCL, SCC7)",
+      "Transport Management System — STMS routes and import queues",
+      "System monitoring with CCMS (RZ20, AL01, SM50/SM66)",
+      "User administration and authorizations (SU01, PFCG, SUIM)",
+      "Background job scheduling and management (SM36/SM37)",
+      "Profile parameter management (RZ10 / RZ11)",
+      "Support package installation (SPAM / SAINT)",
+      "SAP HANA administration basics — backup, monitoring",
+      "Fiori Launchpad and OData service activation",
     ],
     tips: [
-      "Focus on SM36/SM37/SM50 — commonly tested in detail",
-      "Know all SCC* transactions for client copy scenarios",
-      "Understand STMS transport routes and domain controller concept",
-      "RZ10 dynamic vs static parameters — exam favourite",
-      "Practice with SAP Learning Hub trial systems before exam",
+      "Know SM36/SM37/SM50 deeply — these are consistently examined",
+      "Understand all SCC* client copy transactions and their differences",
+      "RZ10 static vs dynamic parameters — expect scenario-based questions",
+      "STMS domain controller concept and transport route configuration",
+      "Use SAP Learning Hub trial systems for hands-on practice before exam",
     ],
     examUrl: "https://training.sap.com/certification/c_s4adm_2404-sap-certified-associate---sap-s4hana-system-administration-g/",
     studyUrl: "https://learning.sap.com/",
     relevance: "critical",
-    color: "from-blue-600 to-indigo-600",
-    icon: <Database className="w-5 h-5" />,
+    gradient: "from-blue-600 to-indigo-600",
   },
   {
     id: "c_hanatec",
     code: "C_HANATEC_18",
-    title: "SAP Certified Technology Associate – SAP HANA 2.0",
+    title: "SAP Certified Technology Associate – SAP HANA 2.0 (SPS07)",
     vendor: "SAP",
     level: "Associate",
     duration: "180 min",
     questions: 80,
     passMark: 68,
-    price: "$575 USD",
+    price: "$575",
     validity: "2 years",
-    description: "Deep dive into SAP HANA 2.0 database administration: installation, configuration, backup & recovery, monitoring, security, and replication. Essential for any DBA-focused Basis role.",
+    description: "Deep dive into SAP HANA 2.0 database administration: installation, HANA System Replication, backup & recovery, security, multi-tenant containers, monitoring, and performance tuning.",
     topics: [
-      "SAP HANA installation and initial configuration",
-      "HANA System Replication (HSR) — SYNC, ASYNC, SYNCMEM",
-      "HANA backup and recovery strategies (file, backint, snapshot)",
-      "HANA security: users, roles, privileges, auditing",
-      "HANA monitoring with HANA Cockpit and Studio",
-      "HANA persistence layer and storage configuration",
-      "HANA multi-tenant database containers (MDC)",
-      "HANA performance analysis and SQL tuning",
-      "HANA scale-out architecture",
+      "SAP HANA installation, configuration, and initial setup",
+      "HANA System Replication — SYNC, SYNCMEM, ASYNC modes",
+      "Backup and recovery: file, Backint, incremental, delta",
+      "Multi-tenant Database Containers (MDC) — system DB vs tenant DB",
+      "HANA security: users, roles, privileges, audit policies",
+      "HANA monitoring with HANA Cockpit and system views",
+      "Persistence and storage configuration for HANA",
+      "Performance analysis: expensive statements, delta merge",
+      "HANA scale-out architecture concepts",
       "SAP HANA Cloud fundamentals",
     ],
     tips: [
-      "Deep focus on HSR — know all modes and when to use each",
-      "Backup/recovery scenarios: full, incremental, delta — exam tests recovery procedures",
-      "MDC architecture (system DB vs tenant DB) is heavily tested",
-      "Security: difference between object privileges, system privileges, analytic privileges",
-      "Use hdbsql command-line for practice — many exam questions are on CLI procedures",
+      "HSR — know all modes and exact configuration commands (hdbnsutil)",
+      "Backup/recovery procedure in MDC: system DB first, then tenants",
+      "MDC architecture is the most heavily tested area",
+      "Security: distinguish object, system, and analytic privileges",
+      "Use hdbsql CLI for hands-on practice — many exam questions are CLI-based",
     ],
     examUrl: "https://training.sap.com/certification/c_hanatec_18-sap-certified-technology-associate---sap-hana-20-sps07-g/",
+    studyUrl: "https://learning.sap.com/",
     relevance: "critical",
-    color: "from-indigo-600 to-violet-600",
-    icon: <Database className="w-5 h-5" />,
+    gradient: "from-indigo-600 to-violet-600",
   },
+
+  // ── AWS ────────────────────────────────────────────────────────────────────
   {
-    id: "c_byd_mis",
-    code: "C_BYD_MIS",
-    title: "SAP Certified Technology Specialist – SAP BTP Integration",
-    vendor: "SAP",
-    level: "Professional",
-    duration: "180 min",
-    questions: 60,
-    passMark: 62,
-    price: "$575 USD",
-    validity: "2 years",
-    description: "BTP Integration Suite configuration and operations. Relevant for Basis consultants managing SAP BTP subaccounts, Cloud Connector, and integration flows connecting on-premise to cloud.",
+    id: "aws-cp",
+    code: "CLF-C02",
+    title: "AWS Certified Cloud Practitioner",
+    vendor: "AWS",
+    level: "Foundational",
+    duration: "90 min",
+    questions: 65,
+    passMark: 70,
+    price: "$100",
+    validity: "3 years",
+    description: "Entry-level AWS certification covering cloud concepts, AWS core services, security, pricing, and billing. Recommended first step for SAP professionals new to AWS cloud.",
     topics: [
-      "SAP BTP account structure and subaccount management",
-      "Cloud Connector installation and configuration",
-      "Integration Suite iFlow design and monitoring",
-      "API Management basics",
-      "Identity Authentication (IAS) setup",
-      "BTP security and role management",
+      "AWS Cloud concepts and value proposition",
+      "Core services: EC2, S3, VPC, IAM, RDS",
+      "Security and compliance on AWS",
+      "AWS pricing models and cost management tools",
+      "Cloud migration and AWS support plans",
     ],
     tips: [
-      "Focus on Cloud Connector master/shadow HA — widely tested",
-      "Know the difference between Application Option and Integration Option in DMS",
-      "IAS as SAML proxy — common exam scenario",
+      "No technical depth required — focus on concepts and terminology",
+      "Use AWS Cloud Practitioner Essentials free course (AWS Skill Builder)",
+      "Good foundation before tackling SAA-C03",
     ],
-    examUrl: "https://training.sap.com/",
-    relevance: "high",
-    color: "from-violet-600 to-pink-600",
-    icon: <Cloud className="w-5 h-5" />,
+    examUrl: "https://aws.amazon.com/certification/certified-cloud-practitioner/",
+    studyUrl: "https://aws.amazon.com/training/learn-about/cloud-practitioner/",
+    relevance: "useful",
+    gradient: "from-orange-400 to-amber-400",
   },
   {
     id: "aws-saa",
     code: "SAA-C03",
-    title: "AWS Solutions Architect — Associate",
+    title: "AWS Certified Solutions Architect — Associate",
     vendor: "AWS",
     level: "Associate",
     duration: "130 min",
     questions: 65,
     passMark: 72,
-    price: "$300 USD",
+    price: "$300",
     validity: "3 years",
-    description: "Industry-standard cloud architect certification. Highly valuable for SAP Basis consultants deploying SAP on AWS — covers EC2 instance sizing, EBS/EFS storage, VPC networking, HA, and IAM.",
+    description: "Industry-standard cloud architect certification. Essential for SAP Basis deploying on AWS — covers EC2 sizing, EBS/EFS/FSx storage, VPC, IAM, HA with Multi-AZ, and disaster recovery.",
     topics: [
-      "EC2 instance types and auto scaling",
-      "Storage: EBS, EFS, S3, FSx (including ONTAP for SAP NFS)",
-      "VPC: subnets, routing, security groups, NACLs",
-      "High availability: ALB/NLB, Multi-AZ, Route 53",
-      "IAM: users, roles, policies (critical for SAP EC2 permissions)",
-      "AWS Backup and Disaster Recovery (DRS)",
-      "RDS/Aurora (for non-HANA SAP DBs on AWS)",
-      "CloudWatch monitoring and alerting",
+      "EC2 instance types, Auto Scaling, placement groups",
+      "Storage: EBS (io2/gp3), EFS, S3, FSx for NetApp ONTAP (critical for SAP NFS)",
+      "VPC: subnets, routing tables, security groups, NACLs, Transit Gateway",
+      "High availability: ALB/NLB, Route 53, Multi-AZ architectures",
+      "IAM: users, roles, policies, instance profiles",
+      "AWS Backup, snapshots, Disaster Recovery patterns",
+      "CloudWatch monitoring and EventBridge",
+      "RDS and Aurora for SAP non-HANA databases",
     ],
     tips: [
-      "Study FSx for NetApp ONTAP — directly relevant for HANA shared volumes",
-      "Understand Elastic Fabric Adapter (EFA) for HANA scale-out",
-      "EBS io2 Block Express vs gp3 — understand when to use each",
-      "Transit Gateway for Overlay IP SAP HA — study carefully",
-      "Free tier practice + AWS SAP whitepapers are excellent study materials",
+      "Study FSx for NetApp ONTAP — directly used for SAP HANA shared NFS volume",
+      "Transit Gateway for Overlay IP SAP HA routing — exam scenario",
+      "Understand EBS io2 Block Express vs gp3 for HANA storage",
+      "Elastic Fabric Adapter (EFA) for HANA scale-out network",
+      "AWS Free Tier + AWS SAP whitepapers are excellent study materials",
     ],
     examUrl: "https://aws.amazon.com/certification/certified-solutions-architect-associate/",
     studyUrl: "https://docs.aws.amazon.com/sap/",
     relevance: "critical",
-    color: "from-orange-500 to-amber-500",
-    icon: <Cloud className="w-5 h-5" />,
+    gradient: "from-orange-500 to-amber-500",
   },
   {
-    id: "aws-sap",
+    id: "aws-cloudops",
+    code: "SOA-C02",
+    title: "AWS Certified CloudOps Engineer — Associate",
+    vendor: "AWS",
+    level: "Associate",
+    duration: "180 min",
+    questions: 65,
+    passMark: 72,
+    price: "$300",
+    validity: "3 years",
+    description: "Validates ability to deploy, manage, and operate workloads on AWS — directly applicable to SAP operations: monitoring with CloudWatch, Systems Manager, Config, automation, patching, and incident management.",
+    topics: [
+      "AWS Systems Manager (SSM) — automation, patch management, Run Command",
+      "AWS CloudWatch — metrics, logs, alarms, dashboards",
+      "AWS Config — compliance and resource configuration auditing",
+      "Deployment strategies: CloudFormation, rolling, blue/green",
+      "AWS Organizations and Service Control Policies (SCP)",
+      "Cost management: AWS Cost Explorer, Budgets, Reserved Instances",
+      "Incident and event management with EventBridge",
+      "Backup and disaster recovery operations",
+    ],
+    tips: [
+      "AWS Systems Manager for SAP is directly tested in this cert's skill set",
+      "CloudWatch agent configuration for SAP-specific metrics",
+      "AWS Config rules for compliance checks on SAP EC2 instances",
+      "Good complement to SAA-C03 for operational SAP-on-AWS roles",
+    ],
+    examUrl: "https://aws.amazon.com/certification/certified-cloudops-engineer-associate/",
+    studyUrl: "https://aws.amazon.com/training/",
+    relevance: "high",
+    gradient: "from-amber-500 to-orange-500",
+  },
+  {
+    id: "aws-sap-pro",
+    code: "SAP-C02",
+    title: "AWS Certified Solutions Architect — Professional",
+    vendor: "AWS",
+    level: "Professional",
+    duration: "180 min",
+    questions: 75,
+    passMark: 75,
+    price: "$300",
+    validity: "3 years",
+    description: "Advanced AWS architecture certification. Covers complex multi-account architectures, migration strategies, enterprise networking, and advanced HA/DR patterns directly applicable to large-scale SAP on AWS landscapes.",
+    topics: [
+      "AWS Organizations, Control Tower, multi-account strategy",
+      "Advanced networking: Transit Gateway, Direct Connect, VPN",
+      "Complex disaster recovery patterns for SAP workloads",
+      "SAP migration strategies: lift-and-shift, re-platform, hybrid",
+      "Data migration: AWS DMS, Snowball, DataSync",
+      "Advanced security: GuardDuty, Security Hub, AWS KMS for HANA encryption",
+      "Cost optimization: Savings Plans, Compute Optimizer at scale",
+      "Application integration: SQS, SNS, EventBridge for SAP event-driven architectures",
+    ],
+    tips: [
+      "Requires SAA-C03 knowledge as foundation — sit that exam first",
+      "Deep understanding of AWS Organizations is critical for enterprise SAP accounts",
+      "Study AWS Migration Hub and migration patterns for SAP",
+      "Direct Connect bandwidth planning for SAP workloads",
+    ],
+    examUrl: "https://aws.amazon.com/certification/certified-solutions-architect-professional/",
+    studyUrl: "https://aws.amazon.com/training/",
+    relevance: "high",
+    gradient: "from-amber-600 to-orange-600",
+  },
+  {
+    id: "aws-sap-specialty",
     code: "PAS-C01",
     title: "AWS Certified: SAP on AWS — Specialty",
     vendor: "AWS",
@@ -170,68 +235,160 @@ const CERTS: Cert[] = [
     duration: "170 min",
     questions: 65,
     passMark: 75,
-    price: "$300 USD",
+    price: "$300",
     validity: "3 years",
-    description: "The only SAP-specific cloud certification from AWS. Validates expertise in designing, deploying, and operating SAP workloads on AWS. Highly valued by consulting firms and SAP customers on AWS.",
+    description: "The only SAP-specific cloud certification from AWS. Validates expert-level knowledge of designing, deploying, and operating SAP workloads on AWS — the highest-value certification for SAP Basis professionals on AWS.",
     topics: [
-      "SAP HANA sizing and EC2 instance selection",
-      "Storage for SAP HANA (EBS io2, FSx, backint)",
-      "SAP HA with HSR + Pacemaker + Overlay IP on AWS",
-      "SAP backup strategies: backint to S3, EBS snapshots",
-      "Network design for SAP: VPC, Transit Gateway, Direct Connect",
-      "SAP migration strategies to AWS (HomHetSys, SNP, MIGMON)",
+      "SAP HANA sizing: M-series (x1e, u-*tb1), certified EC2 selection",
+      "Storage for SAP HANA: EBS io2, FSx for NetApp ONTAP, backint to S3",
+      "SAP HA on AWS: HSR + Pacemaker + Overlay IP with Transit Gateway",
+      "HANA backup using AWS Backint Agent — configuration and monitoring",
+      "Network architecture: VPC design for SAP, Direct Connect, Transit Gateway",
+      "SAP migration strategies: homogeneous, heterogeneous, MIGMON, SNP Cockpit",
       "AWS Launch Wizard for SAP and Systems Manager for SAP",
       "RISE with SAP on AWS operational considerations",
-      "SAP LaMa (Landscape Management) integration with AWS",
-      "Cost optimization for SAP on AWS",
+      "SAP LaMa integration with AWS cloud extension",
+      "Cost optimization for SAP on AWS: Savings Plans, right-sizing",
     ],
     tips: [
-      "Complete the AWS SAA-C03 first — prerequisite knowledge",
-      "Read the 'SAP on AWS Best Practices' whitepaper thoroughly",
-      "Understand Overlay IP routing with Transit Gateway in depth",
-      "HANA backup with Backint for AWS S3 — know configuration steps",
-      "AWS Systems Manager for SAP — increasingly exam-relevant",
+      "SAA-C03 is a prerequisite in practice — build that foundation first",
+      "Read 'SAP on AWS Best Practices' whitepaper cover-to-cover",
+      "Overlay IP routing with Transit Gateway — deep focus needed",
+      "AWS Backint Agent configuration steps are exam questions",
+      "AWS Systems Manager for SAP — increasingly prominent in this exam",
     ],
     examUrl: "https://aws.amazon.com/certification/certified-sap-on-aws-specialty/",
     studyUrl: "https://docs.aws.amazon.com/sap/",
     relevance: "critical",
-    color: "from-amber-600 to-orange-600",
-    icon: <Award className="w-5 h-5" />,
+    gradient: "from-orange-600 to-red-500",
+  },
+  {
+    id: "aws-security",
+    code: "SCS-C02",
+    title: "AWS Certified Security — Specialty",
+    vendor: "AWS",
+    level: "Specialty",
+    duration: "170 min",
+    questions: 65,
+    passMark: 75,
+    price: "$300",
+    validity: "3 years",
+    description: "Advanced AWS security expertise. Directly relevant for SAP Basis professionals responsible for securing SAP on AWS: KMS key management for HANA encryption, IAM policies, GuardDuty, and network security.",
+    topics: [
+      "AWS KMS for HANA data-at-rest encryption",
+      "IAM policies, Permission Boundaries, AWS Organizations SCPs",
+      "AWS GuardDuty, Security Hub, Macie for SAP threat detection",
+      "VPC security: NACLs, security groups, Network Firewall",
+      "AWS Certificate Manager (ACM) for TLS/SSL in SAP web layers",
+      "CloudTrail for SAP operational audit and forensics",
+      "AWS WAF for protecting SAP Fiori web endpoints",
+      "Secrets Manager for managing SAP technical user credentials",
+    ],
+    tips: [
+      "Requires strong IAM knowledge — study this first",
+      "Focus on KMS key policies and grants — common in HANA encryption scenarios",
+      "AWS Secrets Manager for SAP database passwords is a best-practice scenario",
+    ],
+    examUrl: "https://aws.amazon.com/certification/certified-security-specialty/",
+    relevance: "useful",
+    gradient: "from-red-500 to-rose-600",
+  },
+
+  // ── Azure ──────────────────────────────────────────────────────────────────
+  {
+    id: "az-900",
+    code: "AZ-900",
+    title: "Microsoft Certified: Azure Fundamentals",
+    vendor: "Azure",
+    level: "Foundational",
+    duration: "60 min",
+    questions: 40,
+    passMark: 70,
+    price: "$165",
+    validity: "Permanent",
+    description: "Entry-level Azure certification covering cloud concepts, Azure core services, security, compliance, privacy, pricing, and support. Ideal first step for SAP professionals new to Azure.",
+    topics: [
+      "Cloud concepts: IaaS, PaaS, SaaS, shared responsibility",
+      "Azure core services: Virtual Machines, Storage, Networking",
+      "Azure security: Defender, Sentinel, Key Vault",
+      "Azure governance: Policy, Blueprints, Management Groups",
+      "Azure pricing and SLAs",
+    ],
+    tips: [
+      "Use Microsoft Learn free AZ-900 learning path — official and comprehensive",
+      "No hands-on experience required — conceptual understanding is sufficient",
+      "Good pre-requisite before AZ-104",
+    ],
+    examUrl: "https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/",
+    studyUrl: "https://learn.microsoft.com/en-us/training/paths/az-900-describe-cloud-concepts/",
+    relevance: "useful",
+    gradient: "from-sky-400 to-blue-500",
   },
   {
     id: "az-104",
     code: "AZ-104",
-    title: "Microsoft Azure Administrator",
+    title: "Microsoft Certified: Azure Administrator Associate",
     vendor: "Azure",
     level: "Associate",
     duration: "120 min",
     questions: 60,
     passMark: 70,
-    price: "$165 USD",
+    price: "$165",
     validity: "1 year (renewable)",
-    description: "Foundational Azure certification for managing Azure infrastructure. Covers VMs, storage (Premium SSD v2, Ultra Disk, ANF), networking, and Azure Monitor — directly applicable to SAP on Azure deployments.",
+    description: "Core Azure administration certification. Covers VMs (M-series for HANA), storage (Premium SSD v2, Ultra Disk, ANF), networking, and Azure Monitor — directly applicable to SAP on Azure deployments.",
     topics: [
       "Azure Virtual Machines: M-series sizing for SAP HANA",
-      "Managed Disks: Premium SSD v2, Ultra Disk configuration",
-      "Azure NetApp Files (ANF) for SAP HANA shared/backup",
-      "Virtual networks, NSGs, and peering",
-      "Azure Monitor and Alerts for SAP workloads",
+      "Managed Disks: Premium SSD v2, Ultra Disk configuration and IOPS",
+      "Azure NetApp Files (ANF) for SAP HANA shared and backup volumes",
+      "Virtual Networks, NSGs, VNet peering, and routing",
+      "Azure Monitor, Log Analytics, and Alerts for SAP workloads",
       "Azure Backup and Recovery Services Vault",
-      "Azure Active Directory and RBAC",
+      "Azure Active Directory / Entra ID and RBAC",
       "Azure Site Recovery (ASR) for SAP DR",
     ],
     tips: [
-      "Focus heavily on Azure NetApp Files — it's central to all SAP HANA on Azure deployments",
-      "Understand Proximity Placement Groups — exam-tested for SAP",
-      "Ultra Disk configuration for HANA log volumes — know throughput/IOPS requirements",
+      "Focus heavily on Azure NetApp Files — central to all SAP HANA on Azure deployments",
+      "Understand Proximity Placement Groups for SAP HA node latency",
+      "Ultra Disk configuration for HANA log volumes — IOPS and throughput requirements",
       "Azure ILB (Standard) as virtual IP for Pacemaker — key SAP-Azure HA concept",
-      "Use Microsoft Learn free path for AZ-104 (official, up-to-date)",
+      "Use Microsoft Learn free AZ-104 path (official, regularly updated)",
     ],
-    examUrl: "https://learn.microsoft.com/en-us/certifications/exams/az-104/",
+    examUrl: "https://learn.microsoft.com/en-us/credentials/certifications/azure-administrator/",
+    studyUrl: "https://learn.microsoft.com/en-us/azure/sap/",
+    relevance: "critical",
+    gradient: "from-blue-500 to-cyan-500",
+  },
+  {
+    id: "az-305",
+    code: "AZ-305",
+    title: "Microsoft Certified: Azure Solutions Architect Expert",
+    vendor: "Azure",
+    level: "Expert",
+    duration: "150 min",
+    questions: 60,
+    passMark: 70,
+    price: "$165",
+    validity: "1 year (renewable)",
+    description: "Advanced Azure architecture certification. Validates ability to design full Azure landing zones, networking, governance, and HA architectures at enterprise scale — applicable to designing complex SAP on Azure landscapes.",
+    topics: [
+      "Azure Landing Zone and Hub-Spoke topology for SAP",
+      "Complex networking: ExpressRoute, VPN Gateway, Virtual WAN",
+      "Identity and governance: Entra ID, Conditional Access, PIM",
+      "SAP HA/DR architecture design on Azure",
+      "Azure Kubernetes Service (AKS) for SAP BTP extensions",
+      "Azure cost architecture and optimization at scale",
+      "Data and analytics: Azure Synapse, Data Factory integration with SAP",
+    ],
+    tips: [
+      "Requires AZ-104 as prerequisite (and AZ-204 recommended)",
+      "Study Azure Well-Architected Framework thoroughly",
+      "SAP on Azure architecture center guides are relevant study material",
+      "ExpressRoute private peering for SAP connectivity is a common scenario",
+    ],
+    examUrl: "https://learn.microsoft.com/en-us/credentials/certifications/azure-solutions-architect/",
     studyUrl: "https://learn.microsoft.com/en-us/azure/sap/",
     relevance: "high",
-    color: "from-blue-500 to-cyan-500",
-    icon: <Cloud className="w-5 h-5" />,
+    gradient: "from-cyan-500 to-teal-600",
   },
   {
     id: "az-120",
@@ -242,33 +399,93 @@ const CERTS: Cert[] = [
     duration: "120 min",
     questions: 60,
     passMark: 70,
-    price: "$165 USD",
+    price: "$165",
     validity: "1 year (renewable)",
-    description: "The SAP-specific Azure certification. Validates design and deployment of SAP solutions on Azure. One of the highest-value certifications for SAP Basis professionals in Microsoft-centric enterprises.",
+    description: "The SAP-specific Azure certification. Validates expert design and deployment of SAP solutions on Azure — the highest-value certification for SAP Basis professionals in Microsoft environments.",
     topics: [
-      "SAP HANA on Azure: M-series and Mv2 instance selection",
-      "HANA Large Instances (HLI) architecture and operations",
-      "Azure NetApp Files deep dive: service levels, QoS, CRR",
-      "Pacemaker HA with Azure ILB — full configuration",
-      "Azure Site Recovery for SAP: runbooks and test failover",
-      "Azure Center for SAP Solutions (ACSS)",
-      "Azure Monitor for SAP Solutions (AMS)",
-      "S/4HANA migration to Azure: Homogeneous/Heterogeneous",
-      "Cost management for SAP on Azure",
+      "SAP HANA on Azure: Mv2 instance selection and HANA HLI",
+      "Azure NetApp Files deep dive: service levels, QoS policies, CRR",
+      "Pacemaker HA with Azure ILB — full cluster configuration",
+      "Azure Site Recovery for SAP: runbook automation, test failover",
+      "Azure Center for SAP Solutions (ACSS) — lifecycle management",
+      "Azure Monitor for SAP Solutions (AMS) — provider setup, alerts",
+      "S/4HANA migration to Azure: homogeneous and heterogeneous paths",
+      "Cost management for SAP on Azure: Reserved Instances, right-sizing",
       "RISE with SAP on Azure operational model",
+      "ExpressRoute for SAP production connectivity — design and sizing",
     ],
     tips: [
-      "Complete AZ-104 before attempting AZ-120",
-      "Study ACSS thoroughly — it's SAP lifecycle management on Azure",
-      "Azure Monitor for SAP (AMS) — providers, metrics, dashboards",
-      "Read the SAP on Azure architecture center guides (Microsoft)",
-      "Hands-on labs with Azure free tier + SAP CAL trial systems",
+      "Complete AZ-104 before AZ-120 — assumed knowledge",
+      "ACSS deployment automation — study the portal wizard steps",
+      "Azure Monitor for SAP (AMS) providers and dashboards — exam-heavy",
+      "Microsoft Learn SAP on Azure learning path is essential",
+      "Hands-on: deploy a HANA HA lab on Azure free trial + ANF trial",
     ],
-    examUrl: "https://learn.microsoft.com/en-us/certifications/exams/az-120/",
+    examUrl: "https://learn.microsoft.com/en-us/credentials/certifications/azure-for-sap-workloads-specialty/",
     studyUrl: "https://learn.microsoft.com/en-us/azure/sap/",
     relevance: "critical",
-    color: "from-cyan-500 to-blue-600",
-    icon: <Award className="w-5 h-5" />,
+    gradient: "from-teal-500 to-blue-600",
+  },
+  {
+    id: "az-security",
+    code: "AZ-500",
+    title: "Microsoft Certified: Azure Security Engineer Associate",
+    vendor: "Azure",
+    level: "Associate",
+    duration: "120 min",
+    questions: 60,
+    passMark: 70,
+    price: "$165",
+    validity: "1 year (renewable)",
+    description: "Validates Azure security expertise — directly relevant for securing SAP on Azure: Azure Key Vault for SAP HANA encryption keys, Defender for Cloud, Azure Sentinel SIEM integration with SAP logs.",
+    topics: [
+      "Azure Key Vault for HANA data-at-rest encryption key management",
+      "Microsoft Defender for Cloud — security posture for SAP VMs",
+      "Microsoft Sentinel — SIEM integration with SAP Security Audit Log",
+      "Azure AD Conditional Access for SAP Fiori access",
+      "Network security: Azure Firewall, WAF for SAP web endpoints",
+      "Entra Privileged Identity Management (PIM) for SAP admin access",
+      "Azure DDoS Protection for SAP internet-facing systems",
+    ],
+    tips: [
+      "Microsoft Sentinel SAP integration (SAP connector) is increasingly relevant",
+      "Azure Key Vault customer-managed keys for HANA — key scenario",
+      "Defender for Cloud security score improvement for SAP VMs",
+    ],
+    examUrl: "https://learn.microsoft.com/en-us/credentials/certifications/azure-security-engineer/",
+    relevance: "useful",
+    gradient: "from-blue-600 to-indigo-600",
+  },
+
+  // ── GCP ────────────────────────────────────────────────────────────────────
+  {
+    id: "gcp-cdl",
+    code: "CDL",
+    title: "Google Cloud Certified: Cloud Digital Leader",
+    vendor: "GCP",
+    level: "Foundational",
+    duration: "90 min",
+    questions: 60,
+    passMark: 70,
+    price: "$200",
+    validity: "3 years",
+    description: "Entry-level GCP certification covering Google Cloud fundamentals, digital transformation concepts, and core GCP services. Ideal for SAP professionals beginning their GCP journey.",
+    topics: [
+      "Google Cloud core products and services overview",
+      "Digital transformation with Google Cloud",
+      "Infrastructure modernization and cloud migration concepts",
+      "Data management and analytics fundamentals",
+      "Security and compliance in Google Cloud",
+    ],
+    tips: [
+      "No technical depth required — conceptual orientation",
+      "Google Skills Boost (cloud.google.com) has a free learning path",
+      "Good starting point before ACE exam",
+    ],
+    examUrl: "https://cloud.google.com/certification/cloud-digital-leader",
+    studyUrl: "https://cloud.google.com/learn/certification/cloud-digital-leader",
+    relevance: "useful",
+    gradient: "from-green-400 to-emerald-500",
   },
   {
     id: "gcp-ace",
@@ -279,50 +496,256 @@ const CERTS: Cert[] = [
     duration: "120 min",
     questions: 50,
     passMark: 70,
-    price: "$200 USD",
+    price: "$200",
     validity: "3 years",
-    description: "Foundational GCP certification covering Compute Engine (M-series VMs), Persistent Disk/Hyperdisk, VPC, IAM, and Cloud Operations — all applicable to SAP on GCP deployments.",
+    description: "Foundational GCP certification covering Compute Engine (M-series VMs), Persistent Disk/Hyperdisk, VPC, IAM, and Cloud Operations — all directly applicable to SAP on GCP deployments.",
     topics: [
-      "Compute Engine: M2/M3 VMs for SAP HANA",
-      "Storage: Persistent Disk (SSD, Extreme), Hyperdisk, Filestore NFS",
-      "GCP networking: VPC, Cloud Load Balancing (ILB for SAP HA)",
-      "Cloud Operations: Cloud Monitoring, Logging",
-      "IAM and service accounts",
+      "Compute Engine: M2/M3-series VMs for certified SAP HANA workloads",
+      "Storage: Hyperdisk Extreme, PD SSD Extreme, Filestore Enterprise (NFS)",
+      "VPC networking, Cloud Load Balancing (ILB for SAP HA)",
+      "Cloud IAM: roles, service accounts, policies",
+      "Cloud Operations: Cloud Monitoring, Logging, Error Reporting",
       "Cloud Storage for HANA backups (Backint for GCS)",
+      "Deployment Manager and Infrastructure as Code",
     ],
     tips: [
-      "Understand Hyperdisk Extreme vs PD Extreme for HANA log volumes",
-      "Filestore Enterprise for production SAP NFS — study service levels",
-      "GCP Workload Manager for SAP — emerging but exam-relevant",
-      "Regional PD for cross-zone HA (synchronous replication)",
+      "Hyperdisk Extreme vs PD Extreme for HANA log volumes — know the difference",
+      "Filestore Enterprise for SAP production NFS — service levels and SLAs",
+      "Regional PD for cross-zone synchronous replication (HA data volumes)",
+      "Google Skills Boost: 'Getting Started with Google Kubernetes Engine' is useful context",
+      "GCP Workload Manager for SAP is increasingly important",
     ],
-    examUrl: "https://cloud.google.com/learn/certification/cloud-engineer",
+    examUrl: "https://cloud.google.com/certification/cloud-engineer",
+    studyUrl: "https://cloud.google.com/solutions/sap",
+    relevance: "critical",
+    gradient: "from-emerald-500 to-green-600",
+  },
+  {
+    id: "gcp-pca",
+    code: "PCA",
+    title: "Google Cloud Professional Cloud Architect",
+    vendor: "GCP",
+    level: "Professional",
+    duration: "120 min",
+    questions: 60,
+    passMark: 70,
+    price: "$200",
+    validity: "2 years",
+    description: "GCP's most recognized professional certification. Validates ability to design, manage, and govern Google Cloud solutions — directly applicable to architecting SAP landscapes on GCP.",
+    topics: [
+      "GCP landing zone and VPC architecture for SAP",
+      "Hybrid connectivity: Cloud Interconnect, VPN for SAP Direct Connect equivalent",
+      "SAP HANA HA on GCP: HSR + Pacemaker + ILB virtual IP",
+      "Security: Cloud KMS for HANA encryption, VPC Service Controls",
+      "Disaster recovery patterns for SAP: regional failover, backup strategies",
+      "Cloud Spanner, BigQuery for SAP data analytics extension",
+      "GCP resource hierarchy: organizations, folders, projects for SAP isolation",
+      "Identity and access: Workload Identity, IAM conditions",
+    ],
+    tips: [
+      "ACE certification is a strong foundation before PCA",
+      "Study the 4 official case studies (Mountkirk, Dress4Win, TerramEarth, Helicopter) — scenario exam",
+      "GCP Workload Manager for SAP best practices — SAP note 3119619",
+      "Google Cloud SAP on GCP documentation is the best study guide",
+    ],
+    examUrl: "https://cloud.google.com/certification/cloud-architect",
+    studyUrl: "https://cloud.google.com/solutions/sap",
+    relevance: "high",
+    gradient: "from-green-600 to-teal-600",
+  },
+  {
+    id: "gcp-pcde",
+    code: "PCDE",
+    title: "Google Cloud Professional Cloud Database Engineer",
+    vendor: "GCP",
+    level: "Professional",
+    duration: "120 min",
+    questions: 60,
+    passMark: 70,
+    price: "$200",
+    validity: "2 years",
+    description: "Validates expertise in GCP database technologies. Relevant for SAP Basis professionals managing HANA on GCP: Hyperdisk configuration, Cloud Spanner for SAP data tier, BigQuery for SAP analytics.",
+    topics: [
+      "Cloud SQL, Cloud Spanner, BigQuery — design and operations",
+      "Database migration to GCP: Database Migration Service",
+      "HANA on GCP storage: Hyperdisk, Filestore for database volumes",
+      "High availability and replication patterns on GCP",
+      "Database security: Cloud KMS, IAM, VPC Service Controls",
+      "Monitoring databases with Cloud Monitoring and Logs Explorer",
+    ],
+    tips: [
+      "Useful complement if your role involves HANA on GCP at depth",
+      "Focus on migration scenarios — common in this exam",
+      "Less critical than ACE/PCA for typical SAP Basis roles",
+    ],
+    examUrl: "https://cloud.google.com/certification/cloud-database-engineer",
     studyUrl: "https://cloud.google.com/solutions/sap",
     relevance: "useful",
-    color: "from-green-500 to-emerald-600",
-    icon: <Cloud className="w-5 h-5" />,
+    gradient: "from-teal-500 to-cyan-600",
+  },
+  {
+    id: "gcp-security",
+    code: "PCSE",
+    title: "Google Cloud Professional Cloud Security Engineer",
+    vendor: "GCP",
+    level: "Professional",
+    duration: "120 min",
+    questions: 60,
+    passMark: 70,
+    price: "$200",
+    validity: "2 years",
+    description: "Validates GCP security expertise. Relevant for SAP Basis in security-focused roles: Cloud KMS for HANA encryption, VPC Service Controls for SAP data isolation, Security Command Center, and IAM best practices.",
+    topics: [
+      "Cloud KMS and CMEK for HANA data-at-rest encryption",
+      "VPC Service Controls — isolate SAP data perimeter",
+      "Identity and Access: IAM, Workload Identity, service accounts for HANA",
+      "Security Command Center for SAP VM threat detection",
+      "Binary Authorization, Artifact Registry for SAP container deployments",
+      "Cloud Logging and Chronicle for SAP security audit integration",
+    ],
+    tips: [
+      "ACE + PCA are recommended before this exam",
+      "VPC Service Controls for SAP is an important security design pattern",
+      "Cloud KMS customer-managed keys (CMEK) for HANA encryption",
+    ],
+    examUrl: "https://cloud.google.com/certification/cloud-security-engineer",
+    relevance: "useful",
+    gradient: "from-cyan-600 to-blue-600",
   },
 ];
 
 const VENDOR_COLORS: Record<string, string> = {
   SAP: "bg-blue-100 text-blue-700 border-blue-200",
-  AWS: "bg-amber-100 text-amber-700 border-amber-200",
+  AWS: "bg-orange-100 text-orange-700 border-orange-200",
   Azure: "bg-cyan-100 text-cyan-700 border-cyan-200",
   GCP: "bg-green-100 text-green-700 border-green-200",
 };
 
-const RELEVANCE_COLORS = {
+const LEVEL_COLORS: Record<string, string> = {
+  Foundational: "bg-gray-100 text-gray-600",
+  Associate: "bg-emerald-100 text-emerald-700",
+  Professional: "bg-blue-100 text-blue-700",
+  Specialty: "bg-violet-100 text-violet-700",
+  Expert: "bg-rose-100 text-rose-700",
+};
+
+const RELEVANCE_BADGE: Record<string, string> = {
   critical: "bg-red-50 border-red-200 text-red-700",
   high: "bg-amber-50 border-amber-200 text-amber-700",
   useful: "bg-gray-50 border-gray-200 text-gray-600",
 };
 
+const VENDOR_TABS = [
+  { id: "all", label: "All Certifications" },
+  { id: "SAP", label: "SAP" },
+  { id: "AWS", label: "AWS" },
+  { id: "Azure", label: "Azure" },
+  { id: "GCP", label: "GCP" },
+];
+
+const VENDOR_LINKS: Record<string, { label: string; url: string }> = {
+  SAP: { label: "SAP Training Catalog", url: "https://training.sap.com/certification" },
+  AWS: { label: "AWS Certification Portal", url: "https://aws.amazon.com/certification/" },
+  Azure: { label: "Microsoft Learn Credentials", url: "https://learn.microsoft.com/en-us/credentials/browse/" },
+  GCP: { label: "GCP Certification", url: "https://cloud.google.com/learn/certification" },
+};
+
 export default function CloudCertifications() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("all");
+  const [levelFilter, setLevelFilter] = useState<string>("all");
 
-  const vendors = ["all", "SAP", "AWS", "Azure", "GCP"];
-  const shown = filter === "all" ? CERTS : CERTS.filter((c) => c.vendor === filter);
+  const levels = ["all", "Foundational", "Associate", "Professional", "Specialty", "Expert"];
+
+  const shown = CERTS.filter((c) => {
+    const vendorMatch = filter === "all" || c.vendor === filter;
+    const levelMatch = levelFilter === "all" || c.level === levelFilter;
+    return vendorMatch && levelMatch;
+  });
+
+  const critical = shown.filter((c) => c.relevance === "critical");
+  const high = shown.filter((c) => c.relevance === "high");
+  const useful = shown.filter((c) => c.relevance === "useful");
+
+  function renderCert(cert: Cert) {
+    const isExpanded = expanded === cert.id;
+    return (
+      <div
+        key={cert.id}
+        className={`border rounded-2xl overflow-hidden bg-white hover:shadow-md transition-all ${
+          cert.relevance === "critical" ? "border-[#0070F2]/30" :
+          cert.relevance === "high" ? "border-amber-200" : "border-gray-200"
+        }`}
+      >
+        <div className="flex items-start gap-3 p-4 cursor-pointer" onClick={() => setExpanded(isExpanded ? null : cert.id)}>
+          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cert.gradient} flex items-center justify-center text-white flex-shrink-0 mt-0.5`}>
+            <Award className="w-5 h-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start gap-1.5 flex-wrap mb-1">
+              <span className={`text-xs font-bold px-2 py-0.5 rounded border ${VENDOR_COLORS[cert.vendor]}`}>{cert.vendor}</span>
+              <span className="font-mono text-xs font-bold text-gray-500">{cert.code}</span>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${LEVEL_COLORS[cert.level]}`}>{cert.level}</span>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${RELEVANCE_BADGE[cert.relevance]}`}>
+                {cert.relevance === "critical" ? "★ Critical" : cert.relevance === "high" ? "High Value" : "Useful"}
+              </span>
+            </div>
+            <div className="font-semibold text-sm text-gray-900 leading-snug">{cert.title}</div>
+            <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
+              <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{cert.duration}</span>
+              <span>{cert.questions} questions</span>
+              <span>Pass: {cert.passMark}%</span>
+              <span className="font-medium text-gray-600">{cert.price}</span>
+              <span>Valid: {cert.validity}</span>
+            </div>
+          </div>
+          <ChevronRight className={`w-4 h-4 text-gray-400 flex-shrink-0 mt-1 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+        </div>
+
+        {isExpanded && (
+          <div className="border-t border-gray-100 p-4 space-y-4 bg-gray-50/50">
+            <p className="text-sm text-gray-600 leading-relaxed">{cert.description}</p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Key Exam Topics</div>
+                <ul className="space-y-1">
+                  {cert.topics.map((t) => (
+                    <li key={t} className="flex gap-1.5 text-xs text-gray-700">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Study Tips</div>
+                <ul className="space-y-1">
+                  {cert.tips.map((t) => (
+                    <li key={t} className="flex gap-1.5 text-xs text-gray-700">
+                      <Star className="w-3 h-3 text-amber-500 flex-shrink-0 mt-0.5" />
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <a href={cert.examUrl} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-[#0070F2] text-white rounded-xl hover:bg-[#0060D8] transition-colors">
+                <ExternalLink className="w-3.5 h-3.5" /> Register for Exam
+              </a>
+              {cert.studyUrl && (
+                <a href={cert.studyUrl} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors">
+                  <BookOpen className="w-3.5 h-3.5" /> Study Resources
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -334,130 +757,90 @@ export default function CloudCertifications() {
         </div>
         <h1 className="text-2xl font-extrabold mb-1">Cloud & SAP Certifications</h1>
         <p className="text-sm opacity-80 max-w-lg">
-          Curated certification guide for SAP Basis professionals — covering SAP, AWS, Azure, and GCP with exam details, study tips, and salary impact.
+          Complete certification guide for SAP Basis professionals — {CERTS.length} certifications across SAP, AWS, Azure, and GCP with exam details, study tips, and salary impact at each level.
         </p>
       </div>
 
-      {/* Filter */}
+      {/* Vendor quick links */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {Object.entries(VENDOR_LINKS).map(([vendor, link]) => (
+          <a key={vendor} href={link.url} target="_blank" rel="noopener noreferrer"
+            className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all hover:shadow-sm ${VENDOR_COLORS[vendor]}`}>
+            <ExternalLink className="w-3 h-3" />
+            {link.label}
+          </a>
+        ))}
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center gap-4 text-xs text-gray-500">
+        <span className="font-semibold text-gray-400">Relevance:</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400" />Critical Path</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" />High Value</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-300" />Useful</span>
+      </div>
+
+      {/* Vendor filter */}
       <div className="flex gap-2 flex-wrap">
-        {vendors.map((v) => (
-          <button
-            key={v}
-            onClick={() => setFilter(v)}
+        {VENDOR_TABS.map((v) => (
+          <button key={v.id} onClick={() => setFilter(v.id)}
             className={`text-sm font-medium px-4 py-1.5 rounded-full border transition-all ${
-              filter === v
-                ? "bg-violet-600 text-white border-violet-600 shadow-sm"
-                : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
-            }`}
-          >
-            {v === "all" ? "All Certifications" : v}
+              filter === v.id ? "bg-violet-600 text-white border-violet-600 shadow-sm" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+            }`}>
+            {v.label}
           </button>
         ))}
-        <div className="ml-auto flex items-center gap-2 text-xs text-gray-400">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400" />Critical Path</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" />High Value</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-300" />Useful</span>
-        </div>
       </div>
 
-      {/* Cert Cards */}
-      <div className="space-y-3">
-        {shown.map((cert) => {
-          const isExpanded = expanded === cert.id;
-          return (
-            <div
-              key={cert.id}
-              className={`border rounded-2xl overflow-hidden transition-all ${
-                cert.relevance === "critical" ? "border-[#0070F2]/30" :
-                cert.relevance === "high" ? "border-amber-200" : "border-gray-200"
-              } bg-white hover:shadow-md`}
-            >
-              {/* Card header */}
-              <div
-                className="flex items-start gap-3 p-4 cursor-pointer"
-                onClick={() => setExpanded(isExpanded ? null : cert.id)}
-              >
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cert.color} flex items-center justify-center text-white flex-shrink-0 mt-0.5`}>
-                  {cert.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start gap-2 flex-wrap">
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded border ${VENDOR_COLORS[cert.vendor]}`}>
-                      {cert.vendor}
-                    </span>
-                    <span className="font-mono text-xs font-bold text-gray-500">{cert.code}</span>
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${RELEVANCE_COLORS[cert.relevance]}`}>
-                      {cert.relevance === "critical" ? "★ Critical" : cert.relevance === "high" ? "High Value" : "Useful"}
-                    </span>
-                  </div>
-                  <div className="font-semibold text-sm text-gray-900 mt-1 leading-snug">{cert.title}</div>
-                  <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400 flex-wrap">
-                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{cert.duration}</span>
-                    <span>{cert.questions} questions</span>
-                    <span>Pass: {cert.passMark}%</span>
-                    <span className="font-medium text-gray-600">{cert.price}</span>
-                    <span>Valid: {cert.validity}</span>
-                  </div>
-                </div>
-                <ChevronRight className={`w-4 h-4 text-gray-400 flex-shrink-0 mt-1 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+      {/* Level filter */}
+      <div className="flex gap-1.5 flex-wrap">
+        {levels.map((l) => (
+          <button key={l} onClick={() => setLevelFilter(l)}
+            className={`text-xs font-medium px-3 py-1 rounded-full border transition-all ${
+              levelFilter === l
+                ? l === "all" ? "bg-gray-700 text-white border-gray-700" : LEVEL_COLORS[l] + " border-current"
+                : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
+            }`}>
+            {l === "all" ? "All Levels" : l}
+          </button>
+        ))}
+        <span className="ml-auto text-xs text-gray-400 self-center">Showing {shown.length} of {CERTS.length}</span>
+      </div>
+
+      {/* Grouped cert list */}
+      {shown.length === 0 ? (
+        <div className="text-center py-12 text-gray-400 text-sm">No certifications match the selected filters</div>
+      ) : (
+        <div className="space-y-6">
+          {critical.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs font-bold text-red-600 uppercase tracking-wider">★ Critical Path</span>
+                <div className="flex-1 h-px bg-red-100" />
               </div>
-
-              {/* Expanded */}
-              {isExpanded && (
-                <div className="border-t border-gray-100 p-4 space-y-4 bg-gray-50/50">
-                  <p className="text-sm text-gray-600 leading-relaxed">{cert.description}</p>
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Exam Topics</div>
-                      <ul className="space-y-1">
-                        {cert.topics.map((t) => (
-                          <li key={t} className="flex gap-1.5 text-xs text-gray-700">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                            {t}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Study Tips</div>
-                      <ul className="space-y-1">
-                        {cert.tips.map((t) => (
-                          <li key={t} className="flex gap-1.5 text-xs text-gray-700">
-                            <Star className="w-3 h-3 text-amber-500 flex-shrink-0 mt-0.5" />
-                            {t}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 flex-wrap">
-                    <a
-                      href={cert.examUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-[#0070F2] text-white rounded-xl hover:bg-[#0060D8] transition-colors"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" /> Register for Exam
-                    </a>
-                    {cert.studyUrl && (
-                      <a
-                        href={cert.studyUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
-                      >
-                        <BookOpen className="w-3.5 h-3.5" /> Study Resources
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
+              <div className="space-y-2">{critical.map(renderCert)}</div>
             </div>
-          );
-        })}
-      </div>
+          )}
+          {high.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">High Value</span>
+                <div className="flex-1 h-px bg-amber-100" />
+              </div>
+              <div className="space-y-2">{high.map(renderCert)}</div>
+            </div>
+          )}
+          {useful.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Useful / Complementary</span>
+                <div className="flex-1 h-px bg-gray-100" />
+              </div>
+              <div className="space-y-2">{useful.map(renderCert)}</div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
