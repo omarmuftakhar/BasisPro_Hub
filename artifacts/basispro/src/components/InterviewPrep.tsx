@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from "react";
-import { ChevronRight, MessageSquare, Zap, Shield, Database, Cloud, Settings, Star, Copy, Check, Activity, Server, Layers, BookOpen, Code, Search, X } from "lucide-react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
+import { ChevronRight, MessageSquare, Zap, Shield, Database, Cloud, Settings, Star, Copy, Check, Activity, Server, Layers, BookOpen, Code, Search, X, Target, Brain, Trophy, RotateCcw, ChevronDown, Timer, Play, CheckCircle2, XCircle, BookOpen as BookOpenIcon, GraduationCap, ListChecks, Shuffle, Clock } from "lucide-react";
+import { EXAM_PACK_2026 } from "@/data/examPack2026";
 
 interface QA {
   id: string;
@@ -1547,188 +1548,467 @@ const CATEGORIES: Category[] = [
   },
 ];
 
-const LEVEL_COLORS = {
+
+const LEVEL_COLORS: Record<string, string> = {
   junior: "bg-emerald-100 text-emerald-700",
   mid: "bg-blue-100 text-blue-700",
   senior: "bg-violet-100 text-violet-700",
 };
 
+const ALL_CATEGORIES = [...CATEGORIES, ...EXAM_PACK_2026];
+
+type Mode = "study" | "config" | "quiz" | "results";
+
 export default function InterviewPrep() {
+  const [mode, setMode] = useState<Mode>("study");
+
+  // study mode
   const [activeCat, setActiveCat] = useState<string>("system-admin");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [levelFilter, setLevelFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
 
-  const cat = CATEGORIES.find((c) => c.id === activeCat)!;
+  // exam config
+  const [selectedCats, setSelectedCats] = useState<string[]>([]);
+  const [examCount, setExamCount] = useState<number>(20);
+  const [examDiff, setExamDiff] = useState<string>("all");
+  const [timerEnabled, setTimerEnabled] = useState(false);
+  const [timePerQ, setTimePerQ] = useState(60);
 
-  const totalQuestions = useMemo(() => CATEGORIES.reduce((a, c) => a + c.questions.length, 0), []);
+  // exam state
+  const [examQuestions, setExamQuestions] = useState<QA[]>([]);
+  const [examIdx, setExamIdx] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+  const [grades, setGrades] = useState<Record<string, "got" | "review">>({});
+  const [timeLeft, setTimeLeft] = useState(0);
 
-  const questions = useMemo(() => {
-    let qs = cat.questions;
+  const totalQuestions = useMemo(() => ALL_CATEGORIES.reduce((a, c) => a + c.questions.length, 0), []);
+  const studyCat = ALL_CATEGORIES.find((c) => c.id === activeCat)!;
+
+  const studyQuestions = useMemo(() => {
+    let qs = studyCat.questions;
     if (levelFilter !== "all") qs = qs.filter((q) => q.level === levelFilter);
     if (search.trim()) {
-      const q = search.toLowerCase();
-      qs = qs.filter((item) =>
-        item.q.toLowerCase().includes(q) || item.a.toLowerCase().includes(q) || item.tags.some((t) => t.includes(q))
-      );
+      const s = search.toLowerCase();
+      qs = qs.filter((item) => item.q.toLowerCase().includes(s) || item.a.toLowerCase().includes(s) || item.tags.some((t) => t.includes(s)));
     }
     return qs;
-  }, [activeCat, cat, levelFilter, search]);
+  }, [activeCat, studyCat, levelFilter, search]);
 
   function copyAnswer(id: string, text: string) {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(id);
-      setTimeout(() => setCopied(null), 2000);
-    });
+    navigator.clipboard.writeText(text).then(() => { setCopied(id); setTimeout(() => setCopied(null), 2000); });
   }
 
-  return (
-    <div className="space-y-6 max-w-5xl">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-rose-600 to-orange-500 rounded-2xl p-6 text-white">
-        <div className="flex items-center gap-2 mb-2">
-          <MessageSquare className="w-5 h-5 opacity-80" />
-          <span className="text-sm font-medium opacity-80">Career Development</span>
+  function toggleCat(id: string) {
+    setSelectedCats((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+  }
+
+  function startExam() {
+    let pool = ALL_CATEGORIES.filter((c) => selectedCats.includes(c.id)).flatMap((c) => c.questions);
+    if (examDiff !== "all") pool = pool.filter((q) => q.level === examDiff);
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    const selected = examCount === 0 ? shuffled : shuffled.slice(0, examCount);
+    setExamQuestions(selected);
+    setExamIdx(0);
+    setRevealed(false);
+    setGrades({});
+    if (timerEnabled) setTimeLeft(timePerQ);
+    setMode("quiz");
+  }
+
+  const gradeQuestion = useCallback((grade: "got" | "review") => {
+    setGrades((prev) => {
+      const qa = examQuestions[examIdx];
+      return { ...prev, [qa.id]: grade };
+    });
+    setExamIdx((idx) => {
+      if (idx + 1 >= examQuestions.length) {
+        setMode("results");
+        return idx;
+      }
+      setRevealed(false);
+      if (timerEnabled) setTimeLeft(timePerQ);
+      return idx + 1;
+    });
+  }, [examIdx, examQuestions, timerEnabled, timePerQ]);
+
+  useEffect(() => {
+    if (mode !== "quiz" || !timerEnabled || timeLeft <= 0) return;
+    const t = setTimeout(() => setTimeLeft((tl) => tl - 1), 1000);
+    return () => clearTimeout(t);
+  }, [mode, timerEnabled, timeLeft]);
+
+  useEffect(() => {
+    if (mode === "quiz" && timerEnabled && timeLeft === 0 && revealed) {
+      gradeQuestion("review");
+    }
+  }, [timeLeft]);
+
+  const gotCount = Object.values(grades).filter((v) => v === "got").length;
+  const reviewCount = Object.values(grades).filter((v) => v === "review").length;
+  const score = examQuestions.length > 0 ? Math.round((gotCount / examQuestions.length) * 100) : 0;
+  const currentQ = examQuestions[examIdx];
+
+  // STUDY MODE
+  if (mode === "study") return (
+    <div className="space-y-5 max-w-5xl">
+      <div className="bg-gradient-to-r from-rose-600 via-orange-500 to-amber-500 rounded-2xl p-6 text-white">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <GraduationCap className="w-5 h-5 opacity-80" />
+              <span className="text-sm font-medium opacity-80">Interview Prep 2026</span>
+            </div>
+            <h1 className="text-2xl font-extrabold">SAP Basis Interview Mastery</h1>
+            <p className="text-sm opacity-80 mt-1">{totalQuestions}+ expert Q&As across {ALL_CATEGORIES.length} categories — including 2026 Scenario Pack and Killer Q&As</p>
+          </div>
+          <button
+            onClick={() => { setSelectedCats([]); setMode("config"); }}
+            className="flex-shrink-0 flex items-center gap-2 bg-white text-rose-600 font-bold px-5 py-2.5 rounded-xl hover:bg-rose-50 transition-all shadow-lg text-sm">
+            <Play className="w-4 h-4" />
+            Start Exam Mode
+          </button>
         </div>
-        <h1 className="text-2xl font-extrabold mb-1">SAP Basis Interview Prep</h1>
-        <p className="text-sm opacity-80 max-w-lg">
-          {totalQuestions}+ expert Q&A across {CATEGORIES.length} categories — Junior, Mid-level, and Senior roles. Study, practice, and ace your next interview.
-        </p>
+        <div className="grid grid-cols-3 gap-3 mt-5">
+          {[
+            { label: "Total Questions", value: String(totalQuestions) + "+", icon: <ListChecks className="w-4 h-4" /> },
+            { label: "Categories", value: String(ALL_CATEGORIES.length), icon: <BookOpen className="w-4 h-4" /> },
+            { label: "2026 Pack", value: "103 New", icon: <Zap className="w-4 h-4" /> },
+          ].map((s) => (
+            <div key={s.label} className="bg-white/15 rounded-xl px-3 py-2.5 flex items-center gap-2">
+              <span className="opacity-70">{s.icon}</span>
+              <div>
+                <div className="text-sm font-extrabold">{s.value}</div>
+                <div className="text-[10px] opacity-70">{s.label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Filters row */}
       <div className="flex flex-wrap gap-2 items-center">
         <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Level:</span>
         {(["all", "junior", "mid", "senior"] as const).map((l) => (
-          <button
-            key={l}
-            onClick={() => setLevelFilter(l)}
-            className={`text-sm font-medium px-3 py-1 rounded-full border transition-all ${
-              levelFilter === l
-                ? l === "all" ? "bg-gray-800 text-white border-gray-800"
-                  : LEVEL_COLORS[l] + " border-current"
-                : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
-            }`}
-          >
+          <button key={l} onClick={() => setLevelFilter(l)}
+            className={`text-sm font-medium px-3 py-1 rounded-full border transition-all ${levelFilter === l ? (l === "all" ? "bg-gray-800 text-white border-gray-800" : LEVEL_COLORS[l] + " border-current") : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"}`}>
             {l === "all" ? "All Levels" : l.charAt(0).toUpperCase() + l.slice(1)}
           </button>
         ))}
-
         <div className="relative ml-auto w-60">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search questions…"
-            className="w-full pl-8 pr-7 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-400"
-          />
-          {search && (
-            <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search questions..."
+            className="w-full pl-8 pr-7 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/30" />
+          {search && <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"><X className="w-3.5 h-3.5" /></button>}
         </div>
       </div>
 
-      <div className="flex gap-5">
-        {/* Category sidebar */}
-        <div className="hidden md:flex flex-col gap-0.5 w-56 flex-shrink-0">
-          {CATEGORIES.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => { setActiveCat(c.id); setExpanded(null); }}
-              className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-all ${
-                activeCat === c.id
-                  ? "bg-[#0070F2]/10 text-[#0070F2] font-semibold"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-            >
+      <div className="flex gap-4">
+        <div className="hidden md:flex flex-col gap-0.5 w-52 flex-shrink-0">
+          {ALL_CATEGORIES.map((c) => (
+            <button key={c.id} onClick={() => { setActiveCat(c.id); setExpanded(null); }}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-left transition-all ${activeCat === c.id ? "bg-[#0070F2]/10 text-[#0070F2] font-semibold" : "text-gray-600 hover:bg-gray-100"}`}>
               <span className={activeCat === c.id ? "text-[#0070F2]" : "text-gray-400"}>
                 {React.cloneElement(c.icon as React.ReactElement, { className: "w-4 h-4" })}
               </span>
-              <span className="flex-1 truncate">{c.title}</span>
-              <span className="text-xs text-gray-400">{c.questions.length}</span>
+              <span className="flex-1 truncate text-xs">{c.title}</span>
+              <span className="text-xs text-gray-400 flex-shrink-0">{c.questions.length}</span>
             </button>
           ))}
-          <div className="mt-3 px-3 py-2 bg-gray-50 rounded-xl">
-            <div className="text-xs font-bold text-gray-400">Total Questions</div>
-            <div className="text-2xl font-extrabold text-[#0070F2]">{totalQuestions}+</div>
+          <div className="mt-2 px-3 py-2.5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+            <div className="text-xs font-bold text-gray-400">Total</div>
+            <div className="text-2xl font-extrabold text-[#0070F2]">{totalQuestions}</div>
           </div>
         </div>
 
-        {/* Questions */}
-        <div className="flex-1 min-w-0 space-y-2.5">
-          <div className={`flex items-center gap-2 p-3 rounded-xl ${cat.bg}`}>
-            <span className={cat.color}>
-              {React.cloneElement(cat.icon as React.ReactElement, { className: "w-5 h-5" })}
-            </span>
-            <span className={`font-bold text-sm ${cat.color}`}>{cat.title}</span>
-            <span className="text-xs text-gray-400 ml-auto">
-              {questions.length} {questions.length !== cat.questions.length ? `of ${cat.questions.length}` : ""} questions
-            </span>
+        <div className="flex-1 min-w-0 space-y-2">
+          <div className={`flex items-center gap-2 p-3 rounded-xl ${studyCat.bg}`}>
+            <span className={studyCat.color}>{React.cloneElement(studyCat.icon as React.ReactElement, { className: "w-5 h-5" })}</span>
+            <span className={`font-bold text-sm ${studyCat.color}`}>{studyCat.title}</span>
+            <span className="text-xs text-gray-400 ml-auto">{studyQuestions.length}{studyQuestions.length !== studyCat.questions.length ? ` of ${studyCat.questions.length}` : ""} questions</span>
           </div>
-
-          {questions.length === 0 ? (
+          {studyQuestions.length === 0 ? (
             <div className="text-center py-12 text-gray-400 text-sm">No questions match your filters</div>
-          ) : (
-            questions.map((qa) => {
-              const isExpanded = expanded === qa.id;
-              return (
-                <div key={qa.id} className="border border-gray-200 rounded-2xl overflow-hidden bg-white hover:shadow-sm transition-shadow">
-                  <button
-                    className="w-full flex items-start gap-3 p-4 text-left"
-                    onClick={() => setExpanded(isExpanded ? null : qa.id)}
-                  >
-                    <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <div className="text-sm font-semibold text-gray-900 leading-snug">{qa.q}</div>
-                      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${LEVEL_COLORS[qa.level]}`}>
-                          {qa.level.charAt(0).toUpperCase() + qa.level.slice(1)}
-                        </span>
-                        {qa.tags.slice(0, 4).map((tag) => (
-                          <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">{tag}</span>
-                        ))}
-                      </div>
+          ) : studyQuestions.map((qa) => {
+            const isExp = expanded === qa.id;
+            return (
+              <div key={qa.id} className="border border-gray-200 rounded-2xl overflow-hidden bg-white hover:shadow-sm transition-shadow">
+                <button className="w-full flex items-start gap-3 p-4 text-left" onClick={() => setExpanded(isExp ? null : qa.id)}>
+                  <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-gray-900 leading-snug">{qa.q}</div>
+                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${LEVEL_COLORS[qa.level] || "bg-gray-100 text-gray-600"}`}>
+                        {qa.level.charAt(0).toUpperCase() + qa.level.slice(1)}
+                      </span>
+                      {qa.tags.slice(0, 3).map((tag) => (
+                        <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">{tag}</span>
+                      ))}
                     </div>
-                    <ChevronRight className={`w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
-                  </button>
-
-                  {isExpanded && (
-                    <div className="border-t border-gray-100 p-4 space-y-3 bg-gray-50/50">
-                      <div className="relative">
-                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Model Answer</div>
-                        <p className="text-sm text-gray-700 leading-relaxed">{qa.a}</p>
-                        <button
-                          onClick={() => copyAnswer(qa.id, qa.a)}
-                          className="absolute top-0 right-0 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                        >
-                          {copied === qa.id ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                        </button>
-                      </div>
-
-                      {qa.follow_ups && (
-                        <div>
-                          <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Follow-up Questions</div>
-                          <ul className="space-y-1">
-                            {qa.follow_ups.map((fq) => (
-                              <li key={fq} className="flex gap-2 text-xs text-gray-600">
-                                <Zap className="w-3 h-3 text-amber-500 flex-shrink-0 mt-0.5" />
-                                {fq}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                  </div>
+                  <ChevronRight className={`w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5 transition-transform ${isExp ? "rotate-90" : ""}`} />
+                </button>
+                {isExp && (
+                  <div className="border-t border-gray-100 p-4 space-y-3 bg-gray-50/50">
+                    <div className="relative">
+                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Expert Answer</div>
+                      <p className="text-sm text-gray-700 leading-relaxed">{qa.a}</p>
+                      <button onClick={() => copyAnswer(qa.id, qa.a)} className="absolute top-0 right-0 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+                        {copied === qa.id ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                      </button>
                     </div>
-                  )}
-                </div>
-              );
-            })
-          )}
+                    {(qa as any).follow_ups && (
+                      <div>
+                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Follow-up Questions</div>
+                        <ul className="space-y-1">
+                          {(qa as any).follow_ups.map((fq: string) => (
+                            <li key={fq} className="flex gap-2 text-xs text-gray-600"><Zap className="w-3 h-3 text-amber-500 flex-shrink-0 mt-0.5" />{fq}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
   );
+
+  // EXAM CONFIG
+  if (mode === "config") return (
+    <div className="max-w-2xl mx-auto space-y-5">
+      <div className="flex items-center gap-3">
+        <button onClick={() => setMode("study")} className="p-2 rounded-xl hover:bg-gray-100 text-gray-500"><X className="w-5 h-5" /></button>
+        <div>
+          <h2 className="font-extrabold text-xl text-gray-900">Configure Your Exam</h2>
+          <p className="text-sm text-gray-500">Select categories, count, difficulty, and optional timer</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
+        <div className="font-semibold text-sm text-gray-700 flex items-center gap-2">
+          <ListChecks className="w-4 h-4 text-rose-500" /> Select Categories
+          <button onClick={() => setSelectedCats(ALL_CATEGORIES.map(c => c.id))} className="ml-auto text-xs text-blue-600 hover:underline">Select All</button>
+          <button onClick={() => setSelectedCats([])} className="text-xs text-gray-400 hover:underline">Clear</button>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {ALL_CATEGORIES.map((c) => {
+            const sel = selectedCats.includes(c.id);
+            return (
+              <button key={c.id} onClick={() => toggleCat(c.id)}
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm transition-all text-left ${sel ? "border-[#0070F2] bg-[#0070F2]/5 text-[#0070F2] font-semibold" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
+                <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${sel ? "bg-[#0070F2] border-[#0070F2]" : "border-gray-300"}`}>
+                  {sel && <Check className="w-2.5 h-2.5 text-white" />}
+                </div>
+                <span className="flex-1 truncate text-xs">{c.title}</span>
+                <span className="text-xs text-gray-400">{c.questions.length}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
+          <div className="font-semibold text-sm text-gray-700 flex items-center gap-2"><Shuffle className="w-4 h-4 text-purple-500" /> Questions</div>
+          <div className="grid grid-cols-3 gap-2">
+            {[10, 20, 30, 50, 75, 0].map((n) => (
+              <button key={n} onClick={() => setExamCount(n)}
+                className={`py-2 rounded-xl text-sm font-semibold border transition-all ${examCount === n ? "bg-purple-600 text-white border-purple-600" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
+                {n === 0 ? "All" : n}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
+          <div className="font-semibold text-sm text-gray-700 flex items-center gap-2"><Star className="w-4 h-4 text-amber-500" /> Difficulty</div>
+          <div className="space-y-1.5">
+            {["all", "junior", "mid", "senior"].map((d) => (
+              <button key={d} onClick={() => setExamDiff(d)}
+                className={`w-full py-2 rounded-xl text-sm font-semibold border transition-all ${examDiff === d ? "bg-amber-500 text-white border-amber-500" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
+                {d === "all" ? "All Levels" : d.charAt(0).toUpperCase() + d.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="font-semibold text-sm text-gray-700 flex items-center gap-2"><Clock className="w-4 h-4 text-blue-500" /> Countdown Timer per Question</div>
+          <button onClick={() => setTimerEnabled(!timerEnabled)}
+            className={`relative w-11 h-6 rounded-full transition-colors ${timerEnabled ? "bg-blue-500" : "bg-gray-200"}`}>
+            <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${timerEnabled ? "translate-x-6" : "translate-x-1"}`} />
+          </button>
+        </div>
+        {timerEnabled && (
+          <div className="flex gap-2">
+            {[30, 60, 90, 120].map((s) => (
+              <button key={s} onClick={() => setTimePerQ(s)}
+                className={`px-3 py-1.5 rounded-xl text-sm font-medium border transition-all ${timePerQ === s ? "bg-blue-500 text-white border-blue-500" : "border-gray-200 text-gray-600"}`}>
+                {s}s
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <button onClick={startExam} disabled={selectedCats.length === 0}
+        className="w-full py-3.5 rounded-2xl font-bold text-white text-base flex items-center justify-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+        style={{ background: selectedCats.length === 0 ? "#d1d5db" : "linear-gradient(135deg, #DC2626 0%, #EA580C 100%)" }}>
+        <Play className="w-5 h-5" />
+        Start Exam ({selectedCats.reduce((a, id) => { const c = ALL_CATEGORIES.find(x => x.id === id); return a + (c?.questions.length || 0); }, 0)} questions available)
+      </button>
+    </div>
+  );
+
+  // EXAM QUIZ
+  if (mode === "quiz" && currentQ) {
+    const progress = (examIdx / examQuestions.length) * 100;
+    const timerPct = timerEnabled && timePerQ > 0 ? (timeLeft / timePerQ) * 100 : 100;
+    const qCat = ALL_CATEGORIES.find((c) => c.questions.some((q) => q.id === currentQ.id));
+    return (
+      <div className="max-w-2xl mx-auto space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-500 font-medium">Question <span className="font-extrabold text-gray-900">{examIdx + 1}</span> / {examQuestions.length}</div>
+          {timerEnabled && (
+            <div className={`flex items-center gap-1.5 text-sm font-bold px-3 py-1 rounded-full ${timeLeft <= 10 ? "bg-red-100 text-red-600" : "bg-blue-50 text-blue-600"}`}>
+              <Timer className="w-3.5 h-3.5" />{timeLeft}s
+            </div>
+          )}
+          <button onClick={() => setMode("study")} className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1"><X className="w-3.5 h-3.5" />Exit</button>
+        </div>
+
+        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-2 bg-gradient-to-r from-rose-500 to-orange-400 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
+        </div>
+
+        {timerEnabled && (
+          <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+            <div className={`h-1 rounded-full transition-all duration-1000 ${timeLeft <= 10 ? "bg-red-400" : "bg-blue-400"}`} style={{ width: `${timerPct}%` }} />
+          </div>
+        )}
+
+        <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 shadow-sm space-y-4">
+          <div className="flex items-center gap-2 flex-wrap">
+            {qCat && <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${qCat.bg} ${qCat.color}`}>{qCat.title}</span>}
+            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${LEVEL_COLORS[currentQ.level] || "bg-gray-100 text-gray-600"}`}>
+              {currentQ.level.charAt(0).toUpperCase() + currentQ.level.slice(1)}
+            </span>
+            {currentQ.tags.slice(0, 2).map((t) => (
+              <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">{t}</span>
+            ))}
+          </div>
+
+          <div className="text-base font-bold text-gray-900 leading-snug">{currentQ.q}</div>
+
+          {!revealed ? (
+            <div className="bg-gray-50 rounded-xl p-5 text-center border border-dashed border-gray-200">
+              <Brain className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+              <div className="text-gray-400 text-sm mb-3">Think through your answer first, then reveal</div>
+              <button onClick={() => setRevealed(true)}
+                className="bg-gradient-to-r from-rose-600 to-orange-500 text-white font-bold px-6 py-2.5 rounded-xl hover:opacity-90 transition-all shadow-md">
+                Reveal Answer
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                <div className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2">Expert Answer</div>
+                <p className="text-sm text-gray-800 leading-relaxed">{currentQ.a}</p>
+              </div>
+              <div>
+                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider text-center mb-3">How did you do?</div>
+                <div className="grid grid-cols-2 gap-3">
+                  <button onClick={() => gradeQuestion("got")}
+                    className="flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm transition-all shadow">
+                    <CheckCircle2 className="w-5 h-5" /> Got It!
+                  </button>
+                  <button onClick={() => gradeQuestion("review")}
+                    className="flex items-center justify-center gap-2 py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm transition-all shadow">
+                    <XCircle className="w-5 h-5" /> Need Review
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-1 flex-wrap">
+          {examQuestions.map((q, i) => {
+            const g = grades[q.id];
+            return <div key={i} className={`h-2 rounded-full flex-shrink-0 transition-colors ${i < examIdx ? (g === "got" ? "bg-emerald-400" : "bg-rose-400") : i === examIdx ? "bg-blue-500" : "bg-gray-200"}`} style={{ width: Math.max(8, Math.min(24, Math.floor(240 / examQuestions.length))) + "px" }} />;
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // RESULTS
+  if (mode === "results") {
+    const missed = examQuestions.filter((q) => grades[q.id] === "review");
+    const gradeBg = score >= 80 ? "from-emerald-500 to-teal-500" : score >= 60 ? "from-amber-500 to-orange-500" : "from-rose-500 to-red-600";
+    const gradeLabel = score >= 80 ? "Excellent Work!" : score >= 60 ? "Good Progress" : "Keep Practicing";
+    const gradeColor = score >= 80 ? "text-emerald-600" : score >= 60 ? "text-amber-500" : "text-rose-600";
+    return (
+      <div className="max-w-2xl mx-auto space-y-5">
+        <div className={`bg-gradient-to-r ${gradeBg} rounded-2xl p-6 text-white text-center`}>
+          <Trophy className="w-12 h-12 mx-auto mb-3 opacity-90" />
+          <div className="text-5xl font-extrabold">{score}%</div>
+          <div className="text-lg font-bold mt-1 opacity-90">{gradeLabel}</div>
+          <p className="text-sm opacity-75 mt-1">{gotCount} correct out of {examQuestions.length} questions</p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: "Correct", value: String(gotCount), color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
+            { label: "Review", value: String(reviewCount), color: "text-rose-600", bg: "bg-rose-50", border: "border-rose-100" },
+            { label: "Score", value: score + "%", color: gradeColor, bg: "bg-gray-50", border: "border-gray-200" },
+          ].map((s) => (
+            <div key={s.label} className={`${s.bg} border ${s.border} rounded-2xl p-4 text-center`}>
+              <div className={`text-2xl font-extrabold ${s.color}`}>{s.value}</div>
+              <div className="text-xs text-gray-500 font-medium mt-0.5">{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {missed.length > 0 && (
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+            <div className="font-bold text-gray-900 flex items-center gap-2">
+              <XCircle className="w-4 h-4 text-rose-500" /> Questions to Review ({missed.length})
+            </div>
+            <div className="space-y-3 max-h-72 overflow-y-auto">
+              {missed.map((q) => (
+                <div key={q.id} className="border border-rose-100 bg-rose-50/50 rounded-xl p-3 space-y-1.5">
+                  <div className="text-sm font-semibold text-gray-900">{q.q}</div>
+                  <p className="text-xs text-gray-600 leading-relaxed">{q.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <button onClick={() => startExam()}
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white transition-all shadow"
+            style={{ background: "linear-gradient(135deg,#DC2626,#EA580C)" }}>
+            <RotateCcw className="w-4 h-4" /> Retake
+          </button>
+          <button onClick={() => setMode("config")}
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-gray-200 text-gray-700 font-bold text-sm hover:border-gray-300">
+            <Settings className="w-4 h-4" /> New Config
+          </button>
+          <button onClick={() => setMode("study")}
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-gray-200 text-gray-700 font-bold text-sm hover:border-gray-300">
+            <BookOpen className="w-4 h-4" /> Study Mode
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }

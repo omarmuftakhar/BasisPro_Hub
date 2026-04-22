@@ -140,52 +140,8 @@ const navGroups: NavGroup[] = [
 
 const allNavItems = navGroups.flatMap((g) => g.items);
 
-const kpis = [
-  {
-    label: "Active Users",
-    value: "1,284",
-    change: "+14%",
-    up: true,
-    icon: <Users className="w-5 h-5" />,
-    gradient: "from-blue-500 to-blue-600",
-    bg: "bg-blue-50",
-    ring: "ring-blue-100",
-    text: "text-blue-600",
-  },
-  {
-    label: "DB Modules Live",
-    value: "4",
-    change: "All loaded",
-    up: true,
-    icon: <Database className="w-5 h-5" />,
-    gradient: "from-indigo-500 to-indigo-600",
-    bg: "bg-indigo-50",
-    ring: "ring-indigo-100",
-    text: "text-indigo-600",
-  },
-  {
-    label: "Guides & Runbooks",
-    value: "205",
-    change: "+8 this week",
-    up: true,
-    icon: <BookMarked className="w-5 h-5" />,
-    gradient: "from-emerald-500 to-emerald-600",
-    bg: "bg-emerald-50",
-    ring: "ring-emerald-100",
-    text: "text-emerald-600",
-  },
-  {
-    label: "AI Sessions Today",
-    value: "342",
-    change: "+28%",
-    up: true,
-    icon: <Brain className="w-5 h-5" />,
-    gradient: "from-purple-500 to-purple-600",
-    bg: "bg-purple-50",
-    ring: "ring-purple-100",
-    text: "text-purple-600",
-  },
-];
+const TOTAL_INTERVIEW_QS = 303;
+const TOTAL_TCODES = 372;
 
 // ─── Custom tooltip ─────────────────────────────────────────────────────
 const ChartTooltip = ({ active, payload, label }: any) => {
@@ -234,6 +190,54 @@ export default function Dashboard() {
     window.addEventListener("resize", handler);
     return () => window.removeEventListener("resize", handler);
   }, []);
+
+  // Live clock
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const dateStr = now.toLocaleDateString("en-US", { timeZone: tz, weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const timeStr = now.toLocaleTimeString("en-US", { timeZone: tz, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+  // Dynamic KPIs from real platform data
+  const liveModuleCount = Object.keys(moduleRegistry).length;
+  const totalTopics = allNavItems.length;
+  const kpis = [
+    {
+      label: "Learning Topics",
+      value: String(totalTopics),
+      change: "All modules",
+      icon: <BookMarked className="w-5 h-5" />,
+      gradient: "from-blue-500 to-blue-600",
+      bg: "bg-blue-50", ring: "ring-blue-100", text: "text-blue-600",
+    },
+    {
+      label: "Modules with Content",
+      value: String(liveModuleCount),
+      change: `of ${totalTopics} live`,
+      icon: <Database className="w-5 h-5" />,
+      gradient: "from-indigo-500 to-indigo-600",
+      bg: "bg-indigo-50", ring: "ring-indigo-100", text: "text-indigo-600",
+    },
+    {
+      label: "Interview Questions",
+      value: String(TOTAL_INTERVIEW_QS),
+      change: "20 categories",
+      icon: <MessageSquare className="w-5 h-5" />,
+      gradient: "from-rose-500 to-orange-500",
+      bg: "bg-rose-50", ring: "ring-rose-100", text: "text-rose-600",
+    },
+    {
+      label: "SAP TCodes",
+      value: String(TOTAL_TCODES),
+      change: "All categories",
+      icon: <Terminal className="w-5 h-5" />,
+      gradient: "from-emerald-500 to-emerald-600",
+      bg: "bg-emerald-50", ring: "ring-emerald-100", text: "text-emerald-600",
+    },
+  ];
 
   const activeLabel =
     activeId === "overview"
@@ -384,7 +388,7 @@ export default function Dashboard() {
             </button>
             <div className="min-w-0">
               <h1 className="text-base md:text-lg font-bold text-foreground truncate">{activeLabel}</h1>
-              <p className="text-xs text-muted-foreground hidden sm:block">Monday, April 21, 2026</p>
+              <p className="text-xs text-muted-foreground hidden sm:block">{dateStr} · <span className="font-mono">{timeStr}</span> <span className="opacity-60 text-[10px]">({tz})</span></p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -435,6 +439,32 @@ export default function Dashboard() {
           {/* ── Overview dashboard ──────────────────────── */}
           {activeId === "overview" && (
             <>
+              {/* AI Assistant Hero — top of overview */}
+              <div
+                className="rounded-2xl overflow-hidden shadow-lg"
+                style={{ background: "linear-gradient(135deg, #0D47A1 0%, #1565C0 50%, #0070F2 100%)" }}
+              >
+                <div className="px-6 md:px-8 py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0 ring-1 ring-white/20">
+                      <Bot className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-white font-bold text-lg">AI Assistant — All Modules</div>
+                      <div className="text-white/70 text-sm mt-0.5">
+                        Ask anything about SAP Basis — HANA, Oracle, Sybase, Cloud ALM, BTP, SolMan, TCodes, and more.
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setActiveId("ai")}
+                    className="flex-shrink-0 bg-white text-primary font-bold px-6 py-2.5 rounded-xl hover:bg-white/90 transition-all shadow-md hover:shadow-lg text-sm"
+                  >
+                    Open AI Assistant
+                  </button>
+                </div>
+              </div>
+
               {/* KPI cards */}
               <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
                 {kpis.map((kpi, i) => (
@@ -613,31 +643,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* AI Assistant Banner */}
-              <div
-                className="rounded-2xl overflow-hidden shadow-lg"
-                style={{ background: "linear-gradient(135deg, #0D47A1 0%, #1565C0 50%, #0070F2 100%)" }}
-              >
-                <div className="px-6 md:px-8 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0 ring-1 ring-white/20">
-                      <Bot className="w-7 h-7 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-white font-bold text-lg">AI Assistant — All Modules</div>
-                      <div className="text-white/70 text-sm mt-0.5">
-                        Ask anything about SAP Basis — HANA, Oracle, Sybase, Cloud ALM, BTP, SolMan, TCodes, and more.
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setActiveId("ai")}
-                    className="flex-shrink-0 bg-white text-primary font-bold px-6 py-2.5 rounded-xl hover:bg-white/90 transition-all shadow-md hover:shadow-lg text-sm"
-                  >
-                    Open AI Assistant
-                  </button>
-                </div>
-              </div>
             </>
           )}
 
