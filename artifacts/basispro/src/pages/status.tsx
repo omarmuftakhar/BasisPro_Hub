@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowUp } from "lucide-react";
 
 const services = [
   { name: "Website", uptime: "100%", latency: "42ms" },
@@ -16,6 +16,14 @@ const incidents = [
 
 export default function Status() {
   const [, navigate] = useLocation();
+  const [showTop, setShowTop] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 300);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans">
       {/* Navbar */}
@@ -131,6 +139,34 @@ export default function Status() {
           </div>
         </div>
       </div>
+
+      {/* Back to Top */}
+      {showTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Back to top"
+          style={{
+            position: "fixed",
+            bottom: "28px",
+            right: "28px",
+            width: "44px",
+            height: "44px",
+            borderRadius: "50%",
+            background: "#2563EB",
+            color: "#ffffff",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 16px rgba(37,99,235,0.35)",
+            zIndex: 100,
+            transition: "opacity 0.2s",
+          }}
+        >
+          <ArrowUp style={{ width: "18px", height: "18px" }} />
+        </button>
+      )}
     </div>
   );
 }

@@ -1,12 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, Mail, Clock, CheckCircle } from "lucide-react";
+import { ArrowLeft, Mail, Clock, CheckCircle, ArrowUp } from "lucide-react";
 
 export default function Contact() {
   const [, navigate] = useLocation();
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showTop, setShowTop] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 300);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -152,7 +159,7 @@ export default function Contact() {
               </div>
               <h3 className="font-bold text-foreground mb-1">Email Us Directly</h3>
               <p className="text-sm text-muted-foreground mb-3">For support, billing, or general questions:</p>
-              <a href="mailto:support@basispro.app" className="text-sm font-semibold text-primary hover:underline">support@basispro.app</a>
+              <a href="mailto:support@basispro.com" className="text-sm font-semibold text-primary hover:underline">support@basispro.com</a>
             </div>
 
             <div className="bg-white rounded-2xl border border-border shadow-sm p-6">
@@ -179,11 +186,39 @@ export default function Contact() {
             <div className="bg-[#1E3A5F] rounded-2xl p-6 text-white">
               <h3 className="font-bold mb-1">Enterprise & Teams</h3>
               <p className="text-sm text-white/70 mb-4">Need multi-seat licenses or a custom arrangement for your organization?</p>
-              <a href="mailto:enterprise@basispro.app" className="text-sm font-semibold text-white underline">enterprise@basispro.app</a>
+              <a href="mailto:enterprise@basispro.com" className="text-sm font-semibold text-white underline">enterprise@basispro.com</a>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Back to Top */}
+      {showTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Back to top"
+          style={{
+            position: "fixed",
+            bottom: "28px",
+            right: "28px",
+            width: "44px",
+            height: "44px",
+            borderRadius: "50%",
+            background: "#2563EB",
+            color: "#ffffff",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 16px rgba(37,99,235,0.35)",
+            zIndex: 100,
+            transition: "opacity 0.2s",
+          }}
+        >
+          <ArrowUp style={{ width: "18px", height: "18px" }} />
+        </button>
+      )}
     </div>
   );
 }
