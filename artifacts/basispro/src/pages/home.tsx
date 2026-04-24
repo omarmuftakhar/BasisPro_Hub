@@ -179,7 +179,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans overflow-x-hidden">
+    <div className="bg-background text-foreground font-sans overflow-x-hidden">
 
       {/* Navbar — sticky with scroll shadow */}
       <nav

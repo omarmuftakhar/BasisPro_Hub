@@ -1,0 +1,31 @@
+Create a Terms of Service page at the route /terms and a Privacy Policy page at the route /privacy. Make both pages accessible from the footer links. Both pages should have a clean white layout with the BasisPro navbar at the top and footer at the bottom.
+Terms of Service page (/terms):
+Title: Terms of Service
+Last updated: April 2026
+Create these sections with proper content:
+
+Acceptance of Terms — By accessing and using BasisPro, you accept and agree to be bound by these Terms of Service. If you do not agree, please do not use our platform.
+Description of Service — BasisPro is a professional learning platform for SAP Basis engineers, consultants, and architects. We provide technical guides, interview preparation, SAP TCode references, AI assistance, and architecture blueprints.
+Subscription & Payment — BasisPro offers two subscription plans: Monthly at $19.99/month and Yearly at $149/year. All payments are processed securely through Stripe. By subscribing you authorize us to charge your payment method on a recurring basis until cancelled.
+Refund Policy — All subscription payments are final and non-refundable. By subscribing to BasisPro, you acknowledge and agree that no refunds will be issued for any reason, including change of mind after purchase, partial use of the subscription period, cancellation before end of billing cycle, or yearly subscriptions cancelled mid-term. You may cancel anytime to stop future charges. You retain full access until the end of your current billing period.
+Account Responsibilities — You are responsible for maintaining the confidentiality of your account credentials. You agree not to share your account with others. BasisPro reserves the right to terminate accounts found in violation of these terms.
+Intellectual Property — All content on BasisPro including guides, questions, TCodes, and AI responses are the intellectual property of BasisPro. You may not reproduce, distribute, or resell any content without written permission.
+Disclaimer — BasisPro provides content for educational purposes only. We do not guarantee specific career outcomes or exam results. Content accuracy is maintained to the best of our ability but may not reflect the latest SAP updates.
+Changes to Terms — We reserve the right to update these terms at any time. Continued use of the platform after changes constitutes acceptance of the new terms.
+Contact — For any questions regarding these terms, contact us at support@basispro.com
+
+
+Privacy Policy page (/privacy):
+Title: Privacy Policy
+Last updated: April 2026
+Create these sections:
+
+Information We Collect — We collect your name, email address, and payment information when you subscribe. We also collect usage data such as pages visited and features used to improve our platform.
+How We Use Your Information — We use your information to provide and improve our services, process payments, send important account notifications, and respond to support requests. We do not sell your personal data to third parties.
+Payment Processing — All payments are processed by Stripe. BasisPro does not store your credit card details. Please review Stripe's privacy policy for information on how they handle payment data.
+Cookies — We use essential cookies to keep you logged in and remember your preferences. We do not use advertising or tracking cookies.
+Data Security — We implement industry-standard security measures to protect your personal information. However no method of transmission over the internet is 100% secure.
+Data Retention — We retain your account data for as long as your account is active. You may request deletion of your data by contacting us at support@basispro.com
+Your Rights — You have the right to access, correct, or delete your personal data at any time. Contact us at support@basispro.com to make a request.
+Changes to Privacy Policy — We may update this policy from time to time. We will notify you of significant changes via email.
+Contact — For privacy related questions contact us at support@basispro.com
