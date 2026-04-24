@@ -1,0 +1,138 @@
+Fix remaining BasisPro issues only. Do NOT redesign UI.
+
+Scope:
+
+* artifacts/basispro/src/pages/dashboard.tsx
+
+## 1. Fix Sidebar Scroll Properly
+
+Current issue:
+Sidebar still does not scroll correctly to lower groups like Career and AI.
+
+Apply a strict flex-height fix.
+
+Top-level page wrapper must include:
+className="flex h-screen min-h-0 bg-[#F5F7FA] text-foreground overflow-hidden font-sans"
+
+Sidebar aside must include:
+className="... flex flex-col h-screen min-h-0 overflow-hidden ..."
+
+SidebarContent wrapper must be a real flex column:
+Wrap SidebarContent return content in:
+
+<div className="flex flex-col h-full min-h-0">
+
+Logo area:
+className="... flex-shrink-0"
+
+Overview area:
+className="... flex-shrink-0"
+
+Nav area MUST be the only scrollable section:
+className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 pb-6 space-y-0.5 scrollbar-thin"
+
+User profile footer:
+className="... flex-shrink-0"
+
+Important:
+
+* Do not allow the whole sidebar to scroll
+* Only the nav section should scroll
+* Keep logo and user profile fixed
+* Career and AI must be reachable
+
+## 2. Keep Career Expanded
+
+Confirm expandedGroups includes:
+"Career": true,
+"AI": true,
+
+## 3. Improve AI Assistant Output UI
+
+Current AI response is functional but looks like plain chatbot text.
+
+Enhance only the AI Assistant response rendering.
+
+Requirements:
+
+* Keep current AI Assistant layout
+* Do not add external APIs
+* Do not create new route
+* Do not redesign dashboard
+* Replace raw long text output with structured response cards
+
+AI response should display:
+
+* Title
+* Short summary
+* Diagnostic steps as numbered list
+* Commands/TCodes as pill/code blocks
+* “Next action” section
+
+For HANA response include:
+Title: HANA Troubleshooting Checklist
+Commands/TCodes:
+DBACOCKPIT
+HDB info
+hdbnsutil -sr_state
+M_SERVICES
+M_SYSTEM_REPLICATION
+
+For Transport response include:
+STMS
+SE09
+SE10
+SM21
+SLOG
+
+For Job response include:
+SM37
+SM21
+ST22
+SM50
+
+For RFC response include:
+SM59
+SMGW
+SMICM
+ST22
+
+For TCode lookup include:
+Explain what the TCode does and when to use it.
+
+For Cloud migration include:
+Assessment, sizing, network, HA/DR, migration rehearsal, cutover.
+
+## 4. Fix AI Chat Overflow on Mobile
+
+Current screenshot shows horizontal overflow in AI answer.
+
+Fix:
+
+* message bubble must not overflow container
+* use break-words
+* use whitespace-pre-wrap only if needed
+* remove any fixed width that causes horizontal scroll
+* code/commands must wrap or scroll inside small blocks
+
+Add classes where needed:
+max-w-full
+break-words
+overflow-hidden
+
+For code blocks:
+className="max-w-full overflow-x-auto whitespace-pre-wrap break-words"
+
+## 5. Validation
+
+Before finishing:
+
+* Sidebar nav scrolls independently
+* Career and AI visible/reachable
+* Logo remains fixed
+* User profile remains fixed
+* No horizontal overflow in AI Assistant on mobile
+* AI answer looks structured, not raw text
+* No TypeScript errors
+* No duplicate AI Assistant components
+* No unrelated file changes
