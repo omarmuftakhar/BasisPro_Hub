@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { logout } from "@/lib/auth";
 import {
   AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -845,7 +846,7 @@ export default function Dashboard() {
           <div className="text-xs text-emerald-600 font-medium">● Premium Member</div>
         </div>
         <button
-          onClick={() => navigate("/")}
+          onClick={() => { logout(); navigate("/login"); }}
           className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-[#F0F4FF]"
           title="Sign out"
         >

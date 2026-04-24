@@ -201,10 +201,11 @@ export default function Home() {
             <a href="#topics" className="hover:text-primary transition-colors">Topics</a>
             <a href="#platform" className="hover:text-primary transition-colors">Platform</a>
             <a href="#pricing" className="hover:text-primary transition-colors">Pricing</a>
+            <a href="/contact" className="hover:text-primary transition-colors" onClick={(e) => { e.preventDefault(); navigate("/contact"); }}>Contact Us</a>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" className="text-sm font-medium text-foreground hover:text-primary" onClick={() => navigate("/dashboard")}>Sign In</Button>
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-semibold px-5" onClick={() => navigate("/dashboard")}>
+            <Button variant="ghost" className="text-sm font-medium text-foreground hover:text-primary" onClick={() => navigate("/login")}>Sign In</Button>
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-semibold px-5" onClick={() => navigate("/login")}>
               Subscribe
             </Button>
           </div>
