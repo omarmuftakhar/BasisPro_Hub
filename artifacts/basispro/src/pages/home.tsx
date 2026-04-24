@@ -278,7 +278,7 @@ export default function Home() {
                     className="absolute inset-0 transition-opacity duration-500"
                     style={{ opacity: slideIndex === 0 ? 1 : 0, pointerEvents: slideIndex === 0 ? "auto" : "none" }}
                   >
-                    <div className="w-full h-full bg-[#F8FAFC] rounded-2xl shadow-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.15)" }}>
+                    <div className="w-full h-full bg-[#F8FAFC] rounded-2xl overflow-hidden" style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.15)" }}>
                       {/* Slide label */}
                       <div className="bg-[#1E3A5F] px-4 py-2 flex items-center gap-2">
                         <div className="w-5 h-5 bg-[#2563EB] rounded flex items-center justify-center">
@@ -363,7 +363,7 @@ export default function Home() {
                     className="absolute inset-0 transition-opacity duration-500"
                     style={{ opacity: slideIndex === 1 ? 1 : 0, pointerEvents: slideIndex === 1 ? "auto" : "none" }}
                   >
-                    <div className="w-full h-full bg-[#F8FAFC] rounded-2xl shadow-2xl overflow-hidden flex flex-col" style={{ border: "1px solid rgba(255,255,255,0.15)" }}>
+                    <div className="w-full h-full bg-[#F8FAFC] rounded-2xl overflow-hidden flex flex-col" style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.15)" }}>
                       {/* Header */}
                       <div className="bg-[#1E3A5F] px-4 py-2.5 flex items-center gap-2.5 flex-shrink-0">
                         <div className="w-7 h-7 bg-[#7C3AED] rounded-xl flex items-center justify-center">
@@ -444,7 +444,7 @@ export default function Home() {
                     className="absolute inset-0 transition-opacity duration-500"
                     style={{ opacity: slideIndex === 2 ? 1 : 0, pointerEvents: slideIndex === 2 ? "auto" : "none" }}
                   >
-                    <div className="w-full h-full bg-[#F8FAFC] rounded-2xl shadow-2xl overflow-hidden flex flex-col" style={{ border: "1px solid rgba(255,255,255,0.15)" }}>
+                    <div className="w-full h-full bg-[#F8FAFC] rounded-2xl overflow-hidden flex flex-col" style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.15)" }}>
                       {/* Header */}
                       <div className="bg-[#1E3A5F] px-4 py-2.5 flex items-center gap-2.5 flex-shrink-0">
                         <div className="w-7 h-7 bg-[#DC2626] rounded-xl flex items-center justify-center">
@@ -799,23 +799,35 @@ export default function Home() {
           </div>
 
           {/* Toggle */}
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <span className={`text-sm font-semibold transition-colors ${!isYearly ? "text-white" : "text-white/50"}`}>Monthly</span>
+          <div className="flex items-center justify-center gap-5 mb-8">
+            <span
+              className="text-sm transition-all"
+              style={{ color: !isYearly ? "#ffffff" : "rgba(255,255,255,0.45)", fontWeight: !isYearly ? 700 : 500 }}
+            >
+              Monthly
+            </span>
             <button
               onClick={() => setIsYearly((v) => !v)}
-              className="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none"
-              style={{ background: isYearly ? "#22C55E" : "rgba(255,255,255,0.3)" }}
+              className="relative flex-shrink-0 rounded-full transition-colors duration-300 focus:outline-none"
+              style={{ width: "48px", height: "26px", background: isYearly ? "#22C55E" : "rgba(255,255,255,0.3)" }}
               aria-label="Toggle billing period"
             >
               <span
-                className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300"
-                style={{ transform: isYearly ? "translateX(26px)" : "translateX(2px)" }}
+                className="absolute top-[3px] w-5 h-5 bg-white rounded-full shadow transition-transform duration-300"
+                style={{ transform: isYearly ? "translateX(24px)" : "translateX(3px)" }}
               />
             </button>
-            <span className={`text-sm font-semibold transition-colors ${isYearly ? "text-white" : "text-white/50"}`}>Yearly</span>
-            {isYearly && (
-              <span className="px-2.5 py-1 bg-green-500 text-white text-xs font-bold rounded-full">Save 38%</span>
-            )}
+            <div className="flex items-center gap-2">
+              <span
+                className="text-sm transition-all"
+                style={{ color: isYearly ? "#ffffff" : "rgba(255,255,255,0.45)", fontWeight: isYearly ? 700 : 500 }}
+              >
+                Yearly
+              </span>
+              {isYearly && (
+                <span className="px-2.5 py-1 bg-green-500 text-white text-xs font-bold rounded-full">Save 38%</span>
+              )}
+            </div>
           </div>
 
           {/* Pricing card */}
