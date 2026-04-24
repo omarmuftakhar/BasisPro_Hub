@@ -1,12 +1,24 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Server, Database, Cloud, Shield, Activity, RefreshCw, MoveRight, BarChart3, ChevronRight, BookOpen, MessageSquare, Terminal, Bot } from "lucide-react";
+import { ArrowRight, Server, Database, Cloud, Shield, Activity, RefreshCw, MoveRight, BarChart3, ChevronRight, BookOpen, MessageSquare, Terminal, Bot, ChevronLeft, Send } from "lucide-react";
 
 export default function Home() {
   const [, navigate] = useLocation();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const SLIDE_COUNT = 3;
+
+  const nextSlide = useCallback(() => setSlideIndex((i) => (i + 1) % SLIDE_COUNT), []);
+  const prevSlide = useCallback(() => setSlideIndex((i) => (i - 1 + SLIDE_COUNT) % SLIDE_COUNT), []);
+
+  useEffect(() => {
+    if (paused) return;
+    const timer = setInterval(nextSlide, 3000);
+    return () => clearInterval(timer);
+  }, [paused, nextSlide]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -233,181 +245,302 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Right column — enhanced dashboard mockup */}
-              <div className="hidden lg:flex justify-center items-start">
-                <div className="w-full max-w-[500px] bg-white rounded-2xl shadow-2xl overflow-hidden border border-white/20">
-                  {/* Fake browser bar */}
-                  <div className="bg-[#F1F5F9] border-b border-[#E2E8F0] px-4 py-2.5 flex items-center gap-2">
-                    <div className="flex gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
-                      <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
-                      <div className="w-3 h-3 rounded-full bg-[#28C840]" />
-                    </div>
-                    <div className="flex-1 mx-3 bg-white border border-[#E2E8F0] rounded-md px-3 py-1 flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-[#E2E8F0]" />
-                      <span className="text-[11px] text-[#94A3B8] font-medium tracking-tight">basispro.app/dashboard</span>
-                    </div>
-                  </div>
+              {/* Right column — auto-rotating carousel */}
+              <div
+                className="hidden lg:flex flex-col justify-center items-center gap-4"
+                onMouseEnter={() => setPaused(true)}
+                onMouseLeave={() => setPaused(false)}
+              >
+                {/* Carousel track */}
+                <div className="relative w-full max-w-[500px]" style={{ height: "480px" }}>
 
-                  {/* Mockup sidebar + content layout */}
-                  <div className="flex" style={{ minHeight: "520px" }}>
-                    {/* Mini sidebar */}
-                    <div className="w-[52px] bg-[#1E3A5F] flex flex-col items-center pt-3 gap-2 flex-shrink-0">
-                      <div className="w-7 h-7 bg-[#2563EB] rounded-md flex items-center justify-center mb-2">
-                        <span className="text-white font-bold text-[10px]">B</span>
-                      </div>
-                      {[
-                        { icon: "▪", active: true },
-                        { icon: "◆", active: false },
-                        { icon: "●", active: false },
-                        { icon: "▲", active: false },
-                        { icon: "■", active: false },
-                      ].map((item, i) => (
-                        <div
-                          key={i}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px]"
-                          style={{ background: item.active ? "rgba(37,99,235,0.3)" : "transparent", color: item.active ? "#93C5FD" : "#64748B" }}
-                        >
-                          {item.icon}
-                        </div>
-                      ))}
-                    </div>
+                  {/* Arrow — left */}
+                  <button
+                    onClick={prevSlide}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 z-20 w-9 h-9 rounded-full bg-white/20 hover:bg-white/35 border border-white/30 flex items-center justify-center text-white transition-all backdrop-blur-sm"
+                    aria-label="Previous slide"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
 
-                    {/* Main content area */}
-                    <div className="flex-1 bg-[#F8FAFC] p-4 overflow-hidden">
-                      {/* Header row */}
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <div className="text-[11px] font-bold text-[#1e293b]">Dashboard Overview</div>
-                          <div className="text-[9px] text-[#94A3B8]">Friday, April 24, 2026</div>
+                  {/* Arrow — right */}
+                  <button
+                    onClick={nextSlide}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-5 z-20 w-9 h-9 rounded-full bg-white/20 hover:bg-white/35 border border-white/30 flex items-center justify-center text-white transition-all backdrop-blur-sm"
+                    aria-label="Next slide"
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+
+                  {/* ── Slide 1: Dashboard Overview ── */}
+                  <div
+                    className="absolute inset-0 transition-opacity duration-500"
+                    style={{ opacity: slideIndex === 0 ? 1 : 0, pointerEvents: slideIndex === 0 ? "auto" : "none" }}
+                  >
+                    <div className="w-full h-full bg-[#F8FAFC] rounded-2xl shadow-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.15)" }}>
+                      {/* Slide label */}
+                      <div className="bg-[#1E3A5F] px-4 py-2 flex items-center gap-2">
+                        <div className="w-5 h-5 bg-[#2563EB] rounded flex items-center justify-center">
+                          <span className="text-white font-bold text-[9px]">B</span>
                         </div>
-                        <div className="w-6 h-6 bg-[#2563EB] rounded-full flex items-center justify-center">
-                          <span className="text-white font-bold text-[8px]">SP</span>
+                        <span className="text-[11px] font-semibold text-white/90">Dashboard Overview</span>
+                        <div className="ml-auto flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                          <span className="text-[9px] text-white/60">Live</span>
                         </div>
                       </div>
-
-                      {/* Welcome banner */}
-                      <div
-                        className="bg-white rounded-lg border border-[#E2E8F0] p-2.5 mb-3"
-                        style={{ borderLeft: "3px solid #2563EB" }}
-                      >
-                        <div className="text-[10px] font-bold text-[#1e293b]">Welcome back, SAP Professional 👋</div>
-                        <div className="text-[8px] text-[#64748b] mt-0.5">3 modules in progress · Last active today</div>
-                        <div className="flex gap-1.5 mt-2">
-                          {["Continue Learning", "Practice Interview", "AI Assistant"].map((label, i) => (
-                            <div
-                              key={i}
-                              className="px-1.5 py-0.5 rounded-full text-[7px] font-semibold text-white"
-                              style={{ background: ["#2563EB", "#DC2626", "#7C3AED"][i] }}
-                            >
-                              {label}
+                      <div className="p-4 space-y-3">
+                        {/* Welcome banner */}
+                        <div className="bg-white rounded-xl border border-[#E2E8F0] p-3" style={{ borderLeft: "3px solid #2563EB" }}>
+                          <div className="text-[11px] font-bold text-[#1e293b]">Welcome back, SAP Professional 👋</div>
+                          <div className="text-[9px] text-[#64748b] mt-0.5">3 modules in progress · Last active today</div>
+                          <div className="flex gap-1.5 mt-2">
+                            {[["Continue Learning","#2563EB"],["Practice Interview","#DC2626"],["AI Assistant","#7C3AED"]].map(([lbl, col]) => (
+                              <span key={lbl} className="px-2 py-0.5 rounded-full text-[8px] font-semibold text-white" style={{ background: col }}>{lbl}</span>
+                            ))}
+                          </div>
+                        </div>
+                        {/* 4 stat cards */}
+                        <div className="grid grid-cols-2 gap-2">
+                          {[
+                            { label: "Learning Topics", value: "21",  color: "#2563EB", sub: "All modules",    icon: <BookOpen    className="w-3 h-3" style={{ color: "#2563EB" }} /> },
+                            { label: "Interview Qs",    value: "303", color: "#DC2626", sub: "20 categories",  icon: <MessageSquare className="w-3 h-3" style={{ color: "#DC2626" }} /> },
+                            { label: "SAP TCodes",      value: "372", color: "#059669", sub: "All categories", icon: <Terminal     className="w-3 h-3" style={{ color: "#059669" }} /> },
+                            { label: "Live Modules",    value: "13",  color: "#7C3AED", sub: "of 21 live",     icon: <Bot         className="w-3 h-3" style={{ color: "#7C3AED" }} /> },
+                          ].map((c, i) => (
+                            <div key={i} className="bg-white rounded-xl border border-[#E2E8F0] p-2.5" style={{ borderLeft: `2px solid ${c.color}` }}>
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="w-5 h-5 rounded flex items-center justify-center" style={{ background: `${c.color}18` }}>{c.icon}</div>
+                                <span className="text-[8px] font-semibold" style={{ color: c.color }}>{c.sub}</span>
+                              </div>
+                              <div className="text-lg font-extrabold leading-none" style={{ color: c.color }}>{c.value}</div>
+                              <div className="text-[8px] text-[#64748b] font-medium mt-0.5">{c.label}</div>
                             </div>
                           ))}
                         </div>
-                      </div>
-
-                      {/* 4 stat cards 2x2 */}
-                      <div className="grid grid-cols-2 gap-2 mb-3">
-                        {[
-                          { label: "Learning Topics", value: "21", color: "#2563EB", sub: "All modules", icon: <BookOpen className="w-3 h-3" style={{ color: "#2563EB" }} /> },
-                          { label: "Interview Qs", value: "303", color: "#DC2626", sub: "20 categories", icon: <MessageSquare className="w-3 h-3" style={{ color: "#DC2626" }} /> },
-                          { label: "SAP TCodes", value: "372", color: "#059669", sub: "All categories", icon: <Terminal className="w-3 h-3" style={{ color: "#059669" }} /> },
-                          { label: "Live Modules", value: "13", color: "#7C3AED", sub: "of 21 live", icon: <Bot className="w-3 h-3" style={{ color: "#7C3AED" }} /> },
-                        ].map((card, i) => (
-                          <div
-                            key={i}
-                            className="bg-white rounded-lg border border-[#E2E8F0] p-2.5"
-                            style={{ borderLeft: `2px solid ${card.color}` }}
-                          >
-                            <div className="flex items-center justify-between mb-1">
-                              <div className="w-5 h-5 rounded flex items-center justify-center" style={{ background: `${card.color}18` }}>
-                                {card.icon}
+                        {/* Progress bars */}
+                        <div className="bg-white rounded-xl border border-[#E2E8F0] p-3">
+                          <div className="text-[10px] font-bold text-[#1e293b] mb-2.5">Learning Progress</div>
+                          {[
+                            { label: "HANA Database", pct: 78, color: "#2563EB" },
+                            { label: "Oracle DB",     pct: 65, color: "#059669" },
+                            { label: "Sybase ASE",    pct: 45, color: "#7C3AED" },
+                          ].map((b, i) => (
+                            <div key={i} className={i < 2 ? "mb-2" : ""}>
+                              <div className="flex justify-between mb-1">
+                                <span className="text-[8px] text-[#475569] font-medium">{b.label}</span>
+                                <span className="text-[8px] font-bold" style={{ color: b.color }}>{b.pct}%</span>
                               </div>
-                              <span className="text-[8px] font-semibold" style={{ color: card.color }}>{card.sub}</span>
+                              <div className="h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
+                                <div className="h-full rounded-full" style={{ width: `${b.pct}%`, background: b.color }} />
+                              </div>
                             </div>
-                            <div className="text-base font-extrabold leading-none" style={{ color: card.color }}>{card.value}</div>
-                            <div className="text-[8px] text-[#64748b] font-medium mt-0.5">{card.label}</div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Learning Progress */}
-                      <div className="bg-white rounded-lg border border-[#E2E8F0] p-2.5 mb-3">
-                        <div className="text-[10px] font-bold text-[#1e293b] mb-2">Learning Progress</div>
-                        {[
-                          { label: "HANA Database", pct: 78, color: "#2563EB" },
-                          { label: "Oracle DB", pct: 65, color: "#059669" },
-                          { label: "Sybase ASE", pct: 45, color: "#7C3AED" },
-                        ].map((bar, i) => (
-                          <div key={i} className={i < 2 ? "mb-2" : ""}>
-                            <div className="flex justify-between mb-1">
-                              <span className="text-[8px] text-[#475569] font-medium">{bar.label}</span>
-                              <span className="text-[8px] font-bold" style={{ color: bar.color }}>{bar.pct}%</span>
-                            </div>
-                            <div className="h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
-                              <div className="h-full rounded-full" style={{ width: `${bar.pct}%`, background: bar.color }} />
+                          ))}
+                        </div>
+                        {/* Mini chart */}
+                        <div className="bg-white rounded-xl border border-[#E2E8F0] p-3">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[10px] font-bold text-[#1e293b]">Weekly Activity</span>
+                            <div className="flex gap-2">
+                              {[["Sessions","#2563EB"],["Guides","#059669"]].map(([l,c]) => (
+                                <div key={l} className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full" style={{ background: c }} /><span className="text-[7px] text-[#94A3B8]">{l}</span></div>
+                              ))}
                             </div>
                           </div>
-                        ))}
+                          <svg viewBox="0 0 200 40" className="w-full" style={{ height: "40px" }}>
+                            {[10,20,30].map(y => <line key={y} x1="0" y1={y} x2="200" y2={y} stroke="#F1F5F9" strokeWidth="1" />)}
+                            <polyline points="0,30 33,22 66,14 100,18 133,8 166,12 200,6" fill="none" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            <polyline points="0,36 33,32 66,28 100,30 133,24 166,26 200,22" fill="none" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </div>
                       </div>
+                    </div>
+                  </div>
 
-                      {/* Weekly Activity mini chart */}
-                      <div className="bg-white rounded-lg border border-[#E2E8F0] p-2.5">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="text-[10px] font-bold text-[#1e293b]">Weekly Activity</div>
-                          <div className="flex items-center gap-2">
-                            {[{ label: "Sessions", color: "#2563EB" }, { label: "Guides", color: "#059669" }].map((l) => (
-                              <div key={l.label} className="flex items-center gap-1">
-                                <div className="w-1.5 h-1.5 rounded-full" style={{ background: l.color }} />
-                                <span className="text-[7px] text-[#94A3B8]">{l.label}</span>
+                  {/* ── Slide 2: AI Assistant ── */}
+                  <div
+                    className="absolute inset-0 transition-opacity duration-500"
+                    style={{ opacity: slideIndex === 1 ? 1 : 0, pointerEvents: slideIndex === 1 ? "auto" : "none" }}
+                  >
+                    <div className="w-full h-full bg-[#F8FAFC] rounded-2xl shadow-2xl overflow-hidden flex flex-col" style={{ border: "1px solid rgba(255,255,255,0.15)" }}>
+                      {/* Header */}
+                      <div className="bg-[#1E3A5F] px-4 py-2.5 flex items-center gap-2.5 flex-shrink-0">
+                        <div className="w-7 h-7 bg-[#7C3AED] rounded-xl flex items-center justify-center">
+                          <Bot className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-[11px] font-bold text-white">SAP Basis AI Assistant</div>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                            <span className="text-[8px] text-white/60">Online · Powered by BasisPro AI</span>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Chat messages */}
+                      <div className="flex-1 p-4 space-y-3 overflow-hidden">
+                        {/* AI greeting */}
+                        <div className="flex items-start gap-2">
+                          <div className="w-6 h-6 bg-[#7C3AED] rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Bot className="w-3.5 h-3.5 text-white" />
+                          </div>
+                          <div className="bg-[#F0F2F5] rounded-[4px_16px_16px_16px] px-3 py-2 max-w-[80%]">
+                            <p className="text-[10px] text-[#1e293b] leading-relaxed">Hello! I'm your SAP Basis AI Assistant. Ask me anything about system administration, migrations, or troubleshooting.</p>
+                          </div>
+                        </div>
+                        {/* User message */}
+                        <div className="flex items-start gap-2 justify-end">
+                          <div className="bg-[#2563EB] rounded-[16px_16px_4px_16px] px-3 py-2 max-w-[80%]">
+                            <p className="text-[10px] text-white leading-relaxed">How do I fix a transport RC8 error?</p>
+                          </div>
+                          <div className="w-6 h-6 bg-[#2563EB] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-white font-bold text-[8px]">SP</span>
+                          </div>
+                        </div>
+                        {/* AI response */}
+                        <div className="flex items-start gap-2">
+                          <div className="w-6 h-6 bg-[#7C3AED] rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Bot className="w-3.5 h-3.5 text-white" />
+                          </div>
+                          <div className="bg-[#F0F2F5] rounded-[4px_16px_16px_16px] px-3 py-2.5 max-w-[85%]">
+                            <p className="text-[10px] font-semibold text-[#1e293b] mb-1.5">RC8 means the transport ended with errors. Here's how to fix it:</p>
+                            <div className="space-y-1.5">
+                              {[
+                                { step: "1", text: "Go to STMS → Import Queue → find the failed transport" },
+                                { step: "2", text: "Check the transport log in SE09 for the exact error code" },
+                                { step: "3", text: "Common cause: missing objects → re-release from SE10 in source" },
+                                { step: "4", text: "Re-import with option 'Ignore Prerequisites' if objects exist" },
+                              ].map((s) => (
+                                <div key={s.step} className="flex gap-1.5 items-start">
+                                  <div className="w-3.5 h-3.5 rounded-full bg-[#7C3AED] flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <span className="text-white text-[7px] font-bold">{s.step}</span>
+                                  </div>
+                                  <span className="text-[9px] text-[#334155] leading-tight">{s.text}</span>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="flex gap-1.5 mt-2 flex-wrap">
+                              {["STMS","SE09","SE10"].map(tc => (
+                                <span key={tc} className="px-1.5 py-0.5 bg-[#7C3AED]/10 text-[#7C3AED] text-[8px] font-bold rounded">{tc}</span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Input bar */}
+                      <div className="px-4 py-3 border-t border-[#E2E8F0] bg-white flex-shrink-0">
+                        <div className="flex items-center gap-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-3 py-2">
+                          <span className="text-[9px] text-[#94A3B8] flex-1">Ask about SAP Basis, HANA, migrations…</span>
+                          <div className="w-5 h-5 bg-[#2563EB] rounded-lg flex items-center justify-center">
+                            <Send className="w-2.5 h-2.5 text-white" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Slide 3: Interview Prep ── */}
+                  <div
+                    className="absolute inset-0 transition-opacity duration-500"
+                    style={{ opacity: slideIndex === 2 ? 1 : 0, pointerEvents: slideIndex === 2 ? "auto" : "none" }}
+                  >
+                    <div className="w-full h-full bg-[#F8FAFC] rounded-2xl shadow-2xl overflow-hidden flex flex-col" style={{ border: "1px solid rgba(255,255,255,0.15)" }}>
+                      {/* Header */}
+                      <div className="bg-[#1E3A5F] px-4 py-2.5 flex items-center gap-2.5 flex-shrink-0">
+                        <div className="w-7 h-7 bg-[#DC2626] rounded-xl flex items-center justify-center">
+                          <MessageSquare className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-[11px] font-bold text-white">Interview Prep</div>
+                          <div className="text-[8px] text-white/60 mt-0.5">SAP Basis · Architecture Track</div>
+                        </div>
+                        <div className="ml-auto text-right">
+                          <div className="text-[10px] font-bold text-white">47 / 303</div>
+                          <div className="text-[8px] text-white/60">questions</div>
+                        </div>
+                      </div>
+                      <div className="flex-1 p-4 flex flex-col gap-3 overflow-hidden">
+                        {/* Progress bar */}
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <span className="text-[9px] text-[#64748b] font-medium">Overall Progress</span>
+                            <span className="text-[9px] font-bold text-[#DC2626]">15.5%</span>
+                          </div>
+                          <div className="h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-[#DC2626]" style={{ width: "15.5%" }} />
+                          </div>
+                        </div>
+                        {/* Question card */}
+                        <div className="bg-white rounded-xl border border-[#E2E8F0] p-4 flex-1">
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="px-2 py-0.5 bg-[#DC2626]/10 text-[#DC2626] text-[8px] font-bold rounded-full">Question 47</span>
+                            <span className="px-2 py-0.5 bg-[#F1F5F9] text-[#64748b] text-[8px] font-medium rounded-full">Architecture</span>
+                            <span className="px-2 py-0.5 bg-[#FEF3C7] text-[#D97706] text-[8px] font-medium rounded-full">Medium</span>
+                          </div>
+                          <p className="text-[11px] font-semibold text-[#1e293b] leading-snug mb-4">
+                            What is the difference between ABAP and Java stack in SAP NetWeaver?
+                          </p>
+                          <div className="space-y-2">
+                            {[
+                              { letter: "A", text: "ABAP stack runs ABAP programs; Java stack supports J2EE apps and portals", correct: true },
+                              { letter: "B", text: "Both stacks are identical but serve different client types", correct: false },
+                              { letter: "C", text: "Java stack is for database operations; ABAP for UI only", correct: false },
+                              { letter: "D", text: "ABAP stack is deprecated in S/4HANA", correct: false },
+                            ].map((opt) => (
+                              <div
+                                key={opt.letter}
+                                className="flex items-start gap-2.5 p-2 rounded-lg border transition-colors"
+                                style={{
+                                  borderColor: opt.correct ? "#059669" : "#E2E8F0",
+                                  background: opt.correct ? "#F0FDF4" : "transparent",
+                                }}
+                              >
+                                <div
+                                  className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 mt-0.5"
+                                  style={{
+                                    background: opt.correct ? "#059669" : "#F1F5F9",
+                                    color: opt.correct ? "#fff" : "#64748b",
+                                  }}
+                                >
+                                  {opt.letter}
+                                </div>
+                                <span className="text-[9px] leading-snug" style={{ color: opt.correct ? "#065F46" : "#334155", fontWeight: opt.correct ? 600 : 400 }}>
+                                  {opt.text}
+                                </span>
+                                {opt.correct && (
+                                  <svg className="w-3.5 h-3.5 text-green-600 ml-auto flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7"/>
+                                  </svg>
+                                )}
                               </div>
                             ))}
                           </div>
                         </div>
-                        {/* SVG sparkline chart */}
-                        <svg viewBox="0 0 200 48" className="w-full" style={{ height: "48px" }}>
-                          {/* Grid lines */}
-                          {[12, 24, 36].map((y) => (
-                            <line key={y} x1="0" y1={y} x2="200" y2={y} stroke="#F1F5F9" strokeWidth="1" />
-                          ))}
-                          {/* Sessions line */}
-                          <polyline
-                            points="0,36 33,28 66,20 100,24 133,12 166,18 200,10"
-                            fill="none"
-                            stroke="#2563EB"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          {/* Sessions fill */}
-                          <polyline
-                            points="0,36 33,28 66,20 100,24 133,12 166,18 200,10 200,48 0,48"
-                            fill="url(#blueGrad)"
-                            opacity="0.15"
-                          />
-                          {/* Guides line */}
-                          <polyline
-                            points="0,42 33,38 66,34 100,36 133,30 166,32 200,28"
-                            fill="none"
-                            stroke="#059669"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <defs>
-                            <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#2563EB" />
-                              <stop offset="100%" stopColor="#2563EB" stopOpacity="0" />
-                            </linearGradient>
-                          </defs>
-                          {/* Day labels */}
-                          {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-                            <text key={i} x={i * 33 + 1} y={47} fontSize="6" fill="#CBD5E1" textAnchor="middle">{d}</text>
-                          ))}
-                        </svg>
+                        {/* Navigation row */}
+                        <div className="flex items-center justify-between flex-shrink-0">
+                          <button className="px-3 py-1.5 rounded-lg border border-[#E2E8F0] text-[9px] font-semibold text-[#64748b] bg-white">← Previous</button>
+                          <span className="text-[9px] text-[#94A3B8]">47 of 303 completed</span>
+                          <button className="px-3 py-1.5 rounded-lg text-[9px] font-semibold text-white bg-[#DC2626]">Next Question →</button>
+                        </div>
                       </div>
                     </div>
                   </div>
+                </div>
+
+                {/* Dot indicators */}
+                <div className="flex items-center gap-2">
+                  {Array.from({ length: SLIDE_COUNT }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSlideIndex(i)}
+                      className="rounded-full transition-all duration-300"
+                      style={{
+                        width: slideIndex === i ? "24px" : "8px",
+                        height: "8px",
+                        background: slideIndex === i ? "#ffffff" : "rgba(255,255,255,0.4)",
+                      }}
+                      aria-label={`Go to slide ${i + 1}`}
+                    />
+                  ))}
                 </div>
               </div>
             </div>
