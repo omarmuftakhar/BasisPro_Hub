@@ -799,33 +799,74 @@ export default function Home() {
           </div>
 
           {/* Toggle */}
-          <div className="flex items-center justify-center gap-5 mb-8">
-            <span
-              className="text-sm transition-all"
-              style={{ color: !isYearly ? "#ffffff" : "rgba(255,255,255,0.45)", fontWeight: !isYearly ? 700 : 500 }}
-            >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "16px", marginBottom: "32px" }}>
+            {/* Monthly label */}
+            <span style={{
+              fontSize: "14px",
+              fontWeight: !isYearly ? 700 : 400,
+              color: !isYearly ? "#ffffff" : "rgba(255,255,255,0.4)",
+              transition: "color 0.25s, font-weight 0.25s",
+              whiteSpace: "nowrap",
+            }}>
               Monthly
             </span>
+
+            {/* Track */}
             <button
               onClick={() => setIsYearly((v) => !v)}
-              className="relative flex-shrink-0 rounded-full transition-colors duration-300 focus:outline-none"
-              style={{ width: "48px", height: "26px", background: isYearly ? "#22C55E" : "rgba(255,255,255,0.3)" }}
               aria-label="Toggle billing period"
+              style={{
+                position: "relative",
+                flexShrink: 0,
+                width: "52px",
+                height: "28px",
+                borderRadius: "999px",
+                border: "none",
+                cursor: "pointer",
+                outline: "none",
+                background: isYearly ? "#22C55E" : "rgba(255,255,255,0.3)",
+                transition: "background 0.25s",
+                padding: 0,
+              }}
             >
-              <span
-                className="absolute top-[3px] w-5 h-5 bg-white rounded-full shadow transition-transform duration-300"
-                style={{ transform: isYearly ? "translateX(24px)" : "translateX(3px)" }}
-              />
+              {/* Knob — 22×22px, 3px gap on each side */}
+              <span style={{
+                position: "absolute",
+                top: "3px",
+                left: "0px",
+                width: "22px",
+                height: "22px",
+                borderRadius: "50%",
+                background: "#ffffff",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
+                transform: isYearly ? "translateX(27px)" : "translateX(3px)",
+                transition: "transform 0.25s ease",
+              }} />
             </button>
-            <div className="flex items-center gap-2">
-              <span
-                className="text-sm transition-all"
-                style={{ color: isYearly ? "#ffffff" : "rgba(255,255,255,0.45)", fontWeight: isYearly ? 700 : 500 }}
-              >
+
+            {/* Yearly label + badge */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{
+                fontSize: "14px",
+                fontWeight: isYearly ? 700 : 400,
+                color: isYearly ? "#ffffff" : "rgba(255,255,255,0.4)",
+                transition: "color 0.25s, font-weight 0.25s",
+                whiteSpace: "nowrap",
+              }}>
                 Yearly
               </span>
               {isYearly && (
-                <span className="px-2.5 py-1 bg-green-500 text-white text-xs font-bold rounded-full">Save 38%</span>
+                <span style={{
+                  padding: "3px 10px",
+                  background: "#22C55E",
+                  color: "#ffffff",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  borderRadius: "999px",
+                  whiteSpace: "nowrap",
+                }}>
+                  Save 38%
+                </span>
               )}
             </div>
           </div>
