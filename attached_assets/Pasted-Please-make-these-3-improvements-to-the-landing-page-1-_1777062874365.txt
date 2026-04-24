@@ -1,0 +1,19 @@
+Please make these 3 improvements to the landing page:
+1. Hero section:
+
+Make 'Get Started Free' button solid white with blue text (#2563eb), no border. 'View All Topics' stays as outline white border button.
+Enhance the dashboard mockup on the right side — make it taller and more detailed. Add these sections to the mockup: a welcome banner at top, 4 stat cards in a 2x2 grid (21 Learning Topics, 303 Interview Questions, 372 SAP TCodes, 13 Live Modules), a learning progress section with 3 progress bars (HANA Database 78%, Oracle 65%, Sybase ASE 45%), and a small weekly activity chart outline at the bottom. Make it look like a real app screenshot.
+
+2. Testimonials — expand to 9 total (add 6 more):
+Display in a 3-column grid. Make quotes sound natural and human, not corporate. Use these 6 additional testimonials:
+
+Khalid Al-Rashidi, Basis Administrator at SABIC — 'Honestly didn't expect much when I signed up, but the HANA troubleshooting guides are the real deal. Saved me during a production outage at 2am.'
+Priya Nambiar, SAP Technical Consultant at Infosys — 'The interview prep is insanely good. I went through 50 questions before my client interview and got the contract. Worth every riyal.'
+Thomas Brecker, SAP Basis Engineer at Deutsche Telekom — 'Finally a platform that treats Basis as a serious discipline. The depth on transport management and system copies is unmatched.'
+Fatima Al-Zahrawi, SAP Cloud Architect at Accenture — 'The Cloud ALM and BTP content is exactly what I needed for my S/4HANA migration project. Clear, practical, no fluff.'
+Ravi Shankar, Senior Basis Consultant at TCS — 'I have 12 years of SAP experience and I still learned things from the architecture blueprints. The content quality is exceptional.'
+Emma Wilson, Basis Team Lead at Capgemini — 'The AI Assistant is like having a senior Basis expert on call 24/7. Asked it about an RFC gateway issue and got a step-by-step fix instantly.'
+For each testimonial avatar circle: use large bold initials (2 letters), font size 16px minimum, white text on colored background. Each person gets a different color: blue, green, purple, orange, teal, red.
+
+3. Feature cards spacing:
+Add margin-top of 16px between the first row and second row of feature cards. The gap between the two rows of 4 cards needs more breathing room."

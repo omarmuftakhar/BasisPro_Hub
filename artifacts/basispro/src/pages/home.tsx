@@ -26,11 +26,9 @@ export default function Home() {
       },
       { threshold: 0.1 }
     );
-
     document.querySelectorAll(".scroll-animate").forEach((el) => {
       observerRef.current?.observe(el);
     });
-
     return () => observerRef.current?.disconnect();
   }, []);
 
@@ -98,7 +96,7 @@ export default function Home() {
       name: "Ahmed Al-Khalidi",
       title: "SAP Basis Architect",
       company: "Aramco",
-      color: "#0070F2",
+      color: "#2563EB",
       quote: "The depth on HANA administration is unmatched. The migration runbooks alone saved our team weeks of prep work on a critical S/4 HANA conversion. This is exactly what senior Basis architects need.",
     },
     {
@@ -116,6 +114,54 @@ export default function Home() {
       company: "SAP SE",
       color: "#7C3AED",
       quote: "The AI Assistant is genuinely impressive — it answers complex Basis queries better than most consultants I've worked with. I use it daily for configuration questions and architecture decisions.",
+    },
+    {
+      initials: "KR",
+      name: "Khalid Al-Rashidi",
+      title: "Basis Administrator",
+      company: "SABIC",
+      color: "#EA580C",
+      quote: "Honestly didn't expect much when I signed up, but the HANA troubleshooting guides are the real deal. Saved me during a production outage at 2am.",
+    },
+    {
+      initials: "PN",
+      name: "Priya Nambiar",
+      title: "SAP Technical Consultant",
+      company: "Infosys",
+      color: "#0D9488",
+      quote: "The interview prep is insanely good. I went through 50 questions before my client interview and got the contract. Worth every riyal.",
+    },
+    {
+      initials: "TB",
+      name: "Thomas Brecker",
+      title: "SAP Basis Engineer",
+      company: "Deutsche Telekom",
+      color: "#DC2626",
+      quote: "Finally a platform that treats Basis as a serious discipline. The depth on transport management and system copies is unmatched.",
+    },
+    {
+      initials: "FZ",
+      name: "Fatima Al-Zahrawi",
+      title: "SAP Cloud Architect",
+      company: "Accenture",
+      color: "#2563EB",
+      quote: "The Cloud ALM and BTP content is exactly what I needed for my S/4HANA migration project. Clear, practical, no fluff.",
+    },
+    {
+      initials: "RS",
+      name: "Ravi Shankar",
+      title: "Senior Basis Consultant",
+      company: "TCS",
+      color: "#059669",
+      quote: "I have 12 years of SAP experience and I still learned things from the architecture blueprints. The content quality is exceptional.",
+    },
+    {
+      initials: "EW",
+      name: "Emma Wilson",
+      title: "Basis Team Lead",
+      company: "Capgemini",
+      color: "#7C3AED",
+      quote: "The AI Assistant is like having a senior Basis expert on call 24/7. Asked it about an RFC gateway issue and got a step-by-step fix instantly.",
     },
   ];
 
@@ -154,7 +200,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-6 pb-16">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
 
-              {/* Left column — copy */}
+              {/* Left column */}
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/15 border border-white/25 text-white text-xs font-semibold mb-8 rounded-full uppercase tracking-wide">
                   <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
@@ -167,94 +213,199 @@ export default function Home() {
                   The authoritative platform for SAP Basis engineers, consultants, and architects. Deep, precise, and built for professionals who run mission-critical landscapes.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button
-                    size="lg"
-                    className="h-12 px-8 text-base font-semibold group"
-                    style={{ background: "#ffffff", color: "#0070F2" }}
+                  {/* Primary CTA — solid white, blue text, no border */}
+                  <button
+                    className="inline-flex items-center justify-center h-12 px-8 text-base font-semibold rounded-md group transition-opacity hover:opacity-90"
+                    style={{ background: "#ffffff", color: "#2563EB", border: "none" }}
                     onClick={() => navigate("/dashboard")}
                   >
                     Get Started Free
                     <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                  <Button
-                    size="lg"
-                    className="h-12 px-8 text-base font-semibold bg-transparent hover:bg-white/10"
-                    style={{ border: "2px solid rgba(255,255,255,0.85)", color: "#ffffff" }}
-                    onClick={() => {
-                      document.getElementById("topics")?.scrollIntoView({ behavior: "smooth" });
-                    }}
+                  </button>
+                  {/* Secondary CTA — ghost white outline */}
+                  <button
+                    className="inline-flex items-center justify-center h-12 px-8 text-base font-semibold rounded-md transition-colors hover:bg-white/10"
+                    style={{ background: "transparent", border: "2px solid rgba(255,255,255,0.85)", color: "#ffffff" }}
+                    onClick={() => document.getElementById("topics")?.scrollIntoView({ behavior: "smooth" })}
                   >
                     View All Topics
-                  </Button>
+                  </button>
                 </div>
               </div>
 
-              {/* Right column — dashboard mockup */}
-              <div className="hidden lg:flex justify-center items-center">
-                <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-2xl overflow-hidden border border-white/20">
+              {/* Right column — enhanced dashboard mockup */}
+              <div className="hidden lg:flex justify-center items-start">
+                <div className="w-full max-w-[500px] bg-white rounded-2xl shadow-2xl overflow-hidden border border-white/20">
                   {/* Fake browser bar */}
-                  <div className="bg-[#F5F7FA] border-b border-[#E2E8F0] px-4 py-3 flex items-center gap-2.5">
-                    <div className="w-3 h-3 rounded-full bg-red-400" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                    <div className="w-3 h-3 rounded-full bg-green-400" />
-                    <div className="flex-1 mx-3 bg-white border border-[#E2E8F0] rounded-md px-3 py-1 text-xs text-[#64748b] font-medium tracking-tight">
-                      Dashboard Overview
+                  <div className="bg-[#F1F5F9] border-b border-[#E2E8F0] px-4 py-2.5 flex items-center gap-2">
+                    <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+                      <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+                      <div className="w-3 h-3 rounded-full bg-[#28C840]" />
+                    </div>
+                    <div className="flex-1 mx-3 bg-white border border-[#E2E8F0] rounded-md px-3 py-1 flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-[#E2E8F0]" />
+                      <span className="text-[11px] text-[#94A3B8] font-medium tracking-tight">basispro.app/dashboard</span>
                     </div>
                   </div>
 
-                  {/* Mockup body */}
-                  <div className="bg-[#F8FAFC] p-5">
-                    {/* Welcome banner */}
-                    <div className="bg-white rounded-xl border border-[#E2E8F0] p-4 mb-4 flex items-center gap-3" style={{ borderLeft: "4px solid #0070F2" }}>
-                      <div>
-                        <div className="text-sm font-bold text-[#1e293b]">Welcome back, SAP Professional 👋</div>
-                        <div className="text-xs text-[#64748b] mt-0.5">You have 3 modules in progress · Last active today</div>
+                  {/* Mockup sidebar + content layout */}
+                  <div className="flex" style={{ minHeight: "520px" }}>
+                    {/* Mini sidebar */}
+                    <div className="w-[52px] bg-[#1E3A5F] flex flex-col items-center pt-3 gap-2 flex-shrink-0">
+                      <div className="w-7 h-7 bg-[#2563EB] rounded-md flex items-center justify-center mb-2">
+                        <span className="text-white font-bold text-[10px]">B</span>
                       </div>
-                    </div>
-
-                    {/* 4 stat cards */}
-                    <div className="grid grid-cols-2 gap-3 mb-4">
                       {[
-                        { label: "Learning Topics", value: "21", color: "#0070F2", icon: <BookOpen className="w-4 h-4" style={{ color: "#0070F2" }} />, sub: "All modules" },
-                        { label: "Interview Questions", value: "303", color: "#E11D48", icon: <MessageSquare className="w-4 h-4" style={{ color: "#E11D48" }} />, sub: "20 categories" },
-                        { label: "SAP TCodes", value: "372", color: "#059669", icon: <Terminal className="w-4 h-4" style={{ color: "#059669" }} />, sub: "All categories" },
-                        { label: "Live Modules", value: "13", color: "#7C3AED", icon: <Bot className="w-4 h-4" style={{ color: "#7C3AED" }} />, sub: "of 21 live" },
-                      ].map((card, i) => (
+                        { icon: "▪", active: true },
+                        { icon: "◆", active: false },
+                        { icon: "●", active: false },
+                        { icon: "▲", active: false },
+                        { icon: "■", active: false },
+                      ].map((item, i) => (
                         <div
                           key={i}
-                          className="bg-white rounded-xl border border-[#E2E8F0] p-3.5"
-                          style={{ borderLeft: `3px solid ${card.color}` }}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px]"
+                          style={{ background: item.active ? "rgba(37,99,235,0.3)" : "transparent", color: item.active ? "#93C5FD" : "#64748B" }}
                         >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${card.color}15` }}>
-                              {card.icon}
-                            </div>
-                            <span className="text-[10px] font-semibold" style={{ color: card.color }}>{card.sub}</span>
-                          </div>
-                          <div className="text-xl font-extrabold" style={{ color: card.color }}>{card.value}</div>
-                          <div className="text-[11px] text-[#64748b] font-medium mt-0.5">{card.label}</div>
+                          {item.icon}
                         </div>
                       ))}
                     </div>
 
-                    {/* Fake progress bar strip */}
-                    <div className="bg-white rounded-xl border border-[#E2E8F0] p-3.5">
-                      <div className="text-xs font-semibold text-[#1e293b] mb-3">Learning Progress</div>
-                      {[
-                        { label: "HANA Database", pct: 72, color: "#0070F2" },
-                        { label: "Oracle DB", pct: 45, color: "#059669" },
-                        { label: "Sybase ASE", pct: 28, color: "#7C3AED" },
-                      ].map((bar, i) => (
-                        <div key={i} className="mb-2">
-                          <div className="flex justify-between text-[10px] mb-1">
-                            <span className="text-[#475569] font-medium">{bar.label}</span>
-                            <span className="font-semibold" style={{ color: bar.color }}>{bar.pct}%</span>
+                    {/* Main content area */}
+                    <div className="flex-1 bg-[#F8FAFC] p-4 overflow-hidden">
+                      {/* Header row */}
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <div className="text-[11px] font-bold text-[#1e293b]">Dashboard Overview</div>
+                          <div className="text-[9px] text-[#94A3B8]">Friday, April 24, 2026</div>
+                        </div>
+                        <div className="w-6 h-6 bg-[#2563EB] rounded-full flex items-center justify-center">
+                          <span className="text-white font-bold text-[8px]">SP</span>
+                        </div>
+                      </div>
+
+                      {/* Welcome banner */}
+                      <div
+                        className="bg-white rounded-lg border border-[#E2E8F0] p-2.5 mb-3"
+                        style={{ borderLeft: "3px solid #2563EB" }}
+                      >
+                        <div className="text-[10px] font-bold text-[#1e293b]">Welcome back, SAP Professional 👋</div>
+                        <div className="text-[8px] text-[#64748b] mt-0.5">3 modules in progress · Last active today</div>
+                        <div className="flex gap-1.5 mt-2">
+                          {["Continue Learning", "Practice Interview", "AI Assistant"].map((label, i) => (
+                            <div
+                              key={i}
+                              className="px-1.5 py-0.5 rounded-full text-[7px] font-semibold text-white"
+                              style={{ background: ["#2563EB", "#DC2626", "#7C3AED"][i] }}
+                            >
+                              {label}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 4 stat cards 2x2 */}
+                      <div className="grid grid-cols-2 gap-2 mb-3">
+                        {[
+                          { label: "Learning Topics", value: "21", color: "#2563EB", sub: "All modules", icon: <BookOpen className="w-3 h-3" style={{ color: "#2563EB" }} /> },
+                          { label: "Interview Qs", value: "303", color: "#DC2626", sub: "20 categories", icon: <MessageSquare className="w-3 h-3" style={{ color: "#DC2626" }} /> },
+                          { label: "SAP TCodes", value: "372", color: "#059669", sub: "All categories", icon: <Terminal className="w-3 h-3" style={{ color: "#059669" }} /> },
+                          { label: "Live Modules", value: "13", color: "#7C3AED", sub: "of 21 live", icon: <Bot className="w-3 h-3" style={{ color: "#7C3AED" }} /> },
+                        ].map((card, i) => (
+                          <div
+                            key={i}
+                            className="bg-white rounded-lg border border-[#E2E8F0] p-2.5"
+                            style={{ borderLeft: `2px solid ${card.color}` }}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="w-5 h-5 rounded flex items-center justify-center" style={{ background: `${card.color}18` }}>
+                                {card.icon}
+                              </div>
+                              <span className="text-[8px] font-semibold" style={{ color: card.color }}>{card.sub}</span>
+                            </div>
+                            <div className="text-base font-extrabold leading-none" style={{ color: card.color }}>{card.value}</div>
+                            <div className="text-[8px] text-[#64748b] font-medium mt-0.5">{card.label}</div>
                           </div>
-                          <div className="h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
-                            <div className="h-full rounded-full" style={{ width: `${bar.pct}%`, background: bar.color }} />
+                        ))}
+                      </div>
+
+                      {/* Learning Progress */}
+                      <div className="bg-white rounded-lg border border-[#E2E8F0] p-2.5 mb-3">
+                        <div className="text-[10px] font-bold text-[#1e293b] mb-2">Learning Progress</div>
+                        {[
+                          { label: "HANA Database", pct: 78, color: "#2563EB" },
+                          { label: "Oracle DB", pct: 65, color: "#059669" },
+                          { label: "Sybase ASE", pct: 45, color: "#7C3AED" },
+                        ].map((bar, i) => (
+                          <div key={i} className={i < 2 ? "mb-2" : ""}>
+                            <div className="flex justify-between mb-1">
+                              <span className="text-[8px] text-[#475569] font-medium">{bar.label}</span>
+                              <span className="text-[8px] font-bold" style={{ color: bar.color }}>{bar.pct}%</span>
+                            </div>
+                            <div className="h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
+                              <div className="h-full rounded-full" style={{ width: `${bar.pct}%`, background: bar.color }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Weekly Activity mini chart */}
+                      <div className="bg-white rounded-lg border border-[#E2E8F0] p-2.5">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-[10px] font-bold text-[#1e293b]">Weekly Activity</div>
+                          <div className="flex items-center gap-2">
+                            {[{ label: "Sessions", color: "#2563EB" }, { label: "Guides", color: "#059669" }].map((l) => (
+                              <div key={l.label} className="flex items-center gap-1">
+                                <div className="w-1.5 h-1.5 rounded-full" style={{ background: l.color }} />
+                                <span className="text-[7px] text-[#94A3B8]">{l.label}</span>
+                              </div>
+                            ))}
                           </div>
                         </div>
-                      ))}
+                        {/* SVG sparkline chart */}
+                        <svg viewBox="0 0 200 48" className="w-full" style={{ height: "48px" }}>
+                          {/* Grid lines */}
+                          {[12, 24, 36].map((y) => (
+                            <line key={y} x1="0" y1={y} x2="200" y2={y} stroke="#F1F5F9" strokeWidth="1" />
+                          ))}
+                          {/* Sessions line */}
+                          <polyline
+                            points="0,36 33,28 66,20 100,24 133,12 166,18 200,10"
+                            fill="none"
+                            stroke="#2563EB"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          {/* Sessions fill */}
+                          <polyline
+                            points="0,36 33,28 66,20 100,24 133,12 166,18 200,10 200,48 0,48"
+                            fill="url(#blueGrad)"
+                            opacity="0.15"
+                          />
+                          {/* Guides line */}
+                          <polyline
+                            points="0,42 33,38 66,34 100,36 133,30 166,32 200,28"
+                            fill="none"
+                            stroke="#059669"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <defs>
+                            <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#2563EB" />
+                              <stop offset="100%" stopColor="#2563EB" stopOpacity="0" />
+                            </linearGradient>
+                          </defs>
+                          {/* Day labels */}
+                          {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+                            <text key={i} x={i * 33 + 1} y={47} fontSize="6" fill="#CBD5E1" textAnchor="middle">{d}</text>
+                          ))}
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -296,7 +447,8 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* Two rows of 4 cards with extra row gap */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-9">
             {topics.map((topic, i) => (
               <div
                 key={i}
@@ -323,7 +475,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Testimonials Section — 9 cards, 3 columns */}
       <section className="py-24 px-6 bg-white border-y border-border">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14 scroll-animate">
@@ -339,7 +491,7 @@ export default function Home() {
               <div
                 key={i}
                 className="bg-[#F8FAFC] border border-border rounded-2xl p-7 flex flex-col scroll-animate"
-                style={{ transitionDelay: `${i * 100}ms` }}
+                style={{ transitionDelay: `${(i % 3) * 100}ms` }}
               >
                 {/* 5 gold stars */}
                 <div className="flex gap-1 mb-5">
@@ -355,11 +507,11 @@ export default function Home() {
                   "{t.quote}"
                 </p>
 
-                {/* Author */}
+                {/* Author — large bold initials avatar */}
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-                    style={{ background: t.color }}
+                    className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+                    style={{ background: t.color, fontSize: "16px" }}
                   >
                     {t.initials}
                   </div>
