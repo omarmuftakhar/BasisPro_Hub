@@ -712,7 +712,7 @@ export default function Dashboard() {
           md:relative md:translate-x-0 md:flex-shrink-0
         `}
       >
-        <SidebarContent />
+        {SidebarContent()}
       </aside>
 
       {/* Main content */}
