@@ -1555,6 +1555,12 @@ const LEVEL_COLORS: Record<string, string> = {
   senior: "bg-violet-100 text-violet-700",
 };
 
+const LEVEL_BORDER: Record<string, string> = {
+  junior: "#22c55e",
+  mid: "#f59e0b",
+  senior: "#ef4444",
+};
+
 const ALL_CATEGORIES = [...CATEGORIES, ...EXAM_PACK_2026];
 
 type Mode = "study" | "config" | "quiz" | "results";
@@ -1583,6 +1589,14 @@ export default function InterviewPrep() {
   const [grades, setGrades] = useState<Record<string, "got" | "review">>({});
   const [timeLeft, setTimeLeft] = useState(0);
 
+  // progress tracking (persisted)
+  const [completed, setCompleted] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem("bp_interview_completed");
+      return saved ? new Set<string>(JSON.parse(saved)) : new Set<string>();
+    } catch { return new Set<string>(); }
+  });
+
   const totalQuestions = useMemo(() => ALL_CATEGORIES.reduce((a, c) => a + c.questions.length, 0), []);
   const studyCat = ALL_CATEGORIES.find((c) => c.id === activeCat)!;
 
@@ -1595,6 +1609,15 @@ export default function InterviewPrep() {
     }
     return qs;
   }, [activeCat, studyCat, levelFilter, search]);
+
+  function toggleCompleted(id: string) {
+    setCompleted((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      try { localStorage.setItem("bp_interview_completed", JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  }
 
   function copyAnswer(id: string, text: string) {
     navigator.clipboard.writeText(text).then(() => { setCopied(id); setTimeout(() => setCopied(null), 2000); });
@@ -1685,6 +1708,20 @@ export default function InterviewPrep() {
             </div>
           ))}
         </div>
+
+        {/* Progress */}
+        <div className="mt-4">
+          <div className="flex items-center justify-between text-sm font-semibold mb-1.5" style={{ opacity: 0.9 }}>
+            <span>Your Progress: {completed.size} / {totalQuestions} completed</span>
+            <span style={{ opacity: 0.7 }}>{totalQuestions > 0 ? Math.round((completed.size / totalQuestions) * 100) : 0}%</span>
+          </div>
+          <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.25)" }}>
+            <div
+              className="h-2.5 rounded-full transition-all duration-500"
+              style={{ width: `${totalQuestions > 0 ? (completed.size / totalQuestions) * 100 : 0}%`, background: "rgba(255,255,255,0.9)" }}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">
@@ -1709,7 +1746,7 @@ export default function InterviewPrep() {
             <button key={c.id} onClick={() => { setActiveCat(c.id); setExpanded(null); }}
               className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-left transition-all ${activeCat === c.id ? "bg-[#0070F2]/10 text-[#0070F2] font-semibold" : "text-gray-600 hover:bg-gray-100"}`}>
               <span className={activeCat === c.id ? "text-[#0070F2]" : "text-gray-400"}>
-                {React.cloneElement(c.icon as React.ReactElement, { className: "w-4 h-4" })}
+                {React.cloneElement(c.icon as React.ReactElement<{ className?: string }>, { className: "w-4 h-4" })}
               </span>
               <span className="flex-1 truncate text-xs">{c.title}</span>
               <span className="text-xs text-gray-400 flex-shrink-0">{c.questions.length}</span>
@@ -1723,7 +1760,7 @@ export default function InterviewPrep() {
 
         <div className="flex-1 min-w-0 space-y-2">
           <div className={`flex items-center gap-2 p-3 rounded-xl ${studyCat.bg}`}>
-            <span className={studyCat.color}>{React.cloneElement(studyCat.icon as React.ReactElement, { className: "w-5 h-5" })}</span>
+            <span className={studyCat.color}>{React.cloneElement(studyCat.icon as React.ReactElement<{ className?: string }>, { className: "w-5 h-5" })}</span>
             <span className={`font-bold text-sm ${studyCat.color}`}>{studyCat.title}</span>
             <span className="text-xs text-gray-400 ml-auto">{studyQuestions.length}{studyQuestions.length !== studyCat.questions.length ? ` of ${studyCat.questions.length}` : ""} questions</span>
           </div>
@@ -1731,12 +1768,28 @@ export default function InterviewPrep() {
             <div className="text-center py-12 text-gray-400 text-sm">No questions match your filters</div>
           ) : studyQuestions.map((qa) => {
             const isExp = expanded === qa.id;
+            const isDone = completed.has(qa.id);
             return (
-              <div key={qa.id} className="border border-gray-200 rounded-2xl overflow-hidden bg-white hover:shadow-sm transition-shadow">
-                <button className="w-full flex items-start gap-3 p-4 text-left" onClick={() => setExpanded(isExp ? null : qa.id)}>
+              <div
+                key={qa.id}
+                className="border border-gray-200 rounded-2xl overflow-hidden transition-colors"
+                style={{ borderLeft: `4px solid ${LEVEL_BORDER[qa.level] || "#e5e7eb"}`, background: isDone ? "#f0fdf4" : undefined, cursor: "pointer" }}
+                onMouseEnter={(e) => { if (!isDone) (e.currentTarget as HTMLDivElement).style.background = "#eff6ff"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = isDone ? "#f0fdf4" : ""; }}
+              >
+                <div className="w-full flex items-start gap-3 p-4 text-left">
+                  <input
+                    type="checkbox"
+                    checked={isDone}
+                    onChange={() => toggleCompleted(qa.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="mt-0.5 w-4 h-4 flex-shrink-0 cursor-pointer accent-blue-600"
+                    title={isDone ? "Mark as incomplete" : "Mark as completed"}
+                  />
+                  <button className="flex-1 flex items-start gap-3 text-left" onClick={() => setExpanded(isExp ? null : qa.id)}>
                   <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <div className="text-sm font-semibold text-gray-900 leading-snug">{qa.q}</div>
+                    <div className={`text-sm font-semibold leading-snug ${isDone ? "text-gray-400 line-through" : "text-gray-900"}`}>{qa.q}</div>
                     <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${LEVEL_COLORS[qa.level] || "bg-gray-100 text-gray-600"}`}>
                         {qa.level.charAt(0).toUpperCase() + qa.level.slice(1)}
@@ -1747,7 +1800,8 @@ export default function InterviewPrep() {
                     </div>
                   </div>
                   <ChevronRight className={`w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5 transition-transform ${isExp ? "rotate-90" : ""}`} />
-                </button>
+                  </button>
+                </div>
                 {isExp && (
                   <div className="border-t border-gray-100 p-4 space-y-3 bg-gray-50/50">
                     <div className="relative">
@@ -1809,6 +1863,12 @@ export default function InterviewPrep() {
             );
           })}
         </div>
+        {selectedCats.length === 0 && (
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm">
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="10" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01" /></svg>
+            Select at least one category above to enable the Start Exam button.
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1942,6 +2002,33 @@ export default function InterviewPrep() {
             const g = grades[q.id];
             return <div key={i} className={`h-2 rounded-full flex-shrink-0 transition-colors ${i < examIdx ? (g === "got" ? "bg-emerald-400" : "bg-rose-400") : i === examIdx ? "bg-blue-500" : "bg-gray-200"}`} style={{ width: Math.max(8, Math.min(24, Math.floor(240 / examQuestions.length))) + "px" }} />;
           })}
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => {
+              const prev = Math.max(0, examIdx - 1);
+              setExamIdx(prev);
+              setRevealed(!!grades[examQuestions[prev]?.id]);
+              if (timerEnabled) setTimeLeft(timePerQ);
+            }}
+            disabled={examIdx === 0}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold text-sm hover:border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          >
+            ← Previous
+          </button>
+          <button
+            onClick={() => {
+              const next = Math.min(examQuestions.length - 1, examIdx + 1);
+              setExamIdx(next);
+              setRevealed(!!grades[examQuestions[next]?.id]);
+              if (timerEnabled) setTimeLeft(timePerQ);
+            }}
+            disabled={examIdx === examQuestions.length - 1}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold text-sm hover:border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          >
+            Next →
+          </button>
         </div>
       </div>
     );
