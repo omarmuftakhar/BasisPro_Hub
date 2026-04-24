@@ -9,6 +9,7 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [isYearly, setIsYearly] = useState(false);
   const SLIDE_COUNT = 3;
 
   const nextSlide = useCallback(() => setSlideIndex((i) => (i + 1) % SLIDE_COUNT), []);
@@ -231,7 +232,7 @@ export default function Home() {
                     style={{ background: "#ffffff", color: "#2563EB", border: "none" }}
                     onClick={() => navigate("/dashboard")}
                   >
-                    Get Started Free
+                    Subscribe Now
                     <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
                   {/* Secondary CTA — ghost white outline */}
@@ -781,22 +782,98 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Pricing Section */}
       <section id="pricing" className="py-24 px-6 sap-hero-bg">
-        <div className="max-w-3xl mx-auto text-center scroll-animate">
-          <h2 className="text-4xl lg:text-5xl font-bold mb-5 text-white leading-tight">
-            Ready to elevate your Basis expertise?
-          </h2>
-          <p className="text-xl text-white/80 mb-10 leading-relaxed">
-            Join the network of SAP Basis professionals. Get unlimited access to advanced playbooks, configuration guides, and architecture blueprints.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-primary hover:bg-white/90 h-12 px-10 text-base font-semibold" onClick={() => navigate("/dashboard")}>
-              Subscribe Now
-            </Button>
-            <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 h-12 px-10 text-base font-semibold bg-transparent">
-              Contact Sales
-            </Button>
+        <div className="max-w-lg mx-auto scroll-animate">
+          {/* Heading */}
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/15 border border-white/25 text-white text-xs font-semibold mb-5 rounded-full uppercase tracking-wide">
+              Simple Pricing
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-bold mb-4 text-white leading-tight">
+              One plan. Full access.
+            </h2>
+            <p className="text-lg text-white/75">
+              Everything you need to master SAP Basis, at one straightforward price.
+            </p>
+          </div>
+
+          {/* Toggle */}
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <span className={`text-sm font-semibold transition-colors ${!isYearly ? "text-white" : "text-white/50"}`}>Monthly</span>
+            <button
+              onClick={() => setIsYearly((v) => !v)}
+              className="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none"
+              style={{ background: isYearly ? "#22C55E" : "rgba(255,255,255,0.3)" }}
+              aria-label="Toggle billing period"
+            >
+              <span
+                className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300"
+                style={{ transform: isYearly ? "translateX(26px)" : "translateX(2px)" }}
+              />
+            </button>
+            <span className={`text-sm font-semibold transition-colors ${isYearly ? "text-white" : "text-white/50"}`}>Yearly</span>
+            {isYearly && (
+              <span className="px-2.5 py-1 bg-green-500 text-white text-xs font-bold rounded-full">Save 38%</span>
+            )}
+          </div>
+
+          {/* Pricing card */}
+          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            {/* Price header */}
+            <div className="px-8 pt-8 pb-6 border-b border-border text-center">
+              <div className="flex items-end justify-center gap-2 mb-2">
+                <span className="text-5xl font-extrabold text-foreground">
+                  {isYearly ? "$149" : "$19.99"}
+                </span>
+                <span className="text-muted-foreground font-medium mb-2">
+                  {isYearly ? "/year" : "/month"}
+                </span>
+              </div>
+              {isYearly && (
+                <div className="text-sm text-muted-foreground mb-1">
+                  <span className="line-through mr-1 text-[#94A3B8]">$19.99/month</span>
+                  <span className="font-semibold text-green-600">$12.50/month</span>
+                </div>
+              )}
+              <p className="text-sm text-muted-foreground">
+                {isYearly ? "Billed annually, cancel anytime" : "Billed monthly, cancel anytime"}
+              </p>
+            </div>
+
+            {/* Features */}
+            <div className="px-8 py-6">
+              <div className="space-y-3 mb-7">
+                {[
+                  "Full platform access",
+                  "AI Assistant — all modules",
+                  "303 Interview Questions",
+                  "372 SAP TCodes",
+                  "Architecture blueprints & runbooks",
+                  "Priority support",
+                  "Cancel anytime",
+                ].map((feature) => (
+                  <div key={feature} className="flex items-center gap-3">
+                    <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-sm text-foreground font-medium">{feature}</span>
+                  </div>
+                ))}
+              </div>
+              <button
+                className="w-full py-3.5 rounded-xl text-white font-bold text-base transition-opacity hover:opacity-90"
+                style={{ background: "#2563EB" }}
+                onClick={() => navigate("/dashboard")}
+              >
+                Subscribe Now
+              </button>
+              <p className="text-center text-xs text-muted-foreground mt-3">
+                Secure checkout · Instant access · No hidden fees
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -811,10 +888,10 @@ export default function Home() {
             <span className="font-bold text-lg text-foreground tracking-tight">BasisPro</span>
           </div>
           <div className="flex gap-8 text-sm text-muted-foreground">
-            <Link href="#" className="hover:text-primary transition-colors">Status</Link>
-            <Link href="#" className="hover:text-primary transition-colors">Terms</Link>
-            <Link href="#" className="hover:text-primary transition-colors">Privacy</Link>
-            <Link href="#" className="hover:text-primary transition-colors">Contact</Link>
+            <Link href="/status" className="hover:text-primary transition-colors">Status</Link>
+            <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
+            <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
+            <Link href="/contact" className="hover:text-primary transition-colors">Contact</Link>
           </div>
           <div className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} BasisPro. All rights reserved.
