@@ -729,12 +729,12 @@ export default function Dashboard() {
               <Menu className="w-5 h-5" />
             </button>
             <div className="min-w-0">
-              <h1 className="text-base md:text-lg font-bold text-foreground truncate">{activeLabel}</h1>
-              <p className="hidden sm:flex items-center gap-1.5 text-[13px] font-medium text-foreground/70 tracking-tight">
-                <span className="text-foreground font-semibold">{dateStr}</span>
-                <span className="opacity-30">·</span>
-                <span className="text-foreground font-semibold tabular-nums">{timeStr}</span>
-                <span className="text-[11px] font-medium opacity-45">({tz})</span>
+              <h1 className="text-base md:text-lg font-bold truncate" style={{ color: "#1e293b" }}>{activeLabel}</h1>
+              <p className="hidden sm:flex items-center gap-1.5 text-[13px] font-medium tracking-tight" style={{ color: "#64748b" }}>
+                <span>{dateStr}</span>
+                <span className="opacity-40">·</span>
+                <span className="tabular-nums">{timeStr}</span>
+                <span className="text-[11px] opacity-60">({tz})</span>
               </p>
             </div>
           </div>
