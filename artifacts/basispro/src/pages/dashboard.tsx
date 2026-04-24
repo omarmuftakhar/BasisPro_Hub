@@ -160,6 +160,154 @@ const ChartTooltip = ({ active, payload, label }: any) => {
   );
 };
 
+// ─── AI Assistant ───────────────────────────────────────────────────────
+interface ChatMessage { role: "user" | "assistant"; text: string; }
+
+const AI_RESPONSES: Array<{ keywords: string[]; response: string }> = [
+  {
+    keywords: ["hana", "hdb", "memory", "replication", "hsr", "delta merge", "backup"],
+    response: "HANA Troubleshooting Checklist:\n1. Check HANA status: hdbnsutil -sr_state\n2. Review alert log: /usr/sap/<SID>/HDB<nr>/work/nameserver_alert*.trc\n3. Memory: HDB DBA Cockpit → Memory Overview → check Peak Used Memory\n4. System Replication: DBACOCKPIT → System Replication → verify status = ACTIVE\n5. Delta merge pressure: check M_CS_TABLES where LAST_MERGE_REASON = 'CRITICAL'\n6. Backup catalog: DBACOCKPIT → Backup → Catalog — verify last successful backup\n7. Key TCodes: DBACOCKPIT, DB02, DB13\nSAP Notes: 1999997 (HANA sizing), 2380176 (HANA memory).",
+  },
+  {
+    keywords: ["transport", "stms", "rc8", "return code", "import", "tr", "ctc"],
+    response: "Transport Issue — STMS Guidance:\n1. Check import log: STMS → Import Queue → Select TP → Logs\n2. RC8 = warning (objects may have issues, but import continued)\n3. RC12 = error (import failed, investigate immediately)\n4. Verify: tp showbuffer <SID> — see pending imports\n5. Check dependencies: missing prerequisite TRs in wrong sequence?\n6. Emergency fix: SCC1 (client copy) or correction transport\n7. Key TCodes: STMS, SE01, SE09, SE10, SM21 (system log post-import)\nSAP Note: 2216547 (Transport return codes explained).",
+  },
+  {
+    keywords: ["job", "sm37", "background", "batch", "schedule", "sla", "abap dump"],
+    response: "Background Job Issue — SM37 Steps:\n1. SM37 → Job Selection → filter by status (Cancelled / Active)\n2. Check job log: select job → Job Log — identify error step\n3. SM50/SM66 — check if work processes are available\n4. SM12 — enqueue locks blocking the job?\n5. ST22 — ABAP dump details (short dump analysis)\n6. DB13 — job scheduling calendar and conflicts\n7. Reschedule: SM36 → define job → set start condition\n8. For chain failures: check predecessor job status and output conditions\nKey TCodes: SM37, SM36, SM50, SM66, ST22, SM12, DB13.",
+  },
+  {
+    keywords: ["rfc", "sm59", "connection", "destination", "abap", "idoc", "interface"],
+    response: "RFC Connection Troubleshooting — SM59:\n1. SM59 → select destination → Connection Test\n2. Check: host name resolution (ping from OS level), port reachability\n3. Verify logon user: RFC user must exist and not be locked (SU01)\n4. Authorization: user needs S_RFC (or specific auth objects per function group)\n5. SM58 — tRFC / qRFC status (queued/stuck IDocs)\n6. SMGW — Gateway monitor for RFC gateway issues\n7. SXI_MONITOR — PI/PO message monitoring if integrated\n8. Network: check SAP port (33<SysNr>) is open between systems\nKey TCodes: SM59, SM58, SMGW, SU01, SXI_MONITOR, BD54, WE05.",
+  },
+  {
+    keywords: ["tcode", "transaction", "se38", "se80", "su01", "sm50", "st05", "sm21"],
+    response: "TCode Quick Reference:\n• SM50 — Work process overview (active sessions, stuck WPs)\n• SM37 — Background job monitor\n• SM21 — System log (errors, warnings, logon failures)\n• ST05 — SQL/RFC trace (performance analysis)\n• SM59 — RFC destinations\n• SU01 — User administration (lock/unlock, password reset)\n• STMS — Transport Management System\n• DBACOCKPIT — Database administration (HANA, Oracle, Sybase)\n• SM12 — Lock entries (enqueue)\n• ST22 — ABAP dump analysis\n• RZ10 — Profile parameter maintenance\n• SMICM — ICM monitor (HTTP/HTTPS services)\nFor a full TCode library → use the SAP Basis TCodes section.",
+  },
+  {
+    keywords: ["cloud", "aws", "azure", "gcp", "rise", "btp", "migration", "s4hana", "s/4"],
+    response: "SAP Cloud Migration Guidance:\n1. Assess: RISE with SAP vs customer-managed (IaaS)\n2. RISE → SAP manages infrastructure; you own integration, security, configuration\n3. Customer-managed → full control but full responsibility\n4. Key tools: SAP Readiness Check, Maintenance Planner, Transformation Navigator\n5. BTP: use Cloud Connector for on-premise connectivity\n6. Network: dedicated ExpressRoute/Direct Connect strongly recommended\n7. HA/DR: HANA System Replication (HSR) + Pacemaker cluster for ASCS\n8. Identity: IAS + IPS for SSO across SAP and BTP\nFor detailed guides → navigate to Cloud Platforms (AWS / Azure / GCP) in the sidebar.",
+  },
+  {
+    keywords: ["user", "su01", "locked", "password", "logon", "auth", "role", "profile"],
+    response: "User / Authorization Issues:\n1. SU01 — check user status: locked, password expired, validity date\n2. SU53 — check last failed authorization check (run as the affected user)\n3. SUIM → User by Auth Value — find who has a specific authorization\n4. ST01 — authorization trace (DEV/QAS only, never production trace for long)\n5. AGR_USERS — table: which roles are assigned to a user\n6. SU10 — mass user changes\n7. SCUL (CUA) — check central user administration replication status\nBest practice: never assign SAP_ALL in production. Use role-based access with PFCG.",
+  },
+  {
+    keywords: ["performance", "slow", "st12", "st05", "workload", "load", "bottleneck", "response time"],
+    response: "Performance Analysis Workflow:\n1. ST05 — SQL trace: find expensive SELECT statements\n2. ST12 — ABAP trace: identify slow function calls or loops\n3. SM50/SM66 — work process utilization across all instances\n4. OS07N — OS-level CPU, memory, swap usage\n5. DBACOCKPIT → SQL Plan Cache — top SQL by execution time\n6. ST03N — Workload Monitor: compare response time trends\n7. SM21 — system log for errors at time of issue\nKey question to ask: Is it one user / one transaction, or system-wide? Scope defines the analysis path.",
+  },
+];
+
+const AI_DEFAULT = "I can help with SAP Basis topics including HANA, transport management, background jobs, RFC connections, user administration, performance, and cloud migration. Try asking about a specific topic, or use one of the quick buttons above.";
+
+function getAIResponse(input: string): string {
+  const lower = input.toLowerCase();
+  for (const entry of AI_RESPONSES) {
+    if (entry.keywords.some((kw) => lower.includes(kw))) {
+      return entry.response;
+    }
+  }
+  return AI_DEFAULT;
+}
+
+const QUICK_PROMPTS = [
+  { label: "HANA issue", q: "How do I troubleshoot a HANA performance or memory issue?" },
+  { label: "Transport failure", q: "Transport import failed with return code 8. What do I check?" },
+  { label: "Job failure", q: "A background job failed. Walk me through SM37 troubleshooting." },
+  { label: "RFC issue", q: "An RFC connection in SM59 is failing. How do I fix it?" },
+  { label: "TCode lookup", q: "What are the key TCodes for SAP Basis operations?" },
+  { label: "Cloud migration", q: "What should I consider for SAP cloud migration to AWS or Azure?" },
+];
+
+function DashboardAIAssistant() {
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { role: "assistant", text: "Welcome to the BasisPro AI Assistant. I can answer questions about SAP Basis, HANA, transport management, cloud platforms, performance, and more. How can I help you today?" },
+  ]);
+  const [input, setInput] = useState("");
+  const bottomRef = React.useRef<HTMLDivElement>(null);
+
+  function send(text: string) {
+    const q = text.trim();
+    if (!q) return;
+    const response = getAIResponse(q);
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", text: q },
+      { role: "assistant", text: response },
+    ]);
+    setInput("");
+    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+  }
+
+  return (
+    <div className="max-w-3xl space-y-5">
+      {/* Header */}
+      <div className="rounded-2xl overflow-hidden shadow-lg" style={{ background: "linear-gradient(135deg, #0D47A1 0%, #1565C0 50%, #0070F2 100%)" }}>
+        <div className="px-6 py-5 flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0 ring-1 ring-white/20">
+            <Bot className="w-7 h-7 text-white" />
+          </div>
+          <div>
+            <div className="text-white font-bold text-lg">SAP Basis AI Assistant</div>
+            <div className="text-white/70 text-sm">Ask about HANA, transports, jobs, RFC, performance, cloud, and more</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick prompts */}
+      <div className="flex flex-wrap gap-2">
+        {QUICK_PROMPTS.map((p) => (
+          <button key={p.label} onClick={() => send(p.q)}
+            className="text-xs font-semibold px-3 py-1.5 rounded-full border border-primary/30 bg-[#EBF3FD] text-primary hover:bg-primary hover:text-white transition-all">
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Chat window */}
+      <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden flex flex-col" style={{ height: "460px" }}>
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map((msg, i) => (
+            <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+              {msg.role === "assistant" && (
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center flex-shrink-0 mr-2 mt-0.5">
+                  <Bot className="w-4 h-4 text-white" />
+                </div>
+              )}
+              <div className={`max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-line ${
+                msg.role === "user"
+                  ? "bg-primary text-white rounded-br-sm"
+                  : "bg-[#F5F7FA] text-foreground rounded-bl-sm border border-border"
+              }`}>
+                {msg.text}
+              </div>
+            </div>
+          ))}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Input bar */}
+        <div className="border-t border-border p-3 flex gap-2 bg-white">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }}
+            placeholder="Ask about HANA, transports, performance, TCodes..."
+            className="flex-1 text-sm px-4 py-2.5 bg-[#F5F7FA] border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40"
+          />
+          <button
+            onClick={() => send(input)}
+            disabled={!input.trim()}
+            className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Component ──────────────────────────────────────────────────────────
 export default function Dashboard() {
   const [, navigate] = useLocation();
@@ -173,6 +321,7 @@ export default function Dashboard() {
     "Applications": true,
     "ALM & Operations": true,
     "Analytics & Cloud": true,
+    "Career": true,
     "AI": true,
   });
 
@@ -282,7 +431,7 @@ export default function Dashboard() {
       </div>
 
       {/* Nav groups */}
-      <nav className="flex-1 overflow-y-auto px-3 pb-3 space-y-0.5 scrollbar-thin">
+      <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 pb-3 space-y-0.5 scrollbar-thin">
         {navGroups.map((group) => (
           <div key={group.group} className="pt-2">
             <button
@@ -388,7 +537,7 @@ export default function Dashboard() {
             </button>
             <div className="min-w-0">
               <h1 className="text-base md:text-lg font-bold text-foreground truncate">{activeLabel}</h1>
-              <p className="text-xs text-muted-foreground hidden sm:block">{dateStr} · <span className="font-mono">{timeStr}</span> <span className="opacity-60 text-[10px]">({tz})</span></p>
+              <p className="text-xs text-muted-foreground hidden sm:block">{dateStr} · <span className="font-semibold text-foreground">{timeStr}</span> <span className="opacity-60 text-[10px]">({tz})</span></p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -418,9 +567,10 @@ export default function Dashboard() {
           {activeId === "roadmap" && <CareerRoadmap />}
           {activeId === "certifications" && <CloudCertifications />}
           {activeId === "interviewPrep" && <InterviewPrep />}
+          {activeId === "ai" && <DashboardAIAssistant />}
 
           {/* ── Module content ─────────────────────────── */}
-          {!["tcodes","roadmap","certifications","interviewPrep","overview"].includes(activeId) && (
+          {!["tcodes","roadmap","certifications","interviewPrep","overview","ai"].includes(activeId) && (
             moduleRegistry[activeId] ? (
               <ModuleView module={moduleRegistry[activeId]} />
             ) : (

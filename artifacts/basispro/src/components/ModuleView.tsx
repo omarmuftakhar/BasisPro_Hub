@@ -41,6 +41,16 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   Globe: <Globe className="w-5 h-5" />,
 };
 
+const isValidExternalUrl = (url?: string): boolean => {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+};
+
 function NodeCard({ node, color }: { node: ContentNode; color: string }) {
   const [expanded, setExpanded] = useState(false);
   const icon = ICON_MAP[node.icon] ?? <Database className="w-5 h-5" />;
@@ -194,20 +204,33 @@ function NodeCard({ node, color }: { node: ContentNode; color: string }) {
                 <h4 className="text-sm font-bold text-foreground uppercase tracking-wide">Official Documentation</h4>
               </div>
               <div className="space-y-1.5">
-                {node.links.map((link, i) => (
-                  <a
-                    key={i}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-3 py-2 bg-white border border-border rounded-lg hover:border-primary/40 hover:bg-accent transition-colors group"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" style={{ color }} />
-                    <span className="text-sm text-foreground flex-1">{link.label}</span>
-                    {link.note && <span className="text-xs text-muted-foreground">{link.note}</span>}
-                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-                  </a>
-                ))}
+                {node.links.map((link, i) => {
+                  const valid = isValidExternalUrl(link.url);
+                  if (!valid) {
+                    if (import.meta.env.DEV) console.warn("[BasisPro] Invalid module link", link);
+                    return (
+                      <div key={i} className="flex items-center gap-3 px-3 py-2 bg-gray-50 border border-border rounded-lg opacity-60 cursor-not-allowed">
+                        <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
+                        <span className="text-sm text-muted-foreground flex-1">{link.label}</span>
+                        <span className="text-xs text-gray-400 italic">Link pending</span>
+                      </div>
+                    );
+                  }
+                  return (
+                    <a
+                      key={i}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 px-3 py-2 bg-white border border-border rounded-lg hover:border-primary/40 hover:bg-accent transition-colors group"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" style={{ color }} />
+                      <span className="text-sm text-foreground flex-1">{link.label}</span>
+                      {link.note && <span className="text-xs text-muted-foreground">{link.note}</span>}
+                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                    </a>
+                  );
+                })}
               </div>
             </div>
           )}

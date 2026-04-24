@@ -1,0 +1,228 @@
+Fix BasisPro dashboard issues ONLY.  
+Do NOT redesign UI. Do NOT refactor architecture. Do NOT touch unrelated files.
+
+Repository scope:
+- artifacts/basispro/src/pages/dashboard.tsx
+- artifacts/basispro/src/components/ModuleView.tsx
+
+---
+
+## BUG 1 — Sidebar Career Group + Scroll
+
+Problem:
+- "Career" group is not expanded
+- Sidebar cannot scroll fully
+
+Fix:
+
+1. Update expandedGroups in dashboard.tsx:
+
+const [expandedGroups, setExpandedGroups] = useState({
+  "Operating Systems": true,
+  "Cloud Platforms": true,
+  "Databases": true,
+  "Resources": true,
+  "Applications": true,
+  "ALM & Operations": true,
+  "Analytics & Cloud": true,
+  "Career": true,
+  "AI": true,
+});
+
+2. Fix scroll behavior:
+
+Sidebar stays:
+className="flex flex-col h-full overflow-hidden"
+
+Nav MUST be:
+className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 pb-3 space-y-0.5 scrollbar-thin"
+
+Ensure parent flex containers include:
+min-h-0
+
+Goal:
+- Sidebar scroll works fully
+- Career + AI visible
+
+---
+
+## BUG 2 — AI Assistant Not Working
+
+Problem:
+- AI exists in sidebar (id: "ai")
+- No component → shows "Content Coming Soon"
+
+Fix:
+
+1. Create DashboardAIAssistant component (inside dashboard.tsx)
+
+Requirements:
+- Clean panel UI (reuse existing styles)
+- Input field
+- Quick buttons:
+  HANA issue
+  Transport failure
+  Job failure
+  RFC issue
+  TCode explanation
+  Cloud migration
+
+2. Add simple deterministic logic (NO API):
+
+Example:
+if input includes:
+- "hana" → return HANA troubleshooting steps
+- "transport" → STMS guidance
+- "job" → SM37 steps
+- "rfc" → SM59 steps
+- default → generic SAP Basis response
+
+3. Render it:
+
+Add:
+{activeId === "ai" && <DashboardAIAssistant />}
+
+4. Prevent fallback rendering:
+
+Change exclusion list from:
+["tcodes","roadmap","certifications","interviewPrep","overview"]
+
+TO:
+["tcodes","roadmap","certifications","interviewPrep","overview","ai"]
+
+Goal:
+- AI opens from sidebar
+- Fully functional locally
+- No "Content Coming Soon"
+
+---
+
+## BUG 3 — Dead Guide Links
+
+Problem:
+- Some links invalid → bad UX / errors
+
+Fix in ModuleView.tsx:
+
+1. Add helper:
+
+const isValidExternalUrl = (url?: string) => {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+};
+
+2. Update links rendering:
+
+- Valid URL → normal <a>
+- Invalid → disabled UI
+
+Disabled UI:
+- show label
+- add "Link pending"
+- remove href/click
+
+3. Add DEV warning:
+
+if (import.meta.env.DEV) {
+  console.warn("[BasisPro] Invalid module link", link);
+}
+
+Goal:
+- No crashes
+- Safe fallback
+- Preserve structure
+
+---
+
+## BUG 4 — Date & Time Font Mismatch
+
+Problem:
+- Date = normal font
+- Time = mono font
+
+Fix in dashboard.tsx header:
+
+Replace:
+<span className="font-mono">{timeStr}</span>
+
+WITH:
+<span className="font-semibold text-foreground">{timeStr}</span>
+
+Final:
+
+<p className="text-xs text-muted-foreground hidden sm:block">
+  {dateStr} · <span className="font-semibold text-foreground">{timeStr}</span>
+  <span className="opacity-60 text-[10px]">({tz})</span>
+</p>
+
+Goal:
+- Consistent typography
+- Premium feel
+
+---
+
+## 🔒 FINAL VALIDATION (MANDATORY — DO NOT SKIP)
+
+Before finishing:
+
+1. activeId mapping:
+- overview → dashboard view
+- ai → AI Assistant
+- tcodes → TCodeLibrary
+- roadmap → CareerRoadmap
+- certifications → CloudCertifications
+- interviewPrep → InterviewPrep
+
+Each must have EXACTLY ONE render path.
+
+2. Confirm:
+- "ai" is excluded from ModuleView fallback
+- No duplicate AI components exist
+
+3. Confirm:
+expandedGroups includes ALL navGroups:
+Operating Systems
+Cloud Platforms
+Databases
+Resources
+Applications
+ALM & Operations
+Analytics & Cloud
+Career
+AI
+
+4. Confirm sidebar scroll:
+- Can reach Career and AI
+- No overflow lock
+
+5. Confirm:
+- No TypeScript errors
+- No unused imports
+- No console errors
+
+6. Do NOT:
+- create new routes
+- modify moduleRegistry
+- redesign UI
+- change navigation structure
+
+---
+
+## SUCCESS CRITERIA
+
+✔ Sidebar scroll works  
+✔ Career visible  
+✔ AI Assistant works  
+✔ No fallback errors  
+✔ Links safe  
+✔ Typography consistent  
+✔ No regressions  
+
+---
+
+Only implement above. Nothing else.

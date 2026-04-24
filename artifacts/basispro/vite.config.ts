@@ -5,6 +5,10 @@ import path from "path";
 
 export default defineConfig({
   base: process.env.BASE_PATH || "/",
+  server: {
+    port: Number(process.env.PORT) || 5173,
+    allowedHosts: true,
+  },
   plugins: [
     react(),
     tailwindcss(),
