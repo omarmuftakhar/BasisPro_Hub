@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowUp } from "lucide-react";
 
 const sections = [
   {
@@ -45,11 +45,23 @@ You may cancel anytime to stop future charges. You retain full access until the 
 
 export default function Terms() {
   const [, navigate] = useLocation();
+  const [showTop, setShowTop] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 300);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <div className="bg-[#F8FAFC] font-sans">
-      <nav className="bg-white border-b border-border px-6 h-16 flex items-center">
+      {/* Sticky navbar */}
+      <nav className="sticky top-0 z-50 bg-white border-b border-border px-6 h-16 flex items-center shadow-sm">
         <div className="max-w-3xl mx-auto w-full flex items-center gap-4">
-          <button onClick={() => navigate("/")} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors">
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
             <ArrowLeft className="w-4 h-4" /> Back
           </button>
           <div className="flex items-center gap-2 ml-4">
@@ -84,6 +96,34 @@ export default function Terms() {
           © {new Date().getFullYear()} BasisPro. All rights reserved.
         </p>
       </div>
+
+      {/* Back to Top */}
+      {showTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Back to top"
+          style={{
+            position: "fixed",
+            bottom: "28px",
+            right: "28px",
+            width: "44px",
+            height: "44px",
+            borderRadius: "50%",
+            background: "#2563EB",
+            color: "#ffffff",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 16px rgba(37,99,235,0.35)",
+            zIndex: 100,
+            transition: "opacity 0.2s",
+          }}
+        >
+          <ArrowUp style={{ width: "18px", height: "18px" }} />
+        </button>
+      )}
     </div>
   );
 }

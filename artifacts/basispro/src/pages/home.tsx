@@ -235,14 +235,6 @@ export default function Home() {
                     Subscribe Now
                     <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
-                  {/* Secondary CTA — ghost white outline */}
-                  <button
-                    className="inline-flex items-center justify-center h-12 px-8 text-base font-semibold rounded-md transition-colors hover:bg-white/10"
-                    style={{ background: "transparent", border: "2px solid rgba(255,255,255,0.85)", color: "#ffffff" }}
-                    onClick={() => document.getElementById("topics")?.scrollIntoView({ behavior: "smooth" })}
-                  >
-                    View All Topics
-                  </button>
                 </div>
               </div>
 
