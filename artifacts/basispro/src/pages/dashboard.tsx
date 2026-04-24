@@ -11,7 +11,7 @@ import {
   TrendingUp, Users, BookMarked, Cpu, Globe, Bot, LogOut,
   Home, HardDrive, Layers, MonitorDot, Workflow, FolderOpen,
   Key, Zap, Menu, X, RefreshCw, ArrowUpRight,
-  Award, MessageSquare,
+  Award, MessageSquare, Send, Paperclip,
 } from "lucide-react";
 import ModuleView from "@/components/ModuleView";
 import { moduleRegistry } from "@/data/moduleRegistry";
@@ -352,151 +352,277 @@ function getAIResponse(input: string): StructuredAIResponse {
   return AI_DEFAULT_STRUCTURED;
 }
 
-const QUICK_PROMPTS = [
-  { label: "HANA issue", q: "How do I troubleshoot a HANA memory or replication issue?" },
-  { label: "Transport failure", q: "Transport import failed with return code 8. What do I check?" },
-  { label: "Job failure", q: "A background job failed. Walk me through SM37 troubleshooting." },
-  { label: "RFC issue", q: "An RFC connection in SM59 is failing. How do I fix it?" },
-  { label: "TCode lookup", q: "What are the key TCodes for SAP Basis operations?" },
-  { label: "Cloud migration", q: "What should I consider for SAP cloud migration to AWS or Azure?" },
+const QUICK_PROMPTS: Array<{ label: string; q: string; icon: React.ReactNode; desc: string }> = [
+  { label: "HANA Issue", q: "How do I troubleshoot a HANA memory or replication issue?", icon: <Database className="w-4 h-4" />, desc: "Memory & replication" },
+  { label: "Transport Failure", q: "Transport import failed with return code 8. What do I check?", icon: <RefreshCw className="w-4 h-4" />, desc: "STMS & import errors" },
+  { label: "Job Failure", q: "A background job failed. Walk me through SM37 troubleshooting.", icon: <Activity className="w-4 h-4" />, desc: "SM37 & scheduling" },
+  { label: "RFC Issue", q: "An RFC connection in SM59 is failing. How do I fix it?", icon: <Plug className="w-4 h-4" />, desc: "SM59 connections" },
+  { label: "TCode Lookup", q: "What are the key TCodes for SAP Basis operations?", icon: <Terminal className="w-4 h-4" />, desc: "Quick reference" },
+  { label: "Cloud Migration", q: "What should I consider for SAP cloud migration to AWS or Azure?", icon: <Cloud className="w-4 h-4" />, desc: "AWS, Azure, GCP" },
 ];
 
-function StructuredResponseCard({ r }: { r: StructuredAIResponse }) {
+function TypingIndicator() {
   return (
-    <div className="space-y-3 max-w-full overflow-hidden">
-      <div>
-        <div className="font-bold text-foreground text-sm">{r.title}</div>
-        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed break-words">{r.summary}</p>
-      </div>
-      {r.steps.length > 0 && (
-        <div>
-          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Diagnostic Steps</div>
-          <ol className="space-y-1.5">
-            {r.steps.map((step, i) => (
-              <li key={i} className="flex gap-2 text-xs">
-                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold mt-0.5">
-                  {i + 1}
-                </span>
-                <span className="text-foreground leading-relaxed break-words flex-1 min-w-0 max-w-full overflow-x-auto whitespace-pre-wrap">
-                  {step}
-                </span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
-      {r.tcodes.length > 0 && (
-        <div>
-          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">TCodes / Commands</div>
-          <div className="flex flex-wrap gap-1.5">
-            {r.tcodes.map((tc, i) => (
-              <code key={i} className="text-[11px] font-mono font-semibold bg-[#EBF3FD] text-primary border border-blue-100 px-2 py-0.5 rounded-md break-all">
-                {tc}
-              </code>
-            ))}
-          </div>
-        </div>
-      )}
-      {r.nextAction && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-          <div className="text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-0.5">Next Action</div>
-          <p className="text-xs text-amber-800 leading-relaxed break-words">{r.nextAction}</p>
-        </div>
-      )}
+    <div className="flex items-center gap-1 py-0.5">
+      {[0, 160, 320].map((delay) => (
+        <span
+          key={delay}
+          className="block w-2 h-2 rounded-full bg-primary/40 animate-bounce"
+          style={{ animationDelay: `${delay}ms`, animationDuration: "900ms" }}
+        />
+      ))}
     </div>
   );
 }
 
 function DashboardAIAssistant() {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "assistant", structured: AI_DEFAULT_STRUCTURED },
+    { role: "assistant", text: "Hello! I'm your SAP Basis AI Assistant. I can help you troubleshoot HANA issues, transport failures, background jobs, RFC connections, and more. Use the quick topics above or type your question below." },
   ]);
   const [input, setInput] = useState("");
+  const [typing, setTyping] = useState(false);
+  const [activeDiagnostic, setActiveDiagnostic] = useState<StructuredAIResponse | null>(null);
+  const [diagOpen, setDiagOpen] = useState(false);
   const bottomRef = React.useRef<HTMLDivElement>(null);
 
   function send(text: string) {
     const q = text.trim();
     if (!q) return;
-    const response = getAIResponse(q);
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", text: q },
-      { role: "assistant", structured: response },
-    ]);
+    setMessages((prev) => [...prev, { role: "user", text: q }]);
     setInput("");
-    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+    setTyping(true);
+    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 60);
+    setTimeout(() => {
+      const response = getAIResponse(q);
+      setMessages((prev) => [...prev, { role: "assistant", structured: response }]);
+      setActiveDiagnostic(response);
+      setDiagOpen(true);
+      setTyping(false);
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 80);
+    }, 900);
   }
 
   return (
-    <div className="max-w-3xl space-y-5 min-w-0">
-      {/* Header */}
-      <div className="rounded-2xl overflow-hidden shadow-lg" style={{ background: "linear-gradient(135deg, #0D47A1 0%, #1565C0 50%, #0070F2 100%)" }}>
-        <div className="px-6 py-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0 ring-1 ring-white/20">
-            <Bot className="w-7 h-7 text-white" />
+    <div className="flex gap-4 min-w-0" style={{ height: "calc(100vh - 9.5rem)", minHeight: "640px" }}>
+
+      {/* ── Chat column ─────────────────────────────────── */}
+      <div className="flex-1 flex flex-col bg-white rounded-2xl border border-border shadow-sm overflow-hidden min-w-0">
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border flex-shrink-0 bg-white">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center shadow-md flex-shrink-0">
+              <Bot className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <div className="font-bold text-sm" style={{ color: "#1e293b" }}>SAP Basis AI Assistant</div>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs text-emerald-600 font-medium">Online — ready to assist</span>
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="text-white font-bold text-lg">SAP Basis AI Assistant</div>
-            <div className="text-white/70 text-sm">Ask about HANA, transports, jobs, RFC, performance, cloud, and more</div>
+          <button
+            onClick={() => setDiagOpen(!diagOpen)}
+            className={`flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl border transition-all ${
+              diagOpen
+                ? "bg-primary/10 border-primary/30 text-primary"
+                : "bg-[#F5F7FA] border-border text-muted-foreground hover:text-foreground hover:border-primary/30"
+            }`}
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{diagOpen ? "Hide Diagnostics" : "Diagnostics"}</span>
+          </button>
+        </div>
+
+        {/* Quick prompts — 2×3 grid */}
+        <div className="px-4 pt-3.5 pb-2 border-b border-border/50 flex-shrink-0">
+          <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "#94a3b8" }}>Quick Topics</div>
+          <div className="grid grid-cols-3 gap-2">
+            {QUICK_PROMPTS.map((p) => (
+              <button
+                key={p.label}
+                onClick={() => send(p.q)}
+                disabled={typing}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-[#F8FAFF] hover:bg-primary hover:border-primary text-foreground hover:text-white transition-all group text-left disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span className="text-primary group-hover:text-white transition-colors flex-shrink-0">{p.icon}</span>
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold truncate leading-tight">{p.label}</div>
+                  <div className="text-[10px] text-muted-foreground group-hover:text-white/80 truncate">{p.desc}</div>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
-      </div>
 
-      {/* Quick prompts */}
-      <div className="flex flex-wrap gap-2">
-        {QUICK_PROMPTS.map((p) => (
-          <button key={p.label} onClick={() => send(p.q)}
-            className="text-xs font-semibold px-3 py-1.5 rounded-full border border-primary/30 bg-[#EBF3FD] text-primary hover:bg-primary hover:text-white transition-all">
-            {p.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Chat window */}
-      <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden flex flex-col" style={{ height: "520px" }}>
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-w-0">
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 min-w-0">
           {messages.map((msg, i) => (
-            <div key={i} className={`flex max-w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div key={i} className={`flex gap-2.5 max-w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               {msg.role === "assistant" && (
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center flex-shrink-0 mr-2 mt-0.5">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
               )}
+
               {msg.role === "user" ? (
-                <div className="max-w-[80%] break-words overflow-hidden rounded-2xl rounded-br-sm px-4 py-3 text-sm leading-relaxed bg-primary text-white">
+                <div className="max-w-[72%] bg-primary text-white rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed break-words shadow-sm">
                   {msg.text}
                 </div>
+              ) : msg.structured ? (
+                <div className="flex-1 min-w-0 max-w-[88%] bg-[#F8FAFF] border border-border rounded-2xl rounded-tl-sm px-4 py-3.5 shadow-sm space-y-2.5 overflow-hidden">
+                  <div className="font-bold text-sm" style={{ color: "#1e293b" }}>{msg.structured.title}</div>
+                  <p className="text-xs leading-relaxed break-words" style={{ color: "#64748b" }}>{msg.structured.summary}</p>
+                  {msg.structured.tcodes.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {msg.structured.tcodes.map((tc, j) => (
+                        <code key={j} className="text-[11px] font-mono font-semibold bg-white text-primary border border-blue-100 px-2 py-0.5 rounded-md">
+                          {tc}
+                        </code>
+                      ))}
+                    </div>
+                  )}
+                  {msg.structured.nextAction && (
+                    <div className="bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+                      <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Next Action · </span>
+                      <span className="text-xs text-amber-800 leading-relaxed">{msg.structured.nextAction}</span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => { setActiveDiagnostic(msg.structured!); setDiagOpen(true); }}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/70 transition-colors"
+                  >
+                    <BarChart3 className="w-3 h-3" />
+                    View {msg.structured.steps.length} diagnostic steps
+                    <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
               ) : (
-                <div className="flex-1 min-w-0 max-w-full bg-[#F5F7FA] border border-border rounded-2xl rounded-bl-sm px-4 py-4 overflow-hidden">
-                  {msg.structured
-                    ? <StructuredResponseCard r={msg.structured} />
-                    : <p className="text-sm text-foreground break-words whitespace-pre-wrap">{msg.text}</p>
-                  }
+                <div className="flex-1 min-w-0 max-w-[88%] bg-[#F8FAFF] border border-border rounded-2xl rounded-tl-sm px-4 py-3.5 shadow-sm">
+                  <p className="text-sm leading-relaxed break-words" style={{ color: "#334155" }}>{msg.text}</p>
+                </div>
+              )}
+
+              {msg.role === "user" && (
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-slate-500 to-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                  <User className="w-4 h-4 text-white" />
                 </div>
               )}
             </div>
           ))}
+
+          {/* Typing indicator */}
+          {typing && (
+            <div className="flex gap-2.5 justify-start">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <Bot className="w-4 h-4 text-white" />
+              </div>
+              <div className="bg-[#F8FAFF] border border-border rounded-2xl rounded-tl-sm px-4 py-3.5 shadow-sm">
+                <TypingIndicator />
+              </div>
+            </div>
+          )}
           <div ref={bottomRef} />
         </div>
 
         {/* Input bar */}
-        <div className="border-t border-border p-3 flex gap-2 bg-white">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }}
-            placeholder="Ask about HANA, transports, performance, TCodes..."
-            className="flex-1 min-w-0 text-sm px-4 py-2.5 bg-[#F5F7FA] border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40"
-          />
-          <button
-            onClick={() => send(input)}
-            disabled={!input.trim()}
-            className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
-          >
-            Send
-          </button>
+        <div className="border-t border-border px-4 py-3.5 bg-white flex-shrink-0">
+          <div className="flex items-end gap-2 bg-[#F5F7FA] border border-border rounded-2xl px-3 py-2 focus-within:ring-2 focus-within:ring-primary/25 focus-within:border-primary/40 transition-all">
+            <button className="text-muted-foreground hover:text-foreground transition-colors p-1 flex-shrink-0 mb-0.5">
+              <Paperclip className="w-4 h-4" />
+            </button>
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }}
+              placeholder="Ask about HANA, transports, performance, TCodes..."
+              rows={1}
+              className="flex-1 min-w-0 text-sm bg-transparent focus:outline-none resize-none leading-relaxed max-h-28 overflow-y-auto placeholder:text-muted-foreground/60"
+              style={{ minHeight: "24px", color: "#334155" }}
+            />
+            <button
+              onClick={() => send(input)}
+              disabled={!input.trim() || typing}
+              className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary text-white hover:bg-primary/90 transition-all disabled:opacity-35 disabled:cursor-not-allowed flex-shrink-0 shadow-sm"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </div>
+          <p className="text-[10px] text-center mt-2" style={{ color: "#94a3b8" }}>Enter to send · Shift+Enter for new line</p>
         </div>
       </div>
+
+      {/* ── Diagnostic sidebar ───────────────────────────── */}
+      {diagOpen && (
+        <div className="w-80 flex-shrink-0 flex flex-col bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
+          {/* Sidebar header */}
+          <div className="flex items-center justify-between px-4 py-3.5 border-b border-border flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-primary" />
+              <span className="text-sm font-bold" style={{ color: "#1e293b" }}>Diagnostic Steps</span>
+            </div>
+            <button
+              onClick={() => setDiagOpen(false)}
+              className="p-1 rounded-lg hover:bg-[#F5F7FA] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {activeDiagnostic ? (
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+              <div>
+                <div className="font-bold text-sm mb-1" style={{ color: "#1e293b" }}>{activeDiagnostic.title}</div>
+                <p className="text-xs leading-relaxed" style={{ color: "#64748b" }}>{activeDiagnostic.summary}</p>
+              </div>
+
+              {activeDiagnostic.steps.length > 0 && (
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider mb-2.5" style={{ color: "#94a3b8" }}>Procedure</div>
+                  <ol className="space-y-2.5">
+                    {activeDiagnostic.steps.map((step, i) => (
+                      <li key={i} className="flex gap-2.5 text-xs">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold mt-0.5">
+                          {i + 1}
+                        </span>
+                        <span className="leading-relaxed" style={{ color: "#334155" }}>{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {activeDiagnostic.tcodes.length > 0 && (
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "#94a3b8" }}>TCodes / Commands</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeDiagnostic.tcodes.map((tc, i) => (
+                      <code key={i} className="text-[11px] font-mono font-semibold bg-[#EBF3FD] text-primary border border-blue-100 px-2.5 py-1 rounded-lg">
+                        {tc}
+                      </code>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeDiagnostic.nextAction && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-3">
+                  <div className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "#b45309" }}>Recommended Next Action</div>
+                  <p className="text-xs leading-relaxed" style={{ color: "#92400e" }}>{activeDiagnostic.nextAction}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center p-6 text-center">
+              <div>
+                <BarChart3 className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground">Ask a question to see diagnostic steps here</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
