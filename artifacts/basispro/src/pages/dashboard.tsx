@@ -444,12 +444,13 @@ function DashboardAIAssistant() {
                 key={p.label}
                 onClick={() => send(p.q)}
                 disabled={typing}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-[#F8FAFF] hover:bg-primary hover:border-primary hover:shadow-md hover:scale-[1.02] text-foreground hover:text-white transition-all duration-150 group text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 py-2.5 rounded-xl border border-border border-l-[3px] border-l-transparent bg-[#F8FAFF] hover:bg-blue-50 hover:border-border/60 hover:border-l-primary hover:shadow-sm text-foreground transition-all duration-150 group text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ paddingLeft: "calc(0.75rem - 2px)", paddingRight: "0.75rem" }}
               >
-                <span className="text-primary group-hover:text-white transition-colors flex-shrink-0">{p.icon}</span>
+                <span className="text-primary flex-shrink-0">{p.icon}</span>
                 <div className="min-w-0">
                   <div className="text-xs font-semibold truncate leading-tight">{p.label}</div>
-                  <div className="text-[10px] text-muted-foreground group-hover:text-white/80 truncate">{p.desc}</div>
+                  <div className="text-[10px] text-muted-foreground truncate">{p.desc}</div>
                 </div>
               </button>
             ))}
@@ -467,11 +468,17 @@ function DashboardAIAssistant() {
               )}
 
               {msg.role === "user" ? (
-                <div className="max-w-[68%] bg-primary text-white rounded-3xl rounded-br-md px-4 py-3 text-sm leading-relaxed break-words shadow-md">
+                <div
+                  className="max-w-[75%] bg-primary text-white px-4 py-3 text-sm leading-relaxed break-words"
+                  style={{ borderRadius: "18px 18px 4px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.15)" }}
+                >
                   {msg.text}
                 </div>
               ) : msg.structured ? (
-                <div className="min-w-0 max-w-[78%] bg-white border border-slate-100 rounded-2xl rounded-tl-sm px-4 py-4 shadow-[0_2px_10px_rgba(0,0,0,0.07)] space-y-2.5 overflow-hidden">
+                <div
+                  className="min-w-0 max-w-[75%] space-y-2.5 overflow-hidden px-4 py-3.5"
+                  style={{ background: "#F0F2F5", borderRadius: "4px 18px 18px 18px" }}
+                >
                   <div className="font-bold text-sm" style={{ color: "#1e293b" }}>{msg.structured.title}</div>
                   <p className="text-xs leading-relaxed break-words" style={{ color: "#64748b" }}>{msg.structured.summary}</p>
                   {msg.structured.tcodes.length > 0 && (
@@ -499,7 +506,10 @@ function DashboardAIAssistant() {
                   </button>
                 </div>
               ) : (
-                <div className="min-w-0 max-w-[78%] bg-white border border-slate-100 rounded-2xl rounded-tl-sm px-4 py-4 shadow-[0_2px_10px_rgba(0,0,0,0.07)]">
+                <div
+                  className="min-w-0 max-w-[75%] px-4 py-3.5"
+                  style={{ background: "#F0F2F5", borderRadius: "4px 18px 18px 18px" }}
+                >
                   <p className="text-sm leading-relaxed break-words" style={{ color: "#334155" }}>{msg.text}</p>
                 </div>
               )}
@@ -518,7 +528,7 @@ function DashboardAIAssistant() {
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center flex-shrink-0 shadow-sm">
                 <Bot className="w-4 h-4 text-white" />
               </div>
-              <div className="bg-white border border-slate-100 rounded-2xl rounded-tl-sm px-4 py-3.5 shadow-[0_2px_10px_rgba(0,0,0,0.07)]">
+              <div className="px-4 py-3.5" style={{ background: "#F0F2F5", borderRadius: "4px 18px 18px 18px" }}>
                 <TypingIndicator />
               </div>
             </div>
