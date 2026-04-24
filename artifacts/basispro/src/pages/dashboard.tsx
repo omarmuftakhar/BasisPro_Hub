@@ -893,11 +893,11 @@ export default function Dashboard() {
             </button>
             <div className="min-w-0">
               <h1 className="text-base md:text-lg font-bold truncate" style={{ color: "#1e293b" }}>{activeLabel}</h1>
-              <p className="hidden sm:flex items-center gap-1.5 text-[13px] font-medium tracking-tight" style={{ color: "#64748b" }}>
+              <p className="hidden sm:flex items-center gap-1.5 font-medium" style={{ color: "#64748b", fontSize: "14px" }}>
                 <span>{dateStr}</span>
                 <span className="opacity-40">·</span>
                 <span className="tabular-nums">{timeStr}</span>
-                <span className="text-[11px] opacity-60">({tz})</span>
+                <span className="opacity-60">({tz})</span>
               </p>
             </div>
           </div>
@@ -976,8 +976,8 @@ export default function Dashboard() {
                   <button
                     key={btn.label}
                     onClick={() => handleNav(btn.action)}
-                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-full text-white text-sm font-semibold transition-all shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
-                    style={{ background: btn.color }}
+                    className="flex items-center justify-center gap-2 rounded-full text-white text-sm font-semibold transition-all shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                    style={{ background: btn.color, padding: "10px 20px" }}
                     onMouseEnter={(e) => (e.currentTarget.style.background = btn.hover)}
                     onMouseLeave={(e) => (e.currentTarget.style.background = btn.color)}
                   >
