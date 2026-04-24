@@ -13,7 +13,7 @@ const sections = [
   },
   {
     title: "3. Payment Processing",
-    body: `All payments are processed by Stripe. BasisPro does not store your credit card details. Please review Stripe's privacy policy for information on how they handle payment data.`,
+    body: `All payments are processed by our secure payment processor. BasisPro does not store your credit card details. Please review their privacy policy for information on how they handle payment data.`,
   },
   {
     title: "4. Cookies",
@@ -62,12 +62,16 @@ export default function Privacy() {
           >
             <ArrowLeft className="w-4 h-4" /> Back
           </button>
-          <div className="flex items-center gap-2 ml-4">
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 ml-4 cursor-pointer"
+            style={{ background: "none", border: "none", padding: 0 }}
+          >
             <div className="w-7 h-7 bg-primary rounded-md flex items-center justify-center">
               <span className="text-white font-bold text-xs">B</span>
             </div>
             <span className="font-bold text-lg text-foreground tracking-tight">BasisPro</span>
-          </div>
+          </button>
         </div>
       </nav>
 

@@ -187,12 +187,16 @@ export default function Home() {
         style={{ boxShadow: scrolled ? "0 2px 16px 0 rgba(0,0,0,0.08)" : "none" }}
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="flex items-center gap-2.5 cursor-pointer"
+            style={{ background: "none", border: "none", padding: 0 }}
+          >
             <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
               <span className="text-white font-bold text-sm">B</span>
             </div>
             <span className="font-bold text-xl text-foreground tracking-tight">BasisPro</span>
-          </div>
+          </button>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
             <a href="#topics" className="hover:text-primary transition-colors">Topics</a>
             <a href="#platform" className="hover:text-primary transition-colors">Platform</a>
@@ -890,13 +894,12 @@ export default function Home() {
             <div className="px-8 py-6">
               <div className="space-y-3 mb-7">
                 {[
-                  "Full platform access",
-                  "AI Assistant — all modules",
-                  "303 Interview Questions",
-                  "372 SAP TCodes",
-                  "Architecture blueprints & runbooks",
-                  "Priority support",
-                  "Cancel anytime",
+                  "Everything SAP Basis in one place",
+                  "AI Assistant for instant troubleshooting",
+                  "303 real interview questions",
+                  "372 SAP TCodes reference",
+                  "Step-by-step migration runbooks",
+                  "Cancel anytime, no commitment",
                 ].map((feature) => (
                   <div key={feature} className="flex items-center gap-3">
                     <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">

@@ -13,7 +13,7 @@ const sections = [
   },
   {
     title: "3. Subscription & Payment",
-    body: `BasisPro offers two subscription plans: Monthly at $19.99/month and Yearly at $149/year. All payments are processed securely through Stripe. By subscribing you authorize us to charge your payment method on a recurring basis until cancelled.`,
+    body: `BasisPro offers two subscription plans: Monthly at $19.99/month and Yearly at $149/year. All payments are processed securely through our secure payment processor. By subscribing you authorize us to charge your payment method on a recurring basis until cancelled.`,
   },
   {
     title: "4. Refund Policy",
@@ -64,12 +64,16 @@ export default function Terms() {
           >
             <ArrowLeft className="w-4 h-4" /> Back
           </button>
-          <div className="flex items-center gap-2 ml-4">
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 ml-4 cursor-pointer"
+            style={{ background: "none", border: "none", padding: 0 }}
+          >
             <div className="w-7 h-7 bg-primary rounded-md flex items-center justify-center">
               <span className="text-white font-bold text-xs">B</span>
             </div>
             <span className="font-bold text-lg text-foreground tracking-tight">BasisPro</span>
-          </div>
+          </button>
         </div>
       </nav>
 

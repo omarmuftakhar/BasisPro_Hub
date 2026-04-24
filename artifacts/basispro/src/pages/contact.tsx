@@ -34,12 +34,16 @@ export default function Contact() {
           <button onClick={() => navigate("/")} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back
           </button>
-          <div className="flex items-center gap-2 ml-4">
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 ml-4 cursor-pointer"
+            style={{ background: "none", border: "none", padding: 0 }}
+          >
             <div className="w-7 h-7 bg-primary rounded-md flex items-center justify-center">
               <span className="text-white font-bold text-xs">B</span>
             </div>
             <span className="font-bold text-lg text-foreground tracking-tight">BasisPro</span>
-          </div>
+          </button>
         </div>
       </nav>
 
