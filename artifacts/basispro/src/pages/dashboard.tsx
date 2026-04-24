@@ -60,9 +60,9 @@ const topContent = [
 
 const moduleProgress = [
   { label: "HANA Database", nodes: 7, total: 7, color: "#0070F2" },
-  { label: "Oracle", nodes: 10, total: 10, color: "#C62828" },
-  { label: "Sybase ASE", nodes: 10, total: 10, color: "#E53935" },
-  { label: "MaxDB", nodes: 9, total: 9, color: "#E65100" },
+  { label: "Oracle", nodes: 10, total: 10, color: "#059669" },
+  { label: "Sybase ASE", nodes: 10, total: 10, color: "#7C3AED" },
+  { label: "MaxDB", nodes: 9, total: 9, color: "#F59E0B" },
 ];
 
 // ─── Nav definition ────────────────────────────────────────────────────
@@ -713,22 +713,25 @@ export default function Dashboard() {
       icon: <BookMarked className="w-5 h-5" />,
       gradient: "from-blue-500 to-blue-600",
       bg: "bg-blue-50", ring: "ring-blue-100", text: "text-blue-600",
+      accentColor: "#0070F2",
     },
     {
       label: "Modules with Content",
       value: String(liveModuleCount),
       change: `of ${totalTopics} live`,
       icon: <Database className="w-5 h-5" />,
-      gradient: "from-indigo-500 to-indigo-600",
-      bg: "bg-indigo-50", ring: "ring-indigo-100", text: "text-indigo-600",
+      gradient: "from-violet-500 to-violet-600",
+      bg: "bg-violet-50", ring: "ring-violet-100", text: "text-violet-600",
+      accentColor: "#7C3AED",
     },
     {
       label: "Interview Questions",
       value: String(TOTAL_INTERVIEW_QS),
       change: "20 categories",
       icon: <MessageSquare className="w-5 h-5" />,
-      gradient: "from-rose-500 to-orange-500",
+      gradient: "from-rose-500 to-rose-600",
       bg: "bg-rose-50", ring: "ring-rose-100", text: "text-rose-600",
+      accentColor: "#E11D48",
     },
     {
       label: "SAP TCodes",
@@ -737,6 +740,7 @@ export default function Dashboard() {
       icon: <Terminal className="w-5 h-5" />,
       gradient: "from-emerald-500 to-emerald-600",
       bg: "bg-emerald-50", ring: "ring-emerald-100", text: "text-emerald-600",
+      accentColor: "#059669",
     },
   ];
 
@@ -972,10 +976,51 @@ export default function Dashboard() {
                 </div>
               </div>
 
+              {/* Welcome banner */}
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex">
+                <div className="w-1.5 flex-shrink-0" style={{ background: "linear-gradient(180deg, #0070F2 0%, #7C3AED 100%)" }} />
+                <div className="flex-1 px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="font-bold text-base" style={{ color: "#1e293b" }}>Welcome back, SAP Professional 👋</div>
+                    <div className="text-sm mt-0.5" style={{ color: "#64748b" }}>You have 3 modules in progress · Last active today</div>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-blue-50 px-3 py-1.5 rounded-full ring-1 ring-blue-100 self-start sm:self-auto flex-shrink-0">
+                    <BookMarked className="w-3.5 h-3.5" />
+                    3 in progress
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick actions */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  { label: "Continue Learning", icon: <BookOpen className="w-4 h-4" />, color: "#2563EB", hover: "#1D4ED8", action: "hana" },
+                  { label: "Practice Interview", icon: <MessageSquare className="w-4 h-4" />, color: "#E11D48", hover: "#BE123C", action: "interviewPrep" },
+                  { label: "Search TCodes", icon: <Terminal className="w-4 h-4" />, color: "#059669", hover: "#047857", action: "tcodes" },
+                  { label: "Open AI Assistant", icon: <Bot className="w-4 h-4" />, color: "#7C3AED", hover: "#6D28D9", action: "ai" },
+                ].map((btn) => (
+                  <button
+                    key={btn.label}
+                    onClick={() => handleNav(btn.action)}
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-full text-white text-sm font-semibold transition-all shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                    style={{ background: btn.color }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = btn.hover)}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = btn.color)}
+                  >
+                    {btn.icon}
+                    <span className="truncate">{btn.label}</span>
+                  </button>
+                ))}
+              </div>
+
               {/* KPI cards */}
               <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
                 {kpis.map((kpi, i) => (
-                  <div key={i} className={`bg-white rounded-2xl border ring-1 ${kpi.ring} p-4 md:p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow`}>
+                  <div
+                    key={i}
+                    className="bg-white rounded-2xl p-4 md:p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow border border-slate-100"
+                    style={{ borderLeft: `4px solid ${kpi.accentColor}` }}
+                  >
                     <div className="flex items-center justify-between">
                       <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${kpi.gradient} flex items-center justify-center text-white shadow-md`}>
                         {kpi.icon}
@@ -985,7 +1030,7 @@ export default function Dashboard() {
                       </span>
                     </div>
                     <div>
-                      <div className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">{kpi.value}</div>
+                      <div className="text-3xl md:text-4xl font-extrabold tracking-tight" style={{ color: kpi.accentColor }}>{kpi.value}</div>
                       <div className="text-xs text-muted-foreground font-medium mt-0.5">{kpi.label}</div>
                     </div>
                   </div>
