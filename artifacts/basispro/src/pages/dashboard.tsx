@@ -730,7 +730,12 @@ export default function Dashboard() {
             </button>
             <div className="min-w-0">
               <h1 className="text-base md:text-lg font-bold text-foreground truncate">{activeLabel}</h1>
-              <p className="text-xs text-muted-foreground hidden sm:block">{dateStr} · <span className="font-semibold text-foreground">{timeStr}</span> <span className="opacity-60 text-[10px]">({tz})</span></p>
+              <p className="hidden sm:flex items-center gap-1.5 text-[13px] font-medium text-foreground/70 tracking-tight">
+                <span className="text-foreground font-semibold">{dateStr}</span>
+                <span className="opacity-30">·</span>
+                <span className="text-foreground font-semibold tabular-nums">{timeStr}</span>
+                <span className="text-[11px] font-medium opacity-45">({tz})</span>
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
