@@ -950,32 +950,6 @@ export default function Dashboard() {
           {/* ── Overview dashboard ──────────────────────── */}
           {activeId === "overview" && (
             <>
-              {/* AI Assistant Hero — top of overview */}
-              <div
-                className="rounded-2xl overflow-hidden shadow-lg"
-                style={{ background: "linear-gradient(135deg, #0D47A1 0%, #1565C0 50%, #0070F2 100%)" }}
-              >
-                <div className="px-6 md:px-8 py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0 ring-1 ring-white/20">
-                      <Bot className="w-7 h-7 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-white font-bold text-lg">AI Assistant — All Modules</div>
-                      <div className="text-white/70 text-sm mt-0.5">
-                        Ask anything about SAP Basis — HANA, Oracle, Sybase, Cloud ALM, BTP, SolMan, TCodes, and more.
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setActiveId("ai")}
-                    className="flex-shrink-0 bg-white text-primary font-bold px-6 py-2.5 rounded-xl hover:bg-white/90 transition-all shadow-md hover:shadow-lg text-sm"
-                  >
-                    Open AI Assistant
-                  </button>
-                </div>
-              </div>
-
               {/* Welcome banner */}
               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex">
                 <div className="w-1.5 flex-shrink-0" style={{ background: "linear-gradient(180deg, #0070F2 0%, #7C3AED 100%)" }} />
