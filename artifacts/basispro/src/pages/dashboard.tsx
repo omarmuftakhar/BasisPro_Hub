@@ -444,7 +444,7 @@ function DashboardAIAssistant() {
                 key={p.label}
                 onClick={() => send(p.q)}
                 disabled={typing}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-[#F8FAFF] hover:bg-primary hover:border-primary text-foreground hover:text-white transition-all group text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-[#F8FAFF] hover:bg-primary hover:border-primary hover:shadow-md hover:scale-[1.02] text-foreground hover:text-white transition-all duration-150 group text-left disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="text-primary group-hover:text-white transition-colors flex-shrink-0">{p.icon}</span>
                 <div className="min-w-0">
@@ -467,11 +467,11 @@ function DashboardAIAssistant() {
               )}
 
               {msg.role === "user" ? (
-                <div className="max-w-[72%] bg-primary text-white rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed break-words shadow-sm">
+                <div className="max-w-[68%] bg-primary text-white rounded-3xl rounded-br-md px-4 py-3 text-sm leading-relaxed break-words shadow-md">
                   {msg.text}
                 </div>
               ) : msg.structured ? (
-                <div className="flex-1 min-w-0 max-w-[88%] bg-[#F8FAFF] border border-border rounded-2xl rounded-tl-sm px-4 py-3.5 shadow-sm space-y-2.5 overflow-hidden">
+                <div className="min-w-0 max-w-[78%] bg-white border border-slate-100 rounded-2xl rounded-tl-sm px-4 py-4 shadow-[0_2px_10px_rgba(0,0,0,0.07)] space-y-2.5 overflow-hidden">
                   <div className="font-bold text-sm" style={{ color: "#1e293b" }}>{msg.structured.title}</div>
                   <p className="text-xs leading-relaxed break-words" style={{ color: "#64748b" }}>{msg.structured.summary}</p>
                   {msg.structured.tcodes.length > 0 && (
@@ -499,7 +499,7 @@ function DashboardAIAssistant() {
                   </button>
                 </div>
               ) : (
-                <div className="flex-1 min-w-0 max-w-[88%] bg-[#F8FAFF] border border-border rounded-2xl rounded-tl-sm px-4 py-3.5 shadow-sm">
+                <div className="min-w-0 max-w-[78%] bg-white border border-slate-100 rounded-2xl rounded-tl-sm px-4 py-4 shadow-[0_2px_10px_rgba(0,0,0,0.07)]">
                   <p className="text-sm leading-relaxed break-words" style={{ color: "#334155" }}>{msg.text}</p>
                 </div>
               )}
@@ -518,7 +518,7 @@ function DashboardAIAssistant() {
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center flex-shrink-0 shadow-sm">
                 <Bot className="w-4 h-4 text-white" />
               </div>
-              <div className="bg-[#F8FAFF] border border-border rounded-2xl rounded-tl-sm px-4 py-3.5 shadow-sm">
+              <div className="bg-white border border-slate-100 rounded-2xl rounded-tl-sm px-4 py-3.5 shadow-[0_2px_10px_rgba(0,0,0,0.07)]">
                 <TypingIndicator />
               </div>
             </div>
@@ -528,7 +528,7 @@ function DashboardAIAssistant() {
 
         {/* Input bar */}
         <div className="border-t border-border px-4 py-3.5 bg-white flex-shrink-0">
-          <div className="flex items-end gap-2 bg-[#F5F7FA] border border-border rounded-2xl px-3 py-2 focus-within:ring-2 focus-within:ring-primary/25 focus-within:border-primary/40 transition-all">
+          <div className="flex items-end gap-2 bg-white border border-slate-200 rounded-2xl px-3 py-2 shadow-[0_2px_12px_rgba(0,0,0,0.08)] focus-within:ring-2 focus-within:ring-primary/25 focus-within:border-primary/40 focus-within:shadow-[0_2px_16px_rgba(0,112,242,0.12)] transition-all duration-150">
             <button className="text-muted-foreground hover:text-foreground transition-colors p-1 flex-shrink-0 mb-0.5">
               <Paperclip className="w-4 h-4" />
             </button>
@@ -580,13 +580,13 @@ function DashboardAIAssistant() {
               {activeDiagnostic.steps.length > 0 && (
                 <div>
                   <div className="text-[10px] font-bold uppercase tracking-wider mb-2.5" style={{ color: "#94a3b8" }}>Procedure</div>
-                  <ol className="space-y-2.5">
+                  <ol className="space-y-4">
                     {activeDiagnostic.steps.map((step, i) => (
-                      <li key={i} className="flex gap-2.5 text-xs">
+                      <li key={i} className="flex gap-3 text-xs">
                         <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold mt-0.5">
                           {i + 1}
                         </span>
-                        <span className="leading-relaxed" style={{ color: "#334155" }}>{step}</span>
+                        <span className="leading-relaxed pt-0.5" style={{ color: "#334155" }}>{step}</span>
                       </li>
                     ))}
                   </ol>
