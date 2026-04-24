@@ -31,17 +31,31 @@ export default function Login() {
       className="min-h-screen font-sans flex items-center justify-center px-4"
       style={{ background: "#F0F4FF" }}
     >
-      <div
-        className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-border"
-        style={{ padding: "40px" }}
-      >
+      <div className="w-full max-w-md">
+        {/* Back to home */}
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-5"
+          style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
+        >
+          ← Back to home
+        </button>
+
+        <div
+          className="bg-white rounded-2xl shadow-lg border border-border"
+          style={{ padding: "40px" }}
+        >
         {/* Logo */}
-        <div className="flex items-center gap-2.5 justify-center mb-8">
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2.5 justify-center w-full mb-8"
+          style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
+        >
           <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-base">B</span>
           </div>
           <span className="font-bold text-2xl text-foreground tracking-tight">BasisPro</span>
-        </div>
+        </button>
 
         {/* Heading */}
         <div className="text-center mb-8">
@@ -138,6 +152,7 @@ export default function Login() {
           >
             Subscribe Now
           </a>
+        </div>
         </div>
       </div>
     </div>
