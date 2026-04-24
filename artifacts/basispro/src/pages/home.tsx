@@ -212,8 +212,10 @@ export default function Home() {
       </nav>
 
       {/* Hero Section — 50/50 split */}
-      <section className="relative pt-24 pb-0 overflow-hidden">
-        <div className="sap-hero-bg pt-20 pb-0">
+      <section className="relative sap-hero-bg pb-0 overflow-hidden" style={{ paddingTop: 0, marginTop: 0 }}>
+        {/* Spacer equal to fixed navbar height so content clears the navbar */}
+        <div style={{ height: "64px" }} />
+        <div className="pt-4 pb-0">
           <div className="max-w-7xl mx-auto px-6 pb-16">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
 
@@ -907,7 +909,7 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <span className="text-sm text-foreground font-medium">{feature}</span>
+                    <span className="text-sm font-medium" style={{ color: "#1e293b" }}>{feature}</span>
                   </div>
                 ))}
               </div>
