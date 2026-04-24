@@ -179,7 +179,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="bg-background text-foreground font-sans overflow-x-hidden">
+    <div className="bg-background text-foreground font-sans" style={{ overflowX: "clip" }}>
 
       {/* Navbar — sticky with scroll shadow */}
       <nav
@@ -927,7 +927,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-white py-10 px-6">
+      <footer className="border-t border-border bg-white pt-10 pb-10 px-6" style={{ margin: 0, paddingBottom: "40px" }}>
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-5">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 bg-primary rounded-md flex items-center justify-center">
