@@ -938,7 +938,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-white px-6 pt-[17px] pb-[17px] pl-[38px] pr-[38px]" style={{ margin: 0 }}>
+      <footer className="border-t border-border bg-white px-6 pt-[17px] pb-[17px] pl-[48px] pr-[48px]" style={{ margin: 0 }}>
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-6">
           <div className="flex-1 flex justify-start justify-center">
             <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
