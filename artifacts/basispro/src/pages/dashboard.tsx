@@ -90,7 +90,7 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    group: "System Layers",
+    group: "System Foundation",
     items: [
       { label: "Linux", icon: <Terminal className="w-4 h-4" />, id: "linux" },
       { label: "Windows", icon: <MonitorDot className="w-4 h-4" />, id: "windows" },
@@ -106,7 +106,7 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    group: "Application Layer",
+    group: "Application & Integration",
     items: [
       { label: "Fiori & UI5", icon: <LayoutGrid className="w-4 h-4" />, id: "fiori" },
       { label: "BTP & Integrations", icon: <Plug className="w-4 h-4" />, id: "btp" },
@@ -673,9 +673,9 @@ export default function Dashboard() {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     "Career": true,
     "Core Operations": true,
-    "System Layers": true,
+    "System Foundation": true,
     "Databases": true,
-    "Application Layer": true,
+    "Application & Integration": true,
     "Enterprise Operations": true,
     "Cloud & Infrastructure": true,
     "Analytics": true,

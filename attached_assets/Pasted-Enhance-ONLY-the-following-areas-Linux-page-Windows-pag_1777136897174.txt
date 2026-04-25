@@ -1,0 +1,145 @@
+Enhance ONLY the following areas:
+- Linux page
+- Windows page
+- Sidebar section labels (display text only)
+
+Do not modify:
+- Navigation logic
+- Page IDs
+- Routing
+- Theme, colors, layout
+- Any other modules (Roadmap, Certifications, TCodes, etc.)
+
+----------------------------------
+GOAL
+----------------------------------
+1. Upgrade Linux page into a real SAP Basis Operations Playbook
+2. Add real-world troubleshooting scenarios
+3. Improve Windows page with practical Basis issues
+4. Polish sidebar labels for premium feel
+
+----------------------------------
+LINUX PAGE (MAJOR UPGRADE)
+----------------------------------
+
+Rename positioning internally (no route change):
+“SAP BASIS LINUX OPERATIONS PLAYBOOK”
+
+Add a new section:
+
+### REAL SAP INCIDENTS ON LINUX
+
+Include structured cards or sections for:
+
+1. HANA Database Not Starting
+- Check: systemctl status HDB
+- Check: HANA trace files (/usr/sap/<SID>/HDB<nr>/trace)
+- Check: memory using free -g
+- Action: restart HANA services
+
+2. High CPU / Work Process Stuck
+- Check: top / htop
+- Check: SM50 / SM66
+- Identify long-running processes
+- Action: kill process if required
+
+3. Disk Full Issue
+- Check: df -h
+- Check: large logs (/usr/sap, /var/log)
+- Action: clean old logs, archive traces
+
+4. Network Connectivity Issue
+- ping hostname
+- nslookup
+- check /etc/hosts
+- validate SAProuter / firewall
+
+5. SAP Application Not Responding
+- Check: sapcontrol -nr <nr> -function GetProcessList
+- Check: dev_w0 logs
+- Restart SAP instance if needed
+
+----------------------------------
+Add section:
+
+### BASIS DAILY LINUX COMMANDS (SAP FOCUSED)
+
+Commands:
+- top
+- free -g
+- df -h
+- uptime
+- ps -ef
+- systemctl status
+- journalctl -xe
+- sapcontrol
+- saptune
+- ip addr
+- ping
+- nslookup
+- ssh
+
+----------------------------------
+WINDOWS PAGE (IMPROVEMENT)
+----------------------------------
+
+Add new section:
+
+### COMMON SAP BASIS ISSUES ON WINDOWS
+
+Include:
+
+1. SAP Service Not Starting
+- Check services.msc
+- Restart SAP service
+- Check Windows Event Viewer
+
+2. SAP GUI Connection Issues
+- Check network (ping, tracert)
+- Validate SAP Logon configuration
+
+3. SQL Server Connectivity Issues
+- Check SQL services
+- Validate DB connection
+- Check ports (netstat -ano)
+
+4. Performance Issues
+- Use Task Manager
+- Use perfmon
+- Identify high CPU/memory
+
+5. Permission Issues
+- Check file system access
+- Validate SAP service account rights
+
+----------------------------------
+SIDEBAR LABEL POLISH (DISPLAY ONLY)
+----------------------------------
+
+Update section labels ONLY (no logic change):
+
+- SYSTEM LAYERS → SYSTEM FOUNDATION
+- APPLICATION LAYER → APPLICATION & INTEGRATION
+
+Do NOT change:
+- Category IDs
+- Navigation handlers
+
+----------------------------------
+UI RULES
+----------------------------------
+- Use existing cards and sections
+- No new theme
+- No redesign
+- Keep clean, compact, and professional
+
+----------------------------------
+ACCEPTANCE
+----------------------------------
+✔ Linux page includes real SAP incident scenarios  
+✔ Linux page feels like operations playbook  
+✔ Windows page includes real troubleshooting cases  
+✔ Sidebar labels updated  
+✔ No UI/theme changes  
+✔ Navigation unchanged  
+✔ All other modules unaffected  

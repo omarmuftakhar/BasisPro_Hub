@@ -365,6 +365,8 @@ const SECTIONS: Section[] = [
               { cmd: "systemctl status <service>", desc: "Check status of a systemd service (e.g., sapinit)" },
               { cmd: "journalctl -xe", desc: "Show recent systemd journal with extended error context" },
               { cmd: "journalctl -u <service> -f", desc: "Follow logs for a specific service in real time" },
+              { cmd: "sapcontrol -nr <NR> -function GetProcessList", desc: "Check all SAP work process states for a given instance" },
+              { cmd: "sapcontrol -nr <NR> -function Start", desc: "Start SAP instance via sapcontrol" },
               { cmd: "tail -f /usr/sap/<SID>/D<NR>/work/dev_w0", desc: "Follow SAP work process trace log" },
             ]} />
           </div>
@@ -426,6 +428,181 @@ const SECTIONS: Section[] = [
     ),
   },
   {
+    id: "real-incidents",
+    title: "Real SAP Incidents on Linux",
+    icon: <AlertTriangle className="w-4 h-4" />,
+    tag: "Incidents",
+    tagColor: "bg-red-100 text-red-700",
+    content: (
+      <div className="space-y-4">
+        <p className="text-sm text-gray-600 leading-relaxed">
+          These are the most common production incidents that SAP Basis consultants face on Linux hosts. Each scenario
+          includes the checks to run and the actions to take — in order.
+        </p>
+
+        {/* Incident 1 */}
+        <div className="border border-red-200 rounded-xl overflow-hidden">
+          <div className="bg-red-50 px-4 py-2.5 flex items-center gap-2 border-b border-red-100">
+            <Database className="w-4 h-4 text-red-500" />
+            <span className="text-sm font-bold text-red-800">1. HANA Database Not Starting</span>
+          </div>
+          <div className="p-4 space-y-3 bg-white">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <InfoCard title="Check Steps" items={[
+                "systemctl status HANA<SID>_<NR> — is the OS service running?",
+                "HDB info — are all HANA services (nameserver, indexserver) up?",
+                "ls -lt /usr/sap/<SID>/HDB<NR>/trace/ | head -20 — latest trace files",
+                "free -g — is there enough free memory for HANA to start?",
+                "df -h /hana/data /hana/log — are data/log volumes full?",
+              ]} color="amber" />
+              <InfoCard title="Actions" items={[
+                "If memory insufficient: identify and stop other processes eating RAM",
+                "If disk full: archive or compress old traces before starting",
+                "If trace shows OOM killer: check /var/log/messages for 'oom-kill'",
+                "Start HANA: HDB start (as <sid>adm)",
+                "Confirm: HDB info — all services should show GREEN",
+              ]} color="green" />
+            </div>
+            <CmdBlock cmds={[
+              { cmd: "su - <sid>adm && HDB info", desc: "Switch to HANA admin user and check all HANA process states" },
+              { cmd: "free -g", desc: "Check available memory before attempting HANA start" },
+              { cmd: "df -h /hana/data /hana/log", desc: "Check HANA data and log volume disk usage" },
+              { cmd: "HDB start", desc: "Start HANA database (run as <sid>adm)" },
+            ]} />
+          </div>
+        </div>
+
+        {/* Incident 2 */}
+        <div className="border border-orange-200 rounded-xl overflow-hidden">
+          <div className="bg-orange-50 px-4 py-2.5 flex items-center gap-2 border-b border-orange-100">
+            <Activity className="w-4 h-4 text-orange-500" />
+            <span className="text-sm font-bold text-orange-800">2. High CPU / Work Process Stuck</span>
+          </div>
+          <div className="p-4 space-y-3 bg-white">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <InfoCard title="Check Steps" items={[
+                "top — which processes are consuming the most CPU?",
+                "htop — per-core view; sort by CPU% column",
+                "SM50 — check all work processes for long-running tasks",
+                "SM66 — global work process monitor across all instances",
+                "ps -ef | grep disp+work — identify SAP dispatcher PID",
+              ]} color="amber" />
+              <InfoCard title="Actions" items={[
+                "In SM50: select stuck process → Cancel (soft) → Hard Cancel",
+                "If process won't cancel: identify OS PID from SM50 Process tab",
+                "kill -15 <PID> — graceful termination (SIGTERM)",
+                "If unresponsive: kill -9 <PID> — force kill (use with caution)",
+                "Monitor in SM50 after kill — new work process should spawn",
+              ]} color="green" />
+            </div>
+            <CmdBlock cmds={[
+              { cmd: "top", desc: "Real-time process view — press P to sort by CPU, 1 for per-core view" },
+              { cmd: "ps -ef | grep sap | grep disp", desc: "Find SAP dispatcher and work process PIDs" },
+              { cmd: "kill -15 <PID>", desc: "Graceful terminate — send SIGTERM to stuck process" },
+              { cmd: "kill -9 <PID>", desc: "Force kill — use only if SIGTERM was ignored (last resort)" },
+            ]} />
+          </div>
+        </div>
+
+        {/* Incident 3 */}
+        <div className="border border-amber-200 rounded-xl overflow-hidden">
+          <div className="bg-amber-50 px-4 py-2.5 flex items-center gap-2 border-b border-amber-100">
+            <Server className="w-4 h-4 text-amber-600" />
+            <span className="text-sm font-bold text-amber-800">3. Disk Full Issue</span>
+          </div>
+          <div className="p-4 space-y-3 bg-white">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <InfoCard title="Check Steps" items={[
+                "df -h — find which filesystem is at 100%",
+                "du -sh /usr/sap/* — identify which SID is consuming most space",
+                "du -sh /hana/data/* /hana/log/* — HANA volume usage",
+                "ls -lhSr /usr/sap/<SID>/D<NR>/work/ | tail -20 — largest work files",
+                "ls -lhSr /usr/sap/<SID>/HDB<NR>/trace/ | tail -20 — large trace files",
+              ]} color="amber" />
+              <InfoCard title="Actions" items={[
+                "Compress or delete old dev_w* trace files (keep last 3–5 days)",
+                "Archive HANA backup catalog: check /hana/backup for old backups",
+                "Remove old .trc files in /usr/sap trace directories",
+                "In SAP: RZ20 → check log configuration; reduce trace level if too verbose",
+                "Alert: if /hana/log is full → HANA will freeze all write operations",
+              ]} color="green" />
+            </div>
+            <CmdBlock cmds={[
+              { cmd: "df -h", desc: "Show disk usage of all mounted filesystems" },
+              { cmd: "du -sh /usr/sap/* | sort -rh | head -10", desc: "Find top 10 space consumers under /usr/sap" },
+              { cmd: "find /usr/sap -name '*.trc' -mtime +7 | xargs ls -lh", desc: "Find trace files older than 7 days" },
+              { cmd: "find /usr/sap -name 'dev_w*' -mtime +5 -delete", desc: "Delete SAP work process traces older than 5 days (verify first)" },
+            ]} />
+          </div>
+        </div>
+
+        {/* Incident 4 */}
+        <div className="border border-blue-200 rounded-xl overflow-hidden">
+          <div className="bg-blue-50 px-4 py-2.5 flex items-center gap-2 border-b border-blue-100">
+            <Cloud className="w-4 h-4 text-blue-500" />
+            <span className="text-sm font-bold text-blue-800">4. Network Connectivity Issue</span>
+          </div>
+          <div className="p-4 space-y-3 bg-white">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <InfoCard title="Check Steps" items={[
+                "ping <hostname> — can the host reach the target?",
+                "nslookup <hostname> — is DNS resolving the correct IP?",
+                "cat /etc/hosts — is hostname mapped correctly for SAP?",
+                "ss -tlnp | grep 3<NR>13 — is HANA/dispatcher port listening?",
+                "traceroute <host> — identify where the path breaks",
+              ]} color="blue" />
+              <InfoCard title="Actions" items={[
+                "If DNS fails: add entry to /etc/hosts as temporary workaround",
+                "If SAP port not listening: check if SAP instance is actually running",
+                "If SAProuter involved: verify saprouter process and port 3299",
+                "Check firewall: iptables -L -n or firewall-cmd --list-all",
+                "For RFC issues: verify SM59 destination host resolves on app server",
+              ]} color="green" />
+            </div>
+            <CmdBlock cmds={[
+              { cmd: "ping -c 4 <hostname>", desc: "Basic reachability test — 4 packets to confirm stability" },
+              { cmd: "nslookup <hostname>", desc: "DNS resolution check — verify IP matches /etc/hosts" },
+              { cmd: "ss -tlnp | grep 3<NR>15", desc: "Verify HANA SQL port is actively listening" },
+              { cmd: "traceroute <hostname>", desc: "Trace network path — identify routing hop where connectivity breaks" },
+            ]} />
+          </div>
+        </div>
+
+        {/* Incident 5 */}
+        <div className="border border-violet-200 rounded-xl overflow-hidden">
+          <div className="bg-violet-50 px-4 py-2.5 flex items-center gap-2 border-b border-violet-100">
+            <Layers className="w-4 h-4 text-violet-500" />
+            <span className="text-sm font-bold text-violet-800">5. SAP Application Not Responding</span>
+          </div>
+          <div className="p-4 space-y-3 bg-white">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <InfoCard title="Check Steps" items={[
+                "sapcontrol -nr <NR> -function GetProcessList — are all processes GREEN?",
+                "tail -100 /usr/sap/<SID>/D<NR>/work/dev_disp — dispatcher trace",
+                "tail -100 /usr/sap/<SID>/D<NR>/work/dev_w0 — work process log",
+                "top — is the server under extreme CPU or memory pressure?",
+                "df -h — is any SAP-related filesystem full?",
+              ]} color="violet" />
+              <InfoCard title="Actions" items={[
+                "If dispatcher crashed: sapcontrol -nr <NR> -function Start",
+                "If all work processes in PRIV state: rolling restart instance",
+                "If ICM down: check icm/max_conn profile parameter (SM31)",
+                "Soft restart: sapcontrol -function RestartInstance",
+                "Hard restart: sapcontrol -function Stop → wait → Start",
+              ]} color="green" />
+            </div>
+            <CmdBlock cmds={[
+              { cmd: "sapcontrol -nr <NR> -function GetProcessList", desc: "Check all SAP processes — look for anything not GREEN" },
+              { cmd: "tail -200 /usr/sap/<SID>/D<NR>/work/dev_disp", desc: "Read dispatcher trace — shows instance startup and crashes" },
+              { cmd: "sapcontrol -nr <NR> -function RestartInstance", desc: "Graceful restart of SAP instance (dispatcher + work processes)" },
+              { cmd: "sapcontrol -nr <NR> -function Stop && sleep 60 && sapcontrol -nr <NR> -function Start", desc: "Full stop-start cycle for unresponsive instance" },
+            ]} />
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
     id: "references",
     title: "Reference Links",
     icon: <BookOpen className="w-4 h-4" />,
@@ -463,7 +640,7 @@ export default function LinuxForSAP() {
       <div className="bg-gradient-to-r from-gray-900 to-gray-700 rounded-2xl p-5 text-white">
         <div className="flex items-center gap-2 mb-1.5">
           <Terminal className="w-4 h-4 opacity-80" />
-          <span className="text-xs font-semibold uppercase tracking-wider opacity-70">Operating Systems</span>
+          <span className="text-xs font-semibold uppercase tracking-wider opacity-70">SAP BASIS LINUX OPERATIONS PLAYBOOK</span>
         </div>
         <h1 className="text-xl font-extrabold mb-1">Linux for SAP Basis & SAP HANA Operations</h1>
         <p className="text-xs opacity-70 max-w-xl">

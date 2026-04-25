@@ -376,6 +376,178 @@ const SECTIONS: Section[] = [
     ),
   },
   {
+    id: "common-issues",
+    title: "Common SAP Basis Issues on Windows",
+    icon: <AlertTriangle className="w-4 h-4" />,
+    tag: "Incidents",
+    tagColor: "bg-red-100 text-red-700",
+    content: (
+      <div className="space-y-4">
+        <p className="text-sm text-gray-600 leading-relaxed">
+          These are the most frequent production issues on Windows-hosted SAP systems. Each scenario lists what to check first
+          and the actions to resolve it.
+        </p>
+
+        {/* Issue 1 */}
+        <div className="border border-red-200 rounded-xl overflow-hidden">
+          <div className="bg-red-50 px-4 py-2.5 flex items-center gap-2 border-b border-red-100">
+            <Settings className="w-4 h-4 text-red-500" />
+            <span className="text-sm font-bold text-red-800">1. SAP Service Not Starting</span>
+          </div>
+          <div className="p-4 space-y-3 bg-white">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <InfoCard title="Check Steps" items={[
+                "services.msc — is SAP<SID>_<NR> service stopped or in error state?",
+                "Windows Event Viewer (eventvwr) → Application log — SAP service errors",
+                "Check service logon account — is SAPService<SID> account locked/expired?",
+                "Verify sapmnt UNC share is reachable: ping <central-host>",
+                "Check C:\\usr\\sap\\<SID>\\D<NR>\\work\\dev_disp for dispatcher errors",
+              ]} color="amber" />
+              <InfoCard title="Actions" items={[
+                "Start service: net start SAP<SID>_<NR> (or via services.msc)",
+                "If logon account error: reset SAPService<SID> password in AD, update service",
+                "If profile read error: verify sapmnt share permissions",
+                "Check instance profile for parameter misconfigurations",
+                "After fix: monitor Windows Event Viewer for successful start entry",
+              ]} color="green" />
+            </div>
+            <CmdBlock cmds={[
+              { cmd: "services.msc", desc: "Open Windows Services — check SAP service state and startup type" },
+              { cmd: "eventvwr", desc: "Event Viewer → Application log — look for SAP source entries at error time" },
+              { cmd: "net start SAP<SID>_<NR>", desc: "Start SAP Windows service from command line" },
+              { cmd: "sapcontrol -nr <NR> -function GetProcessList", desc: "Verify SAP processes after service start" },
+            ]} />
+          </div>
+        </div>
+
+        {/* Issue 2 */}
+        <div className="border border-orange-200 rounded-xl overflow-hidden">
+          <div className="bg-orange-50 px-4 py-2.5 flex items-center gap-2 border-b border-orange-100">
+            <Globe className="w-4 h-4 text-orange-500" />
+            <span className="text-sm font-bold text-orange-800">2. SAP GUI Connection Issues</span>
+          </div>
+          <div className="p-4 space-y-3 bg-white">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <InfoCard title="Check Steps" items={[
+                "ping <sap-hostname> — can the client workstation reach the SAP server?",
+                "tracert <sap-hostname> — identify where the connection drops",
+                "Verify SAP Logon Pad: is the hostname or IP configured correctly?",
+                "Check instance number — must match what SAP is running on",
+                "If using SAP Router: is saprouter process running on port 3299?",
+              ]} color="amber" />
+              <InfoCard title="Actions" items={[
+                "Correct hostname/IP in SAP Logon Pad entry",
+                "Check firewall rules — ports 32<NR>15 (HANA SQL) or 32<NR>00 (dispatcher) blocked?",
+                "Try direct connection (bypass router) to isolate the issue",
+                "Test from another machine to rule out local client issue",
+                "For SNC issues: verify PSE certificate validity in STRUST",
+              ]} color="green" />
+            </div>
+            <CmdBlock cmds={[
+              { cmd: "ping <sap-hostname>", desc: "Confirm network reachability from user workstation to SAP host" },
+              { cmd: "tracert <sap-hostname>", desc: "Trace route — identify where the network path fails" },
+              { cmd: "nslookup <sap-hostname>", desc: "Confirm DNS resolves to the correct SAP server IP" },
+              { cmd: "telnet <sap-hostname> 32<NR>00", desc: "Test if SAP dispatcher port is reachable (replace <NR> with instance number)" },
+            ]} />
+          </div>
+        </div>
+
+        {/* Issue 3 */}
+        <div className="border border-blue-200 rounded-xl overflow-hidden">
+          <div className="bg-blue-50 px-4 py-2.5 flex items-center gap-2 border-b border-blue-100">
+            <Database className="w-4 h-4 text-blue-500" />
+            <span className="text-sm font-bold text-blue-800">3. SQL Server Connectivity Issues</span>
+          </div>
+          <div className="p-4 space-y-3 bg-white">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <InfoCard title="Check Steps" items={[
+                "services.msc — is SQL Server (MSSQLSERVER) service running?",
+                "SQL Server Error Log — C:\\Program Files\\Microsoft SQL Server\\...\\MSSQL\\Log",
+                "Windows Event Viewer — Application log for SQL Server errors",
+                "DBACOCKPIT (transaction) — SAP-side database connection status",
+                "netstat -ano — is SQL Server port 1433 listening?",
+              ]} color="amber" />
+              <InfoCard title="Actions" items={[
+                "Start SQL Server: net start MSSQLSERVER (then start SAP)",
+                "Verify SQL Server logon account (SAPService<SID> needs db access)",
+                "Check SQL Server Agent is running — required for backup jobs",
+                "In DBACOCKPIT: run database check and review error messages",
+                "Validate that SAP profile parameter dbs/mss/server is correct",
+              ]} color="green" />
+            </div>
+            <CmdBlock cmds={[
+              { cmd: "netstat -ano | findstr 1433", desc: "Verify SQL Server port 1433 is listening" },
+              { cmd: "net start MSSQLSERVER", desc: "Start SQL Server service from command line" },
+              { cmd: "eventvwr", desc: "Event Viewer → Application — filter by SQL Server source" },
+            ]} />
+          </div>
+        </div>
+
+        {/* Issue 4 */}
+        <div className="border border-amber-200 rounded-xl overflow-hidden">
+          <div className="bg-amber-50 px-4 py-2.5 flex items-center gap-2 border-b border-amber-100">
+            <Activity className="w-4 h-4 text-amber-600" />
+            <span className="text-sm font-bold text-amber-800">4. Performance Issues</span>
+          </div>
+          <div className="p-4 space-y-3 bg-white">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <InfoCard title="Check Steps" items={[
+                "Task Manager (taskmgr) — which process is consuming CPU or memory?",
+                "Resource Monitor (resmon) — per-process disk, CPU, network detail",
+                "Performance Monitor (perfmon) — add SAP process and system counters",
+                "SM50 / SM66 — check for long-running work processes on SAP side",
+                "Windows Pagefile usage — if near 100%, system is out of RAM",
+              ]} color="amber" />
+              <InfoCard title="Actions" items={[
+                "High CPU on disp+work.exe: investigate work processes in SM50",
+                "Low available memory: reduce icm/max_conn or kill non-SAP processes",
+                "Disk I/O bottleneck (perfmon): review SQL Server I/O or transport activity",
+                "If paging is high: add RAM or reduce em/initial_size profile parameter",
+                "Use SM04 to check active user sessions — reduce if session count too high",
+              ]} color="green" />
+            </div>
+            <CmdBlock cmds={[
+              { cmd: "taskmgr", desc: "Task Manager — sort by CPU or Memory to find the top consumer" },
+              { cmd: "resmon", desc: "Resource Monitor — detailed CPU, disk, network per process" },
+              { cmd: "perfmon", desc: "Performance Monitor — add counters: % Processor Time, Available MBytes, Disk Queue Length" },
+            ]} />
+          </div>
+        </div>
+
+        {/* Issue 5 */}
+        <div className="border border-violet-200 rounded-xl overflow-hidden">
+          <div className="bg-violet-50 px-4 py-2.5 flex items-center gap-2 border-b border-violet-100">
+            <Shield className="w-4 h-4 text-violet-500" />
+            <span className="text-sm font-bold text-violet-800">5. Permission Issues</span>
+          </div>
+          <div className="p-4 space-y-3 bg-white">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <InfoCard title="Check Steps" items={[
+                "Right-click folder → Properties → Security — check SAPService<SID> permissions",
+                "Check if transport import fails with 'Access Denied' on C:\\usr\\sap\\trans",
+                "Verify sapmnt share permissions (both share-level and NTFS)",
+                "Check if kernel patch fails — SAPService<SID> must write to exe directory",
+                "Event Viewer → Security log — audit failures show exact permission denials",
+              ]} color="amber" />
+              <InfoCard title="Actions" items={[
+                "Grant SAPService<SID>: Full Control on C:\\usr\\sap\\<SID> recursively",
+                "Grant SAPService<SID>: Full Control on C:\\usr\\sap\\trans",
+                "For sapmnt: set share permissions to Full Control for SAPService<SID>",
+                "After permission change: restart SAP service and retry the operation",
+                "Use icacls command to set permissions from command line in scripts",
+              ]} color="green" />
+            </div>
+            <CmdBlock cmds={[
+              { cmd: "icacls C:\\usr\\sap\\<SID> /grant SAPService<SID>:(OI)(CI)F /T", desc: "Grant SAPService<SID> Full Control on SAP instance directory recursively" },
+              { cmd: "icacls C:\\usr\\sap\\trans /grant SAPService<SID>:(OI)(CI)F /T", desc: "Grant full access to transport directory" },
+              { cmd: "whoami /priv", desc: "Check current user privileges — verify you have admin rights" },
+            ]} />
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
     id: "linux-vs-windows",
     title: "Limitations Compared to Linux for HANA",
     icon: <AlertTriangle className="w-4 h-4" />,
