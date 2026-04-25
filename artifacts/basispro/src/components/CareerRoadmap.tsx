@@ -328,7 +328,7 @@ const INCIDENT_NODES: IncidentNode[] = [
 const STATUS_STYLES = {
   done: { dot: "bg-emerald-500", card: "border-emerald-200 bg-emerald-50/30", badge: "bg-emerald-100 text-emerald-700", label: "Completed" },
   active: { dot: "bg-[#0070F2] animate-pulse", card: "border-[#0070F2] bg-blue-50/30 ring-1 ring-[#0070F2]/20", badge: "bg-blue-100 text-blue-700", label: "In Progress" },
-  upcoming: { dot: "bg-gray-300", card: "border-gray-200 bg-white", badge: "bg-gray-100 text-gray-500", label: "Upcoming" },
+  upcoming: { dot: "bg-gray-300", card: "border-gray-200 bg-white", badge: "bg-gray-100 text-gray-500", label: "Not Started" },
   optional: { dot: "bg-amber-400", card: "border-amber-100 bg-amber-50/20", badge: "bg-amber-100 text-amber-700", label: "Optional" },
 };
 
@@ -455,10 +455,12 @@ export default function CareerRoadmap() {
         {/* Left Column — Node List */}
         <div className="w-64 flex-shrink-0 space-y-1.5">
           {mode === "learning" && LEARNING_NODES.map((node) => {
-            const s = STATUS_STYLES[node.status];
             const isSelected = selectedId === node.id;
             const nodeChecked = node.checklist.filter((c) => checkedItems.has(c.id)).length;
-            const nodePct = Math.round((nodeChecked / node.checklist.length) * 100);
+            const nodeTotal = node.checklist.length;
+            const nodePct = Math.round((nodeChecked / nodeTotal) * 100);
+            const dynamicStatus = nodeChecked === nodeTotal ? "done" : nodeChecked > 0 ? "active" : "upcoming";
+            const s = STATUS_STYLES[dynamicStatus];
             return (
               <button
                 key={node.id}
@@ -578,9 +580,11 @@ export default function CareerRoadmap() {
 function LearningDetailPanel({
   node, checkedItems, onToggle,
 }: { node: LearningNode; checkedItems: Set<string>; onToggle: (id: string) => void; }) {
-  const s = STATUS_STYLES[node.status];
   const nodeChecked = node.checklist.filter((c) => checkedItems.has(c.id)).length;
-  const nodePct = Math.round((nodeChecked / node.checklist.length) * 100);
+  const nodeTotal = node.checklist.length;
+  const nodePct = Math.round((nodeChecked / nodeTotal) * 100);
+  const dynamicStatus = nodeChecked === nodeTotal ? "done" : nodeChecked > 0 ? "active" : "upcoming";
+  const s = STATUS_STYLES[dynamicStatus];
 
   return (
     <div className="border border-gray-200 rounded-2xl bg-white overflow-hidden">
