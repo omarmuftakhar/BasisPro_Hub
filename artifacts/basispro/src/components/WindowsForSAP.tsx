@@ -16,7 +16,7 @@ const ISSUE_ACTIONS: Record<string, {
 }> = {
   "svc-not-starting":  { treeId: "system-down", guideId: "system-down-recovery", tcodes: "SM51 · SM21 · ST22" },
   "gui-connection":    { treeId: "rfc-issue",   guideId: "rfc-connection-issue", tcodes: "SM59 · SMICM · ST11" },
-  "sql-connectivity":  { treeId: "system-down", guideId: "system-down-recovery", tcodes: "DBACOCKPIT · ST04 · SM21" },
+  "sql-connectivity":  { treeId: "rfc-issue",   guideId: "rfc-connection-issue", tcodes: "DBACOCKPIT · ST04 · SM21" },
   "performance":       { treeId: "system-down", guideId: "system-down-recovery", tcodes: "SM50 · SM66 · ST03N · STAD" },
   "permissions":       { treeId: "rfc-issue",   guideId: "rfc-connection-issue", tcodes: "SU01 · PFCG · ST01 · SM21" },
 };
