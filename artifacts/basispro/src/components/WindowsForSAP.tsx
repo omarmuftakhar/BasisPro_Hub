@@ -26,24 +26,20 @@ function ActionButtons({ issue }: { issue: keyof typeof ISSUE_ACTIONS }) {
   const cfg = ISSUE_ACTIONS[issue];
   return (
     <div className="flex flex-wrap items-center gap-2 pt-3 mt-3 border-t border-gray-200">
-      <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-400 font-medium cursor-not-allowed select-none">
+      <button
+        onClick={() => nav?.("troubleshoot")}
+        className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-[#EBF3FD] text-[#0070F2] font-semibold hover:bg-[#D4E8FA] transition-colors"
+      >
         <Layers className="w-3 h-3" />
-        Troubleshoot Tree — Coming soon
-      </span>
-      {cfg.guideId ? (
-        <button
-          onClick={() => nav?.(cfg.guideId!)}
-          className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-[#EBF3FD] text-[#0070F2] font-semibold hover:bg-[#D4E8FA] transition-colors"
-        >
-          <BookOpen className="w-3 h-3" />
-          {cfg.guideLabel}
-        </button>
-      ) : (
-        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-400 font-medium cursor-not-allowed select-none">
-          <BookOpen className="w-3 h-3" />
-          Guide — Coming soon
-        </span>
-      )}
+        Open Troubleshoot Tree
+      </button>
+      <button
+        onClick={() => nav?.("actGuides")}
+        className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-[#EBF3FD] text-[#0070F2] font-semibold hover:bg-[#D4E8FA] transition-colors"
+      >
+        <BookOpen className="w-3 h-3" />
+        Open Related Guide
+      </button>
       <button
         onClick={() => nav?.("tcodes")}
         className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 font-semibold hover:bg-emerald-100 transition-colors"
