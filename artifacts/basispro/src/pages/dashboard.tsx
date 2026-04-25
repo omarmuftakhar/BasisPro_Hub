@@ -846,7 +846,7 @@ export default function Dashboard() {
           <div className="text-xs text-emerald-600 font-medium">● Premium Member</div>
         </div>
         <button
-          onClick={() => { logout(); navigate("/login"); }}
+          onClick={() => { logout(); navigate("/"); }}
           className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-[#F0F4FF]"
           title="Sign out"
         >
