@@ -12,7 +12,7 @@ import {
   TrendingUp, Users, BookMarked, Cpu, Globe, Bot, LogOut,
   Home, HardDrive, Layers, MonitorDot, Workflow, FolderOpen,
   Key, Zap, Menu, X, RefreshCw, ArrowUpRight,
-  Award, MessageSquare, Send, Paperclip,
+  Award, MessageSquare, Send, Paperclip, CheckCircle2,
 } from "lucide-react";
 import ModuleView from "@/components/ModuleView";
 import { moduleRegistry } from "@/data/moduleRegistry";
@@ -74,63 +74,65 @@ type NavGroup = { group: string; items: NavItem[] };
 
 const navGroups: NavGroup[] = [
   {
-    group: "Operating Systems",
+    group: "Career",
+    items: [
+      { label: "Roadmap", icon: <TrendingUp className="w-4 h-4" />, id: "roadmap" },
+      { label: "Interview Prep", icon: <MessageSquare className="w-4 h-4" />, id: "interviewPrep" },
+      { label: "Cloud Certifications", icon: <Award className="w-4 h-4" />, id: "certifications" },
+    ],
+  },
+  {
+    group: "Core Operations",
+    items: [
+      { label: "SAP Basis TCodes", icon: <Key className="w-4 h-4" />, id: "tcodes" },
+      { label: "Activity Guides", icon: <Activity className="w-4 h-4" />, id: "actGuides" },
+      { label: "Troubleshoot Trees", icon: <Workflow className="w-4 h-4" />, id: "troubleshoot" },
+    ],
+  },
+  {
+    group: "System Layers",
     items: [
       { label: "Linux", icon: <Terminal className="w-4 h-4" />, id: "linux" },
       { label: "Windows", icon: <MonitorDot className="w-4 h-4" />, id: "windows" },
     ],
   },
   {
-    group: "Cloud Platforms",
-    items: [
-      { label: "SAP on AWS", icon: <Cloud className="w-4 h-4" />, id: "aws" },
-      { label: "SAP on GCP", icon: <Globe className="w-4 h-4" />, id: "gcp" },
-      { label: "SAP on Azure", icon: <Layers className="w-4 h-4" />, id: "azure" },
-    ],
-  },
-  {
     group: "Databases",
     items: [
       { label: "HANA Database", icon: <Database className="w-4 h-4" />, id: "hana" },
+      { label: "Oracle", icon: <Cpu className="w-4 h-4" />, id: "oracle" },
       { label: "Sybase ASE", icon: <HardDrive className="w-4 h-4" />, id: "sybase" },
       { label: "MaxDB", icon: <Server className="w-4 h-4" />, id: "maxdb" },
-      { label: "Oracle", icon: <Cpu className="w-4 h-4" />, id: "oracle" },
     ],
   },
   {
-    group: "Resources",
-    items: [
-      { label: "SAP Basis TCodes", icon: <Key className="w-4 h-4" />, id: "tcodes" },
-    ],
-  },
-  {
-    group: "Applications",
+    group: "Application Layer",
     items: [
       { label: "Fiori & UI5", icon: <LayoutGrid className="w-4 h-4" />, id: "fiori" },
       { label: "BTP & Integrations", icon: <Plug className="w-4 h-4" />, id: "btp" },
     ],
   },
   {
-    group: "ALM & Operations",
+    group: "Enterprise Operations",
     items: [
-      { label: "Solution Manager", icon: <Activity className="w-4 h-4" />, id: "solman" },
-      { label: "Cloud ALM", icon: <Workflow className="w-4 h-4" />, id: "cloudAlm" },
+      { label: "Solution Manager", icon: <Globe className="w-4 h-4" />, id: "solman" },
+      { label: "Cloud ALM", icon: <Layers className="w-4 h-4" />, id: "cloudAlm" },
       { label: "Content Server DMS", icon: <FolderOpen className="w-4 h-4" />, id: "dms" },
     ],
   },
   {
-    group: "Analytics & Cloud",
+    group: "Cloud & Infrastructure",
     items: [
-      { label: "SAC Configuration", icon: <BarChart3 className="w-4 h-4" />, id: "sac" },
+      { label: "SAP on AWS", icon: <Cloud className="w-4 h-4" />, id: "aws" },
+      { label: "SAP on Azure", icon: <Layers className="w-4 h-4" />, id: "azure" },
+      { label: "SAP on GCP", icon: <Globe className="w-4 h-4" />, id: "gcp" },
       { label: "Cloud Connectors", icon: <Shield className="w-4 h-4" />, id: "connectors" },
     ],
   },
   {
-    group: "Career",
+    group: "Analytics",
     items: [
-      { label: "Roadmap", icon: <TrendingUp className="w-4 h-4" />, id: "roadmap" },
-      { label: "Cloud Certifications", icon: <Award className="w-4 h-4" />, id: "certifications" },
-      { label: "Interview Prep", icon: <MessageSquare className="w-4 h-4" />, id: "interviewPrep" },
+      { label: "SAC Configuration", icon: <BarChart3 className="w-4 h-4" />, id: "sac" },
     ],
   },
   {
@@ -669,16 +671,20 @@ export default function Dashboard() {
   const [activeId, setActiveId] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    "Operating Systems": true,
-    "Cloud Platforms": true,
-    "Databases": true,
-    "Resources": true,
-    "Applications": true,
-    "ALM & Operations": true,
-    "Analytics & Cloud": true,
     "Career": true,
+    "Core Operations": true,
+    "System Layers": true,
+    "Databases": true,
+    "Application Layer": true,
+    "Enterprise Operations": true,
+    "Cloud & Infrastructure": true,
+    "Analytics": true,
     "AI": true,
   });
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackMsg, setFeedbackMsg] = useState("");
+  const [feedbackCategory, setFeedbackCategory] = useState("Other");
+  const [feedbackSent, setFeedbackSent] = useState(false);
 
   const toggleGroup = (group: string) =>
     setExpandedGroups((prev) => ({ ...prev, [group]: !prev[group] }));
@@ -840,6 +846,17 @@ export default function Dashboard() {
           </div>
         ))}
       </nav>
+
+      {/* Feedback button */}
+      <div className="px-3 pb-2 flex-shrink-0">
+        <button
+          onClick={() => { setFeedbackOpen(true); setFeedbackSent(false); setFeedbackMsg(""); setFeedbackCategory("Other"); }}
+          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-muted-foreground hover:bg-[#F0F4FF] hover:text-primary transition-all border border-dashed border-gray-200 hover:border-primary/30"
+        >
+          <MessageSquare className="w-4 h-4" />
+          💬 Feedback
+        </button>
+      </div>
 
       {/* User profile */}
       <div className="border-t border-border px-4 py-3 flex items-center gap-3 flex-shrink-0 bg-[#FAFBFC]">
@@ -1182,6 +1199,90 @@ export default function Dashboard() {
 
         </div>
       </main>
+
+      {/* ── Feedback modal ───────────────────────────────────────── */}
+      {feedbackOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.45)" }}
+          onClick={(e) => { if (e.target === e.currentTarget) setFeedbackOpen(false); }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-gray-100">
+            {feedbackSent ? (
+              <div className="flex flex-col items-center gap-3 py-4 text-center">
+                <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                </div>
+                <div className="text-base font-bold text-gray-900">Thanks for your feedback!</div>
+                <div className="text-sm text-gray-500">Your response has been saved.</div>
+                <button
+                  onClick={() => setFeedbackOpen(false)}
+                  className="mt-2 px-5 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-base font-bold text-gray-900">Share your feedback</div>
+                  <button
+                    onClick={() => setFeedbackOpen(false)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">Message</label>
+                    <textarea
+                      rows={4}
+                      value={feedbackMsg}
+                      onChange={(e) => setFeedbackMsg(e.target.value)}
+                      placeholder="Tell us what you think, what's missing, or what could be better..."
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 resize-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">Category (optional)</label>
+                    <select
+                      value={feedbackCategory}
+                      onChange={(e) => setFeedbackCategory(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all bg-white"
+                    >
+                      {["Roadmap","TCodes","Activity Guides","Troubleshoot Trees","Linux","Windows","Databases","Cloud","Other"].map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => setFeedbackOpen(false)}
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      disabled={!feedbackMsg.trim()}
+                      onClick={() => {
+                        const entry = { message: feedbackMsg.trim(), category: feedbackCategory, timestamp: Date.now() };
+                        const existing = JSON.parse(localStorage.getItem("bp_feedback") || "[]");
+                        localStorage.setItem("bp_feedback", JSON.stringify([...existing, entry]));
+                        console.log("BasisPro feedback:", entry);
+                        setFeedbackSent(true);
+                      }}
+                      className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

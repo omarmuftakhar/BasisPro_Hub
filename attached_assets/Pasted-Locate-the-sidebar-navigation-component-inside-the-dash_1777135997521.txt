@@ -1,0 +1,165 @@
+Locate the sidebar/navigation component inside the dashboard UI file (e.g., dashboard.html or equivalent).
+
+Do not modify:
+- Page IDs
+- Routing logic (goPage, navigation handlers)
+- Auth/session logic
+- Search logic
+- AI Assistant mappings
+- Theme, colors, typography, layout
+
+----------------------------------
+GOAL
+----------------------------------
+1. Reorganize sidebar into enterprise workflow structure (display only)
+2. Add ONE global feedback feature
+3. Ensure nothing breaks
+
+----------------------------------
+CRITICAL RULE
+----------------------------------
+DO NOT change internal page IDs or navigation keys.
+
+ONLY change:
+- Display order
+- Section headers (labels)
+- Grouping
+
+----------------------------------
+NEW SIDEBAR STRUCTURE (DISPLAY ONLY)
+----------------------------------
+
+1. Overview
+
+2. Career
+- Roadmap
+- Interview Prep
+- Cloud Certifications
+
+3. Core Operations
+- SAP Basis TCodes
+- Activity Guides
+- Troubleshoot Trees (add placeholder if not yet active)
+
+4. System Layers
+- Linux
+- Windows
+
+5. Databases
+- HANA Database
+- Oracle
+- Sybase ASE
+- MaxDB
+
+6. Application Layer
+- Fiori & UI5
+- BTP & Integrations
+
+7. Enterprise Operations
+- Solution Manager
+- Cloud ALM
+- Content Server DMS
+
+8. Cloud & Infrastructure
+- SAP on AWS
+- SAP on Azure
+- SAP on GCP
+- Cloud Connectors
+
+9. Analytics
+- SAC Configuration
+
+10. AI
+- AI Assistant
+
+----------------------------------
+SECTION LABEL IMPROVEMENTS
+----------------------------------
+Update labels ONLY (no logic change):
+
+- RESOURCES → CORE OPERATIONS
+- APPLICATIONS → APPLICATION LAYER
+- ALM & OPERATIONS → ENTERPRISE OPERATIONS
+- CLOUD PLATFORMS → CLOUD & INFRASTRUCTURE
+
+----------------------------------
+ADD GLOBAL FEEDBACK FEATURE
+----------------------------------
+
+Add ONE feedback button:
+
+Label:
+“💬 Feedback”
+
+Placement:
+- Bottom of sidebar
+- Above user profile section
+
+----------------------------------
+FEEDBACK BEHAVIOR
+----------------------------------
+
+On click:
+Open modal/popup
+
+Modal content:
+
+Title:
+“Share your feedback”
+
+Fields:
+1. Message (textarea)
+2. Optional category dropdown:
+   - Roadmap
+   - TCodes
+   - Activity Guides
+   - Troubleshoot Trees
+   - Linux
+   - Windows
+   - Databases
+   - Cloud
+   - Other
+
+Buttons:
+- Submit
+- Cancel
+
+----------------------------------
+DATA STORAGE (TEMPORARY)
+----------------------------------
+
+Store in localStorage:
+
+{
+  message: "...",
+  category: "...",
+  timestamp: Date.now()
+}
+
+Optional:
+console.log(feedback)
+
+----------------------------------
+UI RULES
+----------------------------------
+- Use existing modal/card styles
+- No new theme
+- No layout redesign
+- Keep minimal and professional
+- If new CSS is required, prefix:
+  bp-feedback-
+
+----------------------------------
+ACCEPTANCE CHECK
+----------------------------------
+
+✔ Sidebar reordered correctly  
+✔ Section labels updated  
+✔ Navigation still works  
+✔ No broken pages  
+✔ Troubleshoot Trees visible (or placeholder)  
+✔ ONE feedback button exists  
+✔ Feedback modal works  
+✔ Data stored in localStorage  
+✔ No UI/theme changes  
+✔ All other modules unaffected  
