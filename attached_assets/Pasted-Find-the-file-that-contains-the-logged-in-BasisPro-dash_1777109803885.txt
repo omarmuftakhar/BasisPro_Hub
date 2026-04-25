@@ -1,0 +1,123 @@
+Find the file that contains the logged-in BasisPro dashboard UI and the Roadmap page. It may be dashboard.html or another dashboard/page file. Modify only the file/section responsible for the Roadmap page.
+
+Do not modify sidebar navigation, category names, category order, auth/session logic, search, header, theme, global layout, or any unrelated page.
+
+Current sidebar categories must remain exactly as they are:
+- Operating Systems: Linux, Windows
+- Cloud Platforms: SAP on AWS, SAP on GCP, SAP on Azure
+- Databases: HANA Database, Sybase ASE, MaxDB, Oracle
+- Resources: SAP Basis TCodes
+- Applications: Fiori & UI5, BTP & Integrations
+- ALM & Operations: Solution Manager, Cloud ALM, Content Server DMS
+- Analytics & Cloud: SAC Configuration, Cloud Connectors
+- Career: Roadmap, Cloud Certifications, Interview Prep
+- AI: AI Assistant
+
+Goal:
+Enhance only the Roadmap page and make it feel like a professional SAP Basis Career Intelligence System, not a generic learning course.
+
+Important certification rule:
+Cloud Certifications must remain a separate Career item for hyperscaler certifications only:
+- AWS
+- Azure
+- GCP
+- Alibaba Cloud later if needed
+
+Do not place SAP core certifications under Cloud Certifications.
+
+Inside the Roadmap page, SAP certifications should appear as:
+“SAP Career Certifications”
+or
+“SAP Basis / S/4HANA Certifications”
+
+Enhance the Roadmap page with:
+
+1. A compact top summary panel:
+- Current Level
+- Next Target Role
+- Readiness %
+- Recommended Focus
+
+2. Two roadmap modes:
+- Learning Path
+- Real Incident Path
+
+Learning Path should show:
+- Skills
+- Tools / TCodes
+- SAP Career Certifications
+- Cloud certification suggestions only when relevant
+
+Real Incident Path should show practical Basis scenarios:
+- System Down
+- Background Job Failure
+- Transport Issue
+- RFC / Interface Issue
+- Fiori / Gateway Issue
+- HANA Performance Issue
+- Cloud ALM Monitoring Issue
+
+3. Add a right-side detail panel when a roadmap node is selected:
+- What you should master
+- Real tasks you should handle
+- Key TCodes / tools
+- Related guides
+- Related troubleshoot trees
+- Relevant certifications
+- Next Best Action
+
+4. Add a Readiness Checklist for each roadmap stage:
+Examples:
+- Can troubleshoot SM37 job failures
+- Can analyze ST22 dumps
+- Can monitor SM50 / SM66 work processes
+- Can manage transports using STMS
+- Can explain HA/DR basics
+- Can understand HANA backup and recovery
+- Can explain Cloud ALM monitoring basics
+- Can understand SAP on AWS / Azure / GCP landscape concepts
+
+5. Add clean JSON-driven roadmap data in JavaScript only if needed, so later it can be connected to APIs.
+
+6. Certification separation:
+- SAP certifications appear only inside Roadmap as SAP Career Certifications
+- Azure certifications should map to Azure-related roadmap items
+- AWS certifications should map to AWS-related roadmap items
+- GCP certifications should map to GCP-related roadmap items
+- Do not mix SAP core certifications into Cloud Certifications
+
+Design guardrails:
+- No color scheme changes
+- No theme changes
+- No typography changes
+- No global CSS variable changes
+- No sidebar redesign
+- No header redesign
+- No new design system
+- No heavy animations
+- Keep the existing BasisPro visual style
+- Use existing cards, badges, borders, colors, spacing, and layout patterns
+
+Scope guardrails:
+Do not touch:
+- Cloud Certifications page logic
+- SAP Basis TCodes
+- Activity Guides
+- Troubleshoot Trees
+- AI Assistant
+- Auth/session logic
+- Search logic
+- Existing navigation handlers
+- Existing sidebar categories
+
+If new CSS classes are needed, prefix them with:
+bp-roadmap-
+
+Acceptance checks:
+- Roadmap page is enhanced
+- Sidebar is unchanged
+- Cloud Certifications remains separate and hyperscaler-only
+- SAP certifications are not shown as cloud certifications
+- Other pages work exactly as before
+- Theme and color scheme remain unchanged
+- Roadmap feels premium, enterprise-focused, and operational

@@ -1,0 +1,87 @@
+Enhance the Roadmap page only inside dashboard.html.
+
+Do not modify sidebar navigation, auth/session logic, TCode Library, Activity Guides, Troubleshoot Trees, AI Assistant, or any unrelated pages.
+
+Goal:
+Make the SAP Basis Career Roadmap more professional and enterprise-focused, while keeping the current visual style.
+
+Important certification structure:
+There is already one category called “Cloud Certifications”.
+Keep it for hyperscaler certifications only:
+- AWS
+- Azure
+- GCP
+- Alibaba Cloud if available later
+
+Do NOT place SAP core certifications under Cloud Certifications.
+
+SAP certifications should appear only inside the Roadmap page as “SAP Career Certifications” or “SAP Basis / S/4HANA Certifications”, linked to relevant roadmap stages.
+
+Improve the Roadmap page with these sections:
+
+1. Add a small top summary panel:
+- Current Level
+- Next Target Role
+- Readiness %
+- Recommended Focus
+
+2. Add two roadmap modes:
+- Learning Path
+- Real Incident Path
+
+Learning Path should show skills, tools, TCodes, and certifications.
+
+Real Incident Path should show practical Basis scenarios:
+- System Down
+- Background Job Failure
+- Transport Issue
+- RFC / Interface Issue
+- Fiori / Gateway Issue
+- HANA Performance Issue
+- Cloud ALM Monitoring Issue
+
+3. Add a right-side detail panel when a roadmap node is selected:
+- What you should master
+- Real tasks you should handle
+- Key TCodes / tools
+- Related guides
+- Related troubleshoot trees
+- Relevant certifications
+
+4. Certification rules:
+- SAP certifications: show under “SAP Career Certifications”
+- Azure certifications: link to Azure path
+- AWS certifications: link to AWS path
+- GCP certifications: link to GCP path
+- Do not mix SAP with cloud certifications
+
+5. Add “Readiness Checklist” for each roadmap stage:
+Example:
+- Can troubleshoot SM37 job failures
+- Can analyze ST22 dumps
+- Can monitor SM50 / SM66 work processes
+- Can manage transports using STMS
+- Can explain HA/DR basics
+- Can understand HANA backup and recovery
+
+6. Add “Next Best Action” box:
+Based on selected stage, show one recommended action:
+- Open related guide
+- Practice incident scenario
+- Review key TCodes
+- Prepare certification
+
+7. Keep UI clean:
+- No large redesign
+- No new heavy animations
+- Use existing cards, badges, borders, colors, spacing
+- Keep page professional, compact, and premium
+
+8. Add clean placeholder data in JavaScript only if needed.
+Make the structure JSON-driven so later I can connect it to APIs.
+
+Acceptance:
+- Roadmap still works
+- Cloud Certifications page remains separate
+- SAP certifications are not shown as cloud certifications
+- Roadmap feels like a Career Intelligence System, not a learning course
