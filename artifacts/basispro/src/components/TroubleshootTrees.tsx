@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   GitBranch, ChevronRight, RotateCcw, CheckCircle2,
   AlertTriangle, Activity, Wifi,
@@ -378,11 +378,15 @@ function TreeRunner({ tree }: { tree: Tree }) {
 
 // ─── Tree Card ────────────────────────────────────────────────────────────────
 
-function TreeCard({ tree }: { tree: Tree }) {
+function TreeCard({ tree, targeted }: { tree: Tree; targeted: boolean }) {
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    if (targeted) setOpen(true);
+  }, [targeted]);
+
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden">
+    <div className={`border rounded-xl overflow-hidden transition-all ${targeted ? "border-[#0070F2]/40 ring-2 ring-[#0070F2]/20" : "border-gray-200"}`}>
       <button
         onClick={() => setOpen((p) => !p)}
         className="w-full flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 transition-colors text-left"
@@ -420,6 +424,16 @@ function TreeCard({ tree }: { tree: Tree }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function TroubleshootTrees() {
+  const [targetId, setTargetId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const id = localStorage.getItem("basisproTargetTree");
+    if (id) {
+      setTargetId(id);
+      localStorage.removeItem("basisproTargetTree");
+    }
+  }, []);
+
   return (
     <div className="space-y-5 max-w-4xl">
       {/* Header */}
@@ -443,7 +457,7 @@ export default function TroubleshootTrees() {
       {/* Trees */}
       <div className="space-y-3">
         {TREES.map((t) => (
-          <TreeCard key={t.id} tree={t} />
+          <TreeCard key={t.id} tree={t} targeted={targetId === t.id} />
         ))}
       </div>
 

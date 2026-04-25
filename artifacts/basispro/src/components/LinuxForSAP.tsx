@@ -12,29 +12,40 @@ const NavCtx = createContext<((id: string) => void) | undefined>(undefined);
 // ─── Per-incident action config ───────────────────────────────────────────────
 
 const INCIDENT_ACTIONS: Record<string, {
-  guideId?: string; guideLabel?: string; tcodes: string;
+  treeId: string; guideId: string; tcodes: string;
 }> = {
-  "hana-start":  { guideId: "hana", guideLabel: "HANA Database", tcodes: "DBACOCKPIT · ST04 · sapcontrol" },
-  "high-cpu":    { tcodes: "SM50 · SM66 · ST03N · STAD" },
-  "disk-full":   { tcodes: "AL11 · SM21 · ST22" },
-  "network":     { tcodes: "SM59 · SMICM · STRUST" },
-  "app-down":    { tcodes: "SM51 · SM50 · SM21 · ST22" },
+  "hana-start":  { treeId: "system-down", guideId: "system-down-recovery", tcodes: "DBACOCKPIT · ST04 · sapcontrol" },
+  "high-cpu":    { treeId: "system-down", guideId: "system-down-recovery", tcodes: "SM50 · SM66 · ST03N · STAD" },
+  "disk-full":   { treeId: "system-down", guideId: "system-down-recovery", tcodes: "AL11 · SM21 · ST22" },
+  "network":     { treeId: "rfc-issue",   guideId: "rfc-connection-issue", tcodes: "SM59 · SMICM · STRUST" },
+  "app-down":    { treeId: "system-down", guideId: "system-down-recovery", tcodes: "SM51 · SM50 · SM21 · ST22" },
 };
 
 function ActionButtons({ incident }: { incident: keyof typeof INCIDENT_ACTIONS }) {
   const nav = useContext(NavCtx);
   const cfg = INCIDENT_ACTIONS[incident];
+
+  function openTree() {
+    localStorage.setItem("basisproTargetTree", cfg.treeId);
+    nav?.("troubleshoot");
+  }
+
+  function openGuide() {
+    localStorage.setItem("basisproTargetGuide", cfg.guideId);
+    nav?.("actGuides");
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-2 pt-3 mt-3 border-t border-gray-200">
       <button
-        onClick={() => nav?.("troubleshoot")}
+        onClick={openTree}
         className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-[#EBF3FD] text-[#0070F2] font-semibold hover:bg-[#D4E8FA] transition-colors"
       >
         <Layers className="w-3 h-3" />
         Open Troubleshoot Tree
       </button>
       <button
-        onClick={() => nav?.("actGuides")}
+        onClick={openGuide}
         className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-[#EBF3FD] text-[#0070F2] font-semibold hover:bg-[#D4E8FA] transition-colors"
       >
         <BookOpen className="w-3 h-3" />

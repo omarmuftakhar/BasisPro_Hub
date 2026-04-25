@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BookOpen, ChevronDown, ChevronRight, CheckCircle2,
   Activity, Wifi, Server, AlertCircle, Zap, Target, GitBranch,
@@ -318,11 +318,15 @@ function ExpectedOutcome({ items }: { items: string[] }) {
 
 // ─── Guide Card ───────────────────────────────────────────────────────────────
 
-function GuideCard({ guide }: { guide: Guide }) {
+function GuideCard({ guide, targeted }: { guide: Guide; targeted: boolean }) {
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    if (targeted) setOpen(true);
+  }, [targeted]);
+
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden">
+    <div className={`border rounded-xl overflow-hidden transition-all ${targeted ? "border-[#0070F2]/40 ring-2 ring-[#0070F2]/20" : "border-gray-200"}`}>
       <button
         onClick={() => setOpen((p) => !p)}
         className="w-full flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 transition-colors text-left"
@@ -366,6 +370,16 @@ function GuideCard({ guide }: { guide: Guide }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ActivityGuides() {
+  const [targetId, setTargetId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const id = localStorage.getItem("basisproTargetGuide");
+    if (id) {
+      setTargetId(id);
+      localStorage.removeItem("basisproTargetGuide");
+    }
+  }, []);
+
   return (
     <div className="space-y-5 max-w-4xl">
       {/* Header */}
@@ -398,7 +412,7 @@ export default function ActivityGuides() {
       {/* Guide list */}
       <div className="space-y-3">
         {GUIDES.map((g) => (
-          <GuideCard key={g.id} guide={g} />
+          <GuideCard key={g.id} guide={g} targeted={targetId === g.id} />
         ))}
       </div>
 

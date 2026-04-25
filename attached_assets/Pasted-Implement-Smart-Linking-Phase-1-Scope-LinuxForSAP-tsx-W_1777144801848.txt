@@ -1,0 +1,121 @@
+Implement Smart Linking Phase 1.
+
+Scope:
+- LinuxForSAP.tsx
+- WindowsForSAP.tsx
+- Activity Guides component/page
+- Troubleshoot Trees component/page
+
+Do not modify:
+- Sidebar
+- Theme/colors/layout
+- Auth/session
+- Search
+- Roadmap
+- Certifications
+- TCode Library data
+
+Goal:
+When a user clicks an action button from Linux or Windows incidents, open the correct module and preselect/highlight the most relevant guide or troubleshoot tree.
+
+Current behavior:
+- Open Troubleshoot Tree → goes to troubleshoot page
+- Open Related Guide → goes to Activity Guides page
+
+New behavior:
+- Pass a target context when navigating
+- Troubleshoot Trees page should open or highlight the matching tree
+- Activity Guides page should open or highlight the matching guide
+
+Use safe, simple context passing:
+- localStorage
+or
+- navigation state if already used in the app
+
+Preferred localStorage keys:
+basisproTargetTree
+basisproTargetGuide
+
+Example:
+For Linux HANA Database Not Starting:
+- set basisproTargetTree = "system-down"
+- set basisproTargetGuide = "system-down-basic-recovery"
+- navigate to "troubleshoot" or "actGuides"
+
+Suggested mappings:
+
+Linux:
+1. HANA Database Not Starting
+Tree: system-down
+Guide: system-down-basic-recovery
+
+2. High CPU / Work Process Stuck
+Tree: system-down
+Guide: system-down-basic-recovery
+
+3. Disk Full Issue
+Tree: system-down
+Guide: system-down-basic-recovery
+
+4. Network Connectivity Issue
+Tree: rfc-connection-issue
+Guide: rfc-connection-issue
+
+5. SAP Application Not Responding
+Tree: system-down
+Guide: system-down-basic-recovery
+
+Windows:
+1. SAP Service Not Starting
+Tree: system-down
+Guide: system-down-basic-recovery
+
+2. SAP GUI Connection Issues
+Tree: rfc-connection-issue
+Guide: rfc-connection-issue
+
+3. SQL Server Connectivity Issues
+Tree: system-down
+Guide: system-down-basic-recovery
+
+4. Performance Issues
+Tree: system-down
+Guide: system-down-basic-recovery
+
+5. Permission Issues
+Tree: rfc-connection-issue
+Guide: rfc-connection-issue
+
+Important:
+Use actual existing IDs if different.
+If existing guide/tree IDs do not match the suggested names, update mappings to match the real IDs.
+Do not invent new guide/tree IDs unless the guide/tree already exists.
+
+Behavior:
+- When Activity Guides page loads, check basisproTargetGuide
+- If found, auto-expand or visually highlight the matching guide
+- Then clear the localStorage key after applying
+
+- When Troubleshoot Trees page loads, check basisproTargetTree
+- If found, auto-expand or visually highlight the matching tree
+- Then clear the localStorage key after applying
+
+Fallback:
+If target ID is not found:
+- Show normal page
+- Do not break
+- Do not show errors
+
+UI:
+- Keep the same style
+- Highlight can be simple: existing active/selected card style or subtle border
+- No new design system
+
+Acceptance:
+- Linux incident → Open Troubleshoot Tree opens correct tree section
+- Linux incident → Open Related Guide opens correct guide section
+- Windows issue buttons behave the same
+- No fake IDs
+- No duplicate guides/trees
+- No UI/theme changes
+- Fallback works safely
