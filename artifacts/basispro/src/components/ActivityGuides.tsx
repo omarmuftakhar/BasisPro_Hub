@@ -7,6 +7,7 @@ import {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface GuideStep {
+  id?: string;
   step: string;
   tcode?: string;
   note?: string;
@@ -113,6 +114,7 @@ const GUIDES: Guide[] = [
     ],
     steps: [
       {
+        id: "check-services",
         step: "Open SM51 to get an overview of all application servers and their status.",
         tcode: "SM51",
         note: "If SM51 itself is unreachable, the entire dispatcher may be down — proceed directly to OS-level check in Step 2.",
@@ -122,11 +124,13 @@ const GUIDES: Guide[] = [
         note: "On Linux: run as <sid>adm. On Windows: open command prompt with admin rights. RED or missing processes confirm the instance is partially or fully down.",
       },
       {
+        id: "check-processes",
         step: "Open SM50 to inspect work process states — look for any processes stuck in 'running' for too long.",
         tcode: "SM50",
         note: "A dispatcher with 0 free work processes will reject all new logon attempts. Check for PRIV mode (a work process in private mode blocks a slot permanently until released).",
       },
       {
+        id: "check-logs",
         step: "Check SM21 for system log entries in the minutes immediately before the outage started.",
         tcode: "SM21",
         note: "Database connection errors, OOM messages, or work process terminations in SM21 often explain the root cause. Fix the underlying cause before restarting.",
@@ -182,6 +186,7 @@ const GUIDES: Guide[] = [
         note: "RFC destinations are organised by connection type. R/3 connections (Type 3) are the most common between ABAP systems. HTTP connections (Type G) are used for REST/SOAP and BTP integrations.",
       },
       {
+        id: "test-connection",
         step: "Run the Connection Test — note the exact error code and message displayed.",
         note: "CPIC-CALL: ThSAPOCMINIT → target host is unreachable or dispatcher is down. Error 'RFC_ERROR_SYSTEM_FAILURE' → target system has an internal error. Timeout → network is reachable but the response never arrives (firewall drop).",
       },
@@ -209,6 +214,7 @@ const GUIDES: Guide[] = [
         note: "For HTTP-type RFC destinations, SMICM issues are the most frequent cause. Goto → Services and confirm the relevant HTTP/HTTPS port shows status 'Active'.",
       },
       {
+        id: "check-authorization",
         step: "Verify logon credentials in SM59 — confirm the technical RFC user exists, is not locked, and the password has not expired.",
         tcode: "SM59",
         note: "Open SU01 on the target system for the RFC user. Check: user is not locked, password is not expired, user type is 'System' (not Dialog). Update the password in SM59 if it has changed.",
@@ -279,14 +285,14 @@ function QuickCheckList({ items }: { items: QuickCheck[] }) {
   );
 }
 
-function StepItem({ index, step }: { index: number; step: GuideStep }) {
+function StepItem({ index, step, targeted }: { index: number; step: GuideStep; targeted?: boolean }) {
   return (
-    <div className="flex gap-3">
-      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#EBF3FD] flex items-center justify-center mt-0.5">
-        <span className="text-[10px] font-bold text-[#0070F2]">{index + 1}</span>
+    <div className={`flex gap-3 rounded-lg transition-all ${targeted ? "bg-[#EBF3FD]/50 ring-1 ring-[#0070F2]/20 px-2 py-1 -mx-2" : ""}`}>
+      <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${targeted ? "bg-[#0070F2] ring-2 ring-[#0070F2]/30" : "bg-[#EBF3FD]"}`}>
+        <span className={`text-[10px] font-bold ${targeted ? "text-white" : "text-[#0070F2]"}`}>{index + 1}</span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-800 leading-snug">{step.step}</p>
+        <p className={`text-sm leading-snug ${targeted ? "text-[#0070F2] font-semibold" : "text-gray-800"}`}>{step.step}</p>
         {step.tcode && (
           <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-mono font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
             TCode: {step.tcode}
@@ -318,7 +324,7 @@ function ExpectedOutcome({ items }: { items: string[] }) {
 
 // ─── Guide Card ───────────────────────────────────────────────────────────────
 
-function GuideCard({ guide, targeted }: { guide: Guide; targeted: boolean }) {
+function GuideCard({ guide, targeted, targetStepId }: { guide: Guide; targeted: boolean; targetStepId?: string | null }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -357,7 +363,7 @@ function GuideCard({ guide, targeted }: { guide: Guide; targeted: boolean }) {
           <div className="space-y-4">
             <SectionLabel icon={<CheckCircle2 className="w-3.5 h-3.5" />} label={`Step-by-Step — ${guide.steps.length} steps`} />
             {guide.steps.map((s, i) => (
-              <StepItem key={i} index={i} step={s} />
+              <StepItem key={i} index={i} step={s} targeted={!!targetStepId && s.id === targetStepId} />
             ))}
           </div>
           <ExpectedOutcome items={guide.expectedOutcome} />
@@ -371,12 +377,18 @@ function GuideCard({ guide, targeted }: { guide: Guide; targeted: boolean }) {
 
 export default function ActivityGuides() {
   const [targetId, setTargetId] = useState<string | null>(null);
+  const [targetStepId, setTargetStepId] = useState<string | null>(null);
 
   useEffect(() => {
     const id = localStorage.getItem("basisproTargetGuide");
+    const stepId = localStorage.getItem("basisproTargetGuideStep");
     if (id) {
       setTargetId(id);
       localStorage.removeItem("basisproTargetGuide");
+    }
+    if (stepId) {
+      setTargetStepId(stepId);
+      localStorage.removeItem("basisproTargetGuideStep");
     }
   }, []);
 
@@ -412,7 +424,12 @@ export default function ActivityGuides() {
       {/* Guide list */}
       <div className="space-y-3">
         {GUIDES.map((g) => (
-          <GuideCard key={g.id} guide={g} targeted={targetId === g.id} />
+          <GuideCard
+            key={g.id}
+            guide={g}
+            targeted={targetId === g.id}
+            targetStepId={targetId === g.id ? targetStepId : null}
+          />
         ))}
       </div>
 

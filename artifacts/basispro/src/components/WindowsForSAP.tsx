@@ -13,12 +13,13 @@ const NavCtx = createContext<((id: string) => void) | undefined>(undefined);
 
 const ISSUE_ACTIONS: Record<string, {
   treeId: string; guideId: string; tcodes: string;
+  treeStep?: string; guideStep?: string;
 }> = {
-  "svc-not-starting":  { treeId: "system-down", guideId: "system-down-recovery", tcodes: "SM51 · SM21 · ST22" },
-  "gui-connection":    { treeId: "rfc-issue",   guideId: "rfc-connection-issue", tcodes: "SM59 · SMICM · ST11" },
-  "sql-connectivity":  { treeId: "rfc-issue",   guideId: "rfc-connection-issue", tcodes: "DBACOCKPIT · ST04 · SM21" },
-  "performance":       { treeId: "system-down", guideId: "system-down-recovery", tcodes: "SM50 · SM66 · ST03N · STAD" },
-  "permissions":       { treeId: "rfc-issue",   guideId: "rfc-connection-issue", tcodes: "SU01 · PFCG · ST01 · SM21" },
+  "svc-not-starting": { treeId: "system-down", guideId: "system-down-recovery", tcodes: "SM51 · SM21 · ST22",         treeStep: "check-services",    guideStep: "check-services" },
+  "gui-connection":   { treeId: "rfc-issue",   guideId: "rfc-connection-issue", tcodes: "SM59 · SMICM · ST11",         treeStep: "test-connection",   guideStep: "test-connection" },
+  "sql-connectivity": { treeId: "rfc-issue",   guideId: "rfc-connection-issue", tcodes: "DBACOCKPIT · ST04 · SM21",    treeStep: "test-connection",   guideStep: "test-connection" },
+  "performance":      { treeId: "system-down", guideId: "system-down-recovery", tcodes: "SM50 · SM66 · ST03N · STAD",  treeStep: "check-processes",   guideStep: "check-processes" },
+  "permissions":      { treeId: "rfc-issue",   guideId: "rfc-connection-issue", tcodes: "SU01 · PFCG · ST01 · SM21",  treeStep: "check-authorization", guideStep: "check-authorization" },
 };
 
 function ActionButtons({ issue }: { issue: keyof typeof ISSUE_ACTIONS }) {
@@ -27,11 +28,13 @@ function ActionButtons({ issue }: { issue: keyof typeof ISSUE_ACTIONS }) {
 
   function openTree() {
     localStorage.setItem("basisproTargetTree", cfg.treeId);
+    if (cfg.treeStep) localStorage.setItem("basisproTargetTreeStep", cfg.treeStep);
     nav?.("troubleshoot");
   }
 
   function openGuide() {
     localStorage.setItem("basisproTargetGuide", cfg.guideId);
+    if (cfg.guideStep) localStorage.setItem("basisproTargetGuideStep", cfg.guideStep);
     nav?.("actGuides");
   }
 

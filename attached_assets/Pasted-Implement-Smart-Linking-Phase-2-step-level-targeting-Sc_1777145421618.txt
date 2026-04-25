@@ -1,0 +1,66 @@
+Implement Smart Linking Phase 2: step-level targeting.
+
+Scope:
+- LinuxForSAP.tsx
+- WindowsForSAP.tsx
+- ActivityGuides.tsx
+- TroubleshootTrees.tsx
+
+Do not modify:
+- Sidebar
+- Theme/colors/layout
+- Auth/session
+- Roadmap
+- Certifications
+- TCode Library data
+
+Goal:
+When a Linux/Windows incident opens an Activity Guide or Troubleshoot Tree, highlight the most relevant step/question inside the selected card.
+
+Use existing Phase 1 localStorage keys and add optional step keys:
+- basisproTargetGuide
+- basisproTargetGuideStep
+- basisproTargetTree
+- basisproTargetTreeStep
+
+Behavior:
+1. OS incident button sets guide/tree ID and optional step ID.
+2. Target module opens matching guide/tree.
+3. Matching guide/tree card expands.
+4. Matching step/question receives subtle highlight.
+5. Clear localStorage keys after applying.
+6. If step ID does not exist, open the guide/tree normally with no error.
+
+Suggested step targeting:
+
+Linux:
+- HANA Not Starting → system-down-recovery → step: check-services
+- High CPU / WP Stuck → system-down-recovery → step: check-processes
+- Disk Full → system-down-recovery → step: check-logs
+- Network Connectivity → rfc-connection-issue → step: test-connection
+- App Not Responding → system-down-recovery → step: check-processes
+
+Windows:
+- SAP Service Not Starting → system-down-recovery → step: check-services
+- SAP GUI Connection → rfc-connection-issue → step: test-connection
+- SQL Server Connectivity → rfc-connection-issue → step: test-connection
+- Performance Issues → system-down-recovery → step: check-processes
+- Permission Issues → rfc-connection-issue → step: check-authorization
+
+Important:
+Use actual existing step IDs if they exist.
+If steps do not have IDs, add stable internal step IDs only inside guide/tree data.
+Do not change visible step titles unless necessary.
+Do not create new guides or trees.
+
+UI:
+- Use subtle existing highlight only
+- No redesign
+- No new theme
+
+Acceptance:
+- Incident opens correct guide/tree
+- Correct step/question is highlighted when available
+- Missing step target does not break anything
+- localStorage keys are cleared after use
+- No unrelated modules changed

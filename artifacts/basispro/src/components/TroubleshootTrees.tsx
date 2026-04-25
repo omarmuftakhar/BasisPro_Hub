@@ -26,6 +26,7 @@ interface Tree {
   icon: React.ReactNode;
   rootId: string;
   nodes: Record<string, TreeNode>;
+  stepMap?: Record<string, string>;
 }
 
 // ─── Tree Data ────────────────────────────────────────────────────────────────
@@ -112,6 +113,11 @@ const TREES: Tree[] = [
         id: "r6",
         resolution: "Network issue. Verify DNS resolution (nslookup), check firewall rules for port 32<NR>00, and confirm the server is reachable. Escalate to network/infrastructure team if the host itself is unreachable.",
       },
+    },
+    stepMap: {
+      "check-services":  "q3",
+      "check-processes": "q2",
+      "check-logs":      "q4",
     },
   },
   {
@@ -273,24 +279,31 @@ const TREES: Tree[] = [
         tcode: "SM21",
       },
     },
+    stepMap: {
+      "test-connection":    "q1",
+      "check-authorization": "q4",
+    },
   },
 ];
 
 // ─── Tree Runner ──────────────────────────────────────────────────────────────
 
-function TreeRunner({ tree }: { tree: Tree }) {
-  const [currentId, setCurrentId] = useState<string>(tree.rootId);
+function TreeRunner({ tree, startNodeId }: { tree: Tree; startNodeId?: string }) {
+  const [currentId, setCurrentId] = useState<string>(startNodeId ?? tree.rootId);
   const [history, setHistory] = useState<{ nodeId: string; choice: string }[]>([]);
+  const [isTargeted, setIsTargeted] = useState<boolean>(!!startNodeId);
 
-  const node = tree.nodes[currentId];
+  const node = tree.nodes[currentId] ?? tree.nodes[tree.rootId];
   const isResolution = !node.question;
 
   function choose(nextId: string, label: string) {
+    setIsTargeted(false);
     setHistory((h) => [...h, { nodeId: currentId, choice: label }]);
     setCurrentId(nextId);
   }
 
   function reset() {
+    setIsTargeted(false);
     setCurrentId(tree.rootId);
     setHistory([]);
   }
@@ -334,7 +347,13 @@ function TreeRunner({ tree }: { tree: Tree }) {
         </div>
       ) : (
         <div className="space-y-3">
-          <div className="rounded-xl border border-blue-100 bg-[#F5F9FF] p-4 space-y-2">
+          <div className={`rounded-xl p-4 space-y-2 transition-all ${isTargeted ? "border-2 border-[#0070F2]/30 bg-[#EBF3FD]/60 ring-1 ring-[#0070F2]/20" : "border border-blue-100 bg-[#F5F9FF]"}`}>
+            {isTargeted && (
+              <div className="flex items-center gap-1 text-[10px] font-semibold text-[#0070F2] uppercase tracking-wider mb-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#0070F2] inline-block" />
+                Suggested starting point
+              </div>
+            )}
             <p className="text-sm font-semibold text-gray-900 leading-snug">{node.question}</p>
             {node.tcode && (
               <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-[#0070F2] bg-[#EBF3FD] px-2 py-0.5 rounded">
@@ -378,8 +397,12 @@ function TreeRunner({ tree }: { tree: Tree }) {
 
 // ─── Tree Card ────────────────────────────────────────────────────────────────
 
-function TreeCard({ tree, targeted }: { tree: Tree; targeted: boolean }) {
+function TreeCard({ tree, targeted, targetStepId }: { tree: Tree; targeted: boolean; targetStepId?: string | null }) {
   const [open, setOpen] = useState(false);
+
+  const startNodeId = targeted && targetStepId && tree.stepMap?.[targetStepId]
+    ? tree.stepMap[targetStepId]
+    : undefined;
 
   useEffect(() => {
     if (targeted) setOpen(true);
@@ -414,7 +437,7 @@ function TreeCard({ tree, targeted }: { tree: Tree; targeted: boolean }) {
 
       {open && (
         <div className="border-t border-gray-100 bg-white">
-          <TreeRunner tree={tree} />
+          <TreeRunner tree={tree} startNodeId={startNodeId} />
         </div>
       )}
     </div>
@@ -425,12 +448,18 @@ function TreeCard({ tree, targeted }: { tree: Tree; targeted: boolean }) {
 
 export default function TroubleshootTrees() {
   const [targetId, setTargetId] = useState<string | null>(null);
+  const [targetStepId, setTargetStepId] = useState<string | null>(null);
 
   useEffect(() => {
     const id = localStorage.getItem("basisproTargetTree");
+    const stepId = localStorage.getItem("basisproTargetTreeStep");
     if (id) {
       setTargetId(id);
       localStorage.removeItem("basisproTargetTree");
+    }
+    if (stepId) {
+      setTargetStepId(stepId);
+      localStorage.removeItem("basisproTargetTreeStep");
     }
   }, []);
 
@@ -457,7 +486,12 @@ export default function TroubleshootTrees() {
       {/* Trees */}
       <div className="space-y-3">
         {TREES.map((t) => (
-          <TreeCard key={t.id} tree={t} targeted={targetId === t.id} />
+          <TreeCard
+            key={t.id}
+            tree={t}
+            targeted={targetId === t.id}
+            targetStepId={targetId === t.id ? targetStepId : null}
+          />
         ))}
       </div>
 
