@@ -714,10 +714,30 @@ export default function CloudCertifications() {
           </div>
           <button
             onClick={(e) => toggleSaved(cert.id, e)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
-            title={savedCerts.has(cert.id) ? "Remove bookmark" : "Bookmark this certification"}
+            title={savedCerts.has(cert.id) ? "Remove bookmark" : "Save this certification"}
+            style={{
+              flexShrink: 0,
+              width: "34px",
+              height: "34px",
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: savedCerts.has(cert.id) ? "1.5px solid #FCD34D" : "1.5px solid #E5E7EB",
+              background: savedCerts.has(cert.id) ? "#FFFBEB" : "transparent",
+              transition: "all 0.15s",
+            }}
           >
-            <Bookmark className={`w-4 h-4 transition-colors ${savedCerts.has(cert.id) ? "fill-amber-400 text-amber-400" : "text-gray-400"}`} />
+            <Bookmark
+              style={{
+                width: "16px",
+                height: "16px",
+                fill: savedCerts.has(cert.id) ? "#F59E0B" : "none",
+                stroke: savedCerts.has(cert.id) ? "#F59E0B" : "#9CA3AF",
+                strokeWidth: 2,
+                transition: "all 0.15s",
+              }}
+            />
           </button>
           <ChevronRight className={`w-4 h-4 text-gray-400 flex-shrink-0 mt-1 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
         </div>
@@ -784,7 +804,7 @@ export default function CloudCertifications() {
           {[
             { icon: <Trophy className="w-4 h-4" />, value: CERTS.length, label: "Certifications" },
             { icon: <Cloud className="w-4 h-4" />, value: 4, label: "Cloud Platforms" },
-            { icon: <Layers className="w-4 h-4" />, value: 5, label: "Exam Levels" },
+            { icon: <Layers className="w-4 h-4" />, value: CERTS.filter((c) => c.relevance === "critical").length, label: "Critical Path" },
             { icon: <Zap className="w-4 h-4" />, value: CERTS.reduce((a, c) => a + c.tips.length, 0), label: "Study Tips" },
           ].map((stat) => (
             <div key={stat.label} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "10px", padding: "12px 16px" }}>
