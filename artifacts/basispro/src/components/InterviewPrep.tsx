@@ -1570,7 +1570,7 @@ export default function InterviewPrep() {
 
   // study mode
   const [activeCat, setActiveCat] = useState<string>("system-admin");
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [panelQ, setPanelQ] = useState<{ qa: QA; catTitle: string } | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [levelFilter, setLevelFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
@@ -1692,6 +1692,7 @@ export default function InterviewPrep() {
 
   // STUDY MODE
   if (mode === "study") return (
+    <>
     <div className="space-y-5 max-w-5xl">
       <div className="bg-gradient-to-r from-rose-600 via-orange-500 to-amber-500 rounded-2xl p-6 text-white">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -1760,7 +1761,7 @@ export default function InterviewPrep() {
       <div className="flex gap-4">
         <div className="hidden md:flex flex-col gap-0.5 w-52 flex-shrink-0">
           {ALL_CATEGORIES.map((c) => (
-            <button key={c.id} onClick={() => { setActiveCat(c.id); setExpanded(null); }}
+            <button key={c.id} onClick={() => { setActiveCat(c.id); setPanelQ(null); }}
               className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-left transition-all ${activeCat === c.id ? "bg-[#0070F2]/10 text-[#0070F2] font-semibold" : "text-gray-600 hover:bg-gray-100"}`}>
               <span className={activeCat === c.id ? "text-[#0070F2]" : "text-gray-400"}>
                 {React.cloneElement(c.icon as React.ReactElement<{ className?: string }>, { className: "w-4 h-4" })}
@@ -1784,7 +1785,6 @@ export default function InterviewPrep() {
           {studyQuestions.length === 0 ? (
             <div className="text-center py-12 text-gray-400 text-sm">No questions match your filters</div>
           ) : studyQuestions.map((qa) => {
-            const isExp = expanded === qa.id;
             const isDone = completed.has(qa.id);
             return (
               <div
@@ -1803,49 +1803,109 @@ export default function InterviewPrep() {
                     className="mt-0.5 w-4 h-4 flex-shrink-0 cursor-pointer accent-blue-600"
                     title={isDone ? "Mark as incomplete" : "Mark as completed"}
                   />
-                  <button className="flex-1 flex items-start gap-3 text-left" onClick={() => setExpanded(isExp ? null : qa.id)}>
-                  <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <div className={`text-sm font-semibold leading-snug ${isDone ? "text-gray-400 line-through" : "text-gray-900"}`}>{qa.q}</div>
-                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${LEVEL_COLORS[qa.level] || "bg-gray-100 text-gray-600"}`}>
-                        {qa.level.charAt(0).toUpperCase() + qa.level.slice(1)}
-                      </span>
-                      {qa.tags.slice(0, 3).map((tag) => (
-                        <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">{tag}</span>
-                      ))}
+                  <button className="flex-1 flex items-start gap-3 text-left" onClick={() => setPanelQ({ qa, catTitle: studyCat.title })}>
+                    <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <div className={`text-sm font-semibold leading-snug ${isDone ? "text-gray-400 line-through" : "text-gray-900"}`}>{qa.q}</div>
+                      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${LEVEL_COLORS[qa.level] || "bg-gray-100 text-gray-600"}`}>
+                          {qa.level.charAt(0).toUpperCase() + qa.level.slice(1)}
+                        </span>
+                        {qa.tags.slice(0, 3).map((tag) => (
+                          <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">{tag}</span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <ChevronRight className={`w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5 transition-transform ${isExp ? "rotate-90" : ""}`} />
+                    <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   </button>
                 </div>
-                {isExp && (
-                  <div className="border-t border-gray-100 p-4 space-y-3 bg-gray-50/50">
-                    <div className="relative">
-                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Expert Answer</div>
-                      <p className="text-sm text-gray-700 leading-relaxed">{qa.a}</p>
-                      <button onClick={() => copyAnswer(qa.id, qa.a)} className="absolute top-0 right-0 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100">
-                        {copied === qa.id ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {(qa as any).follow_ups && (
-                      <div>
-                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Follow-up Questions</div>
-                        <ul className="space-y-1">
-                          {(qa as any).follow_ups.map((fq: string) => (
-                            <li key={fq} className="flex gap-2 text-xs text-gray-600"><Zap className="w-3 h-3 text-amber-500 flex-shrink-0 mt-0.5" />{fq}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             );
           })}
         </div>
       </div>
     </div>
+
+    {/* Slide-out question panel */}
+    {panelQ && (
+      <div
+        className="fixed inset-0 z-50 flex"
+        style={{ background: "rgba(0,0,0,0.4)" }}
+        onClick={() => setPanelQ(null)}
+      >
+        <div className="flex-1" />
+        <div
+          className="bg-white shadow-2xl flex flex-col h-full"
+          style={{ width: "100%", maxWidth: "460px", minWidth: "320px" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-start justify-between p-5 border-b border-gray-100 gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-gray-900 leading-snug">{panelQ.qa.q}</p>
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${LEVEL_COLORS[panelQ.qa.level] || "bg-gray-100 text-gray-600"}`}>
+                  {panelQ.qa.level.charAt(0).toUpperCase() + panelQ.qa.level.slice(1)}
+                </span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium">{panelQ.catTitle}</span>
+              </div>
+            </div>
+            <button
+              onClick={() => setPanelQ(null)}
+              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 flex-shrink-0 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Tags */}
+          {panelQ.qa.tags.length > 0 && (
+            <div className="px-5 py-3 border-b border-gray-100 flex gap-2 flex-wrap">
+              {panelQ.qa.tags.map((tag) => (
+                <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">{tag}</span>
+              ))}
+            </div>
+          )}
+
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto p-5 space-y-5">
+            <div>
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Expert Answer</div>
+              <p className="text-sm text-gray-700 leading-relaxed" style={{ whiteSpace: "pre-line" }}>{panelQ.qa.a}</p>
+            </div>
+            {panelQ.qa.follow_ups && panelQ.qa.follow_ups.length > 0 && (
+              <div>
+                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Follow-up Questions</div>
+                <ul className="space-y-2">
+                  {panelQ.qa.follow_ups.map((fq) => (
+                    <li key={fq} className="flex gap-2 text-xs text-gray-600 leading-relaxed">
+                      <Zap className="w-3 h-3 text-amber-500 flex-shrink-0 mt-0.5" />{fq}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="p-5 border-t border-gray-100">
+            <button
+              onClick={() => { toggleCompleted(panelQ.qa.id); setPanelQ(null); }}
+              className="w-full py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all"
+              style={{
+                background: completed.has(panelQ.qa.id) ? "#f0fdf4" : "#059669",
+                color: completed.has(panelQ.qa.id) ? "#047857" : "#ffffff",
+                border: completed.has(panelQ.qa.id) ? "2px solid #a7f3d0" : "2px solid transparent",
+              }}
+            >
+              <Check className="w-4 h-4" />
+              {completed.has(panelQ.qa.id) ? "Marked as Complete ✓" : "Mark as Complete"}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 
   // EXAM CONFIG
@@ -1855,7 +1915,7 @@ export default function InterviewPrep() {
         <button onClick={() => setMode("study")} className="p-2 rounded-xl hover:bg-gray-100 text-gray-500"><X className="w-5 h-5" /></button>
         <div>
           <h2 className="font-extrabold text-xl text-gray-900">Configure Your Exam</h2>
-          <p className="text-sm text-gray-500">Select categories, count, difficulty, and optional timer</p>
+          <p className="text-sm text-gray-500">Select categories, question count, and difficulty</p>
         </div>
       </div>
 
