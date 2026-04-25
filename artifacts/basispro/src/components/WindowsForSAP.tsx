@@ -1,9 +1,59 @@
-import React, { useState } from "react";
+import React, { useState, useContext, createContext } from "react";
 import {
   Monitor, CheckCircle2, ExternalLink, ChevronRight, ChevronDown,
   Shield, Zap, AlertTriangle, Server, Layers, BookOpen, Activity,
-  Settings, Database, Info, Code, Globe,
+  Settings, Database, Info, Code, Globe, Key,
 } from "lucide-react";
+
+// ─── Navigation context ────────────────────────────────────────────────────────
+
+const NavCtx = createContext<((id: string) => void) | undefined>(undefined);
+
+// ─── Per-issue action config ───────────────────────────────────────────────────
+
+const ISSUE_ACTIONS: Record<string, {
+  guideId?: string; guideLabel?: string; tcodes: string;
+}> = {
+  "svc-not-starting":  { tcodes: "SM51 · SM21 · ST22" },
+  "gui-connection":    { tcodes: "SM59 · SMICM · ST11" },
+  "sql-connectivity":  { tcodes: "DBACOCKPIT · ST04 · SM21" },
+  "performance":       { tcodes: "SM50 · SM66 · ST03N · STAD" },
+  "permissions":       { tcodes: "SU01 · PFCG · ST01 · SM21" },
+};
+
+function ActionButtons({ issue }: { issue: keyof typeof ISSUE_ACTIONS }) {
+  const nav = useContext(NavCtx);
+  const cfg = ISSUE_ACTIONS[issue];
+  return (
+    <div className="flex flex-wrap items-center gap-2 pt-3 mt-3 border-t border-gray-200">
+      <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-400 font-medium cursor-not-allowed select-none">
+        <Layers className="w-3 h-3" />
+        Troubleshoot Tree — Coming soon
+      </span>
+      {cfg.guideId ? (
+        <button
+          onClick={() => nav?.(cfg.guideId!)}
+          className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-[#EBF3FD] text-[#0070F2] font-semibold hover:bg-[#D4E8FA] transition-colors"
+        >
+          <BookOpen className="w-3 h-3" />
+          {cfg.guideLabel}
+        </button>
+      ) : (
+        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-400 font-medium cursor-not-allowed select-none">
+          <BookOpen className="w-3 h-3" />
+          Guide — Coming soon
+        </span>
+      )}
+      <button
+        onClick={() => nav?.("tcodes")}
+        className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 font-semibold hover:bg-emerald-100 transition-colors"
+      >
+        <Key className="w-3 h-3" />
+        {cfg.tcodes}
+      </button>
+    </div>
+  );
+}
 
 // ─── Shared sub-components ────────────────────────────────────────────────────
 
@@ -417,6 +467,7 @@ const SECTIONS: Section[] = [
               { cmd: "net start SAP<SID>_<NR>", desc: "Start SAP Windows service from command line" },
               { cmd: "sapcontrol -nr <NR> -function GetProcessList", desc: "Verify SAP processes after service start" },
             ]} />
+            <ActionButtons issue="svc-not-starting" />
           </div>
         </div>
 
@@ -449,6 +500,7 @@ const SECTIONS: Section[] = [
               { cmd: "nslookup <sap-hostname>", desc: "Confirm DNS resolves to the correct SAP server IP" },
               { cmd: "telnet <sap-hostname> 32<NR>00", desc: "Test if SAP dispatcher port is reachable (replace <NR> with instance number)" },
             ]} />
+            <ActionButtons issue="gui-connection" />
           </div>
         </div>
 
@@ -480,6 +532,7 @@ const SECTIONS: Section[] = [
               { cmd: "net start MSSQLSERVER", desc: "Start SQL Server service from command line" },
               { cmd: "eventvwr", desc: "Event Viewer → Application — filter by SQL Server source" },
             ]} />
+            <ActionButtons issue="sql-connectivity" />
           </div>
         </div>
 
@@ -511,6 +564,7 @@ const SECTIONS: Section[] = [
               { cmd: "resmon", desc: "Resource Monitor — detailed CPU, disk, network per process" },
               { cmd: "perfmon", desc: "Performance Monitor — add counters: % Processor Time, Available MBytes, Disk Queue Length" },
             ]} />
+            <ActionButtons issue="performance" />
           </div>
         </div>
 
@@ -542,6 +596,7 @@ const SECTIONS: Section[] = [
               { cmd: "icacls C:\\usr\\sap\\trans /grant SAPService<SID>:(OI)(CI)F /T", desc: "Grant full access to transport directory" },
               { cmd: "whoami /priv", desc: "Check current user privileges — verify you have admin rights" },
             ]} />
+            <ActionButtons issue="permissions" />
           </div>
         </div>
       </div>
@@ -619,10 +674,11 @@ const SECTIONS: Section[] = [
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function WindowsForSAP() {
+export default function WindowsForSAP({ onNavigate }: { onNavigate?: (id: string) => void }) {
   const [openId, setOpenId] = useState<string>("when-windows");
 
   return (
+    <NavCtx.Provider value={onNavigate}>
     <div className="space-y-5 max-w-4xl">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-700 to-blue-500 rounded-2xl p-5 text-white">
@@ -677,5 +733,6 @@ export default function WindowsForSAP() {
         })}
       </div>
     </div>
+    </NavCtx.Provider>
   );
 }

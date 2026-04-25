@@ -1,9 +1,59 @@
-import React, { useState } from "react";
+import React, { useState, useContext, createContext } from "react";
 import {
   Terminal, CheckCircle2, ExternalLink, ChevronRight, ChevronDown,
   Shield, Zap, AlertTriangle, Server, Layers, BookOpen, Activity,
-  Settings, Database, Cloud, Info, Code,
+  Settings, Database, Cloud, Info, Code, Key,
 } from "lucide-react";
+
+// ─── Navigation context (injected by dashboard) ───────────────────────────────
+
+const NavCtx = createContext<((id: string) => void) | undefined>(undefined);
+
+// ─── Per-incident action config ───────────────────────────────────────────────
+
+const INCIDENT_ACTIONS: Record<string, {
+  guideId?: string; guideLabel?: string; tcodes: string;
+}> = {
+  "hana-start":  { guideId: "hana", guideLabel: "HANA Database", tcodes: "DBACOCKPIT · ST04 · sapcontrol" },
+  "high-cpu":    { tcodes: "SM50 · SM66 · ST03N · STAD" },
+  "disk-full":   { tcodes: "AL11 · SM21 · ST22" },
+  "network":     { tcodes: "SM59 · SMICM · STRUST" },
+  "app-down":    { tcodes: "SM51 · SM50 · SM21 · ST22" },
+};
+
+function ActionButtons({ incident }: { incident: keyof typeof INCIDENT_ACTIONS }) {
+  const nav = useContext(NavCtx);
+  const cfg = INCIDENT_ACTIONS[incident];
+  return (
+    <div className="flex flex-wrap items-center gap-2 pt-3 mt-3 border-t border-gray-200">
+      <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-400 font-medium cursor-not-allowed select-none">
+        <Layers className="w-3 h-3" />
+        Troubleshoot Tree — Coming soon
+      </span>
+      {cfg.guideId ? (
+        <button
+          onClick={() => nav?.(cfg.guideId!)}
+          className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-[#EBF3FD] text-[#0070F2] font-semibold hover:bg-[#D4E8FA] transition-colors"
+        >
+          <BookOpen className="w-3 h-3" />
+          {cfg.guideLabel}
+        </button>
+      ) : (
+        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-400 font-medium cursor-not-allowed select-none">
+          <BookOpen className="w-3 h-3" />
+          Guide — Coming soon
+        </span>
+      )}
+      <button
+        onClick={() => nav?.("tcodes")}
+        className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 font-semibold hover:bg-emerald-100 transition-colors"
+      >
+        <Key className="w-3 h-3" />
+        {cfg.tcodes}
+      </button>
+    </div>
+  );
+}
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -469,6 +519,7 @@ const SECTIONS: Section[] = [
               { cmd: "df -h /hana/data /hana/log", desc: "Check HANA data and log volume disk usage" },
               { cmd: "HDB start", desc: "Start HANA database (run as <sid>adm)" },
             ]} />
+            <ActionButtons incident="hana-start" />
           </div>
         </div>
 
@@ -501,6 +552,7 @@ const SECTIONS: Section[] = [
               { cmd: "kill -15 <PID>", desc: "Graceful terminate — send SIGTERM to stuck process" },
               { cmd: "kill -9 <PID>", desc: "Force kill — use only if SIGTERM was ignored (last resort)" },
             ]} />
+            <ActionButtons incident="high-cpu" />
           </div>
         </div>
 
@@ -533,6 +585,7 @@ const SECTIONS: Section[] = [
               { cmd: "find /usr/sap -name '*.trc' -mtime +7 | xargs ls -lh", desc: "Find trace files older than 7 days" },
               { cmd: "find /usr/sap -name 'dev_w*' -mtime +5 -delete", desc: "Delete SAP work process traces older than 5 days (verify first)" },
             ]} />
+            <ActionButtons incident="disk-full" />
           </div>
         </div>
 
@@ -565,6 +618,7 @@ const SECTIONS: Section[] = [
               { cmd: "ss -tlnp | grep 3<NR>15", desc: "Verify HANA SQL port is actively listening" },
               { cmd: "traceroute <hostname>", desc: "Trace network path — identify routing hop where connectivity breaks" },
             ]} />
+            <ActionButtons incident="network" />
           </div>
         </div>
 
@@ -597,6 +651,7 @@ const SECTIONS: Section[] = [
               { cmd: "sapcontrol -nr <NR> -function RestartInstance", desc: "Graceful restart of SAP instance (dispatcher + work processes)" },
               { cmd: "sapcontrol -nr <NR> -function Stop && sleep 60 && sapcontrol -nr <NR> -function Start", desc: "Full stop-start cycle for unresponsive instance" },
             ]} />
+            <ActionButtons incident="app-down" />
           </div>
         </div>
       </div>
@@ -631,10 +686,11 @@ const SECTIONS: Section[] = [
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function LinuxForSAP() {
+export default function LinuxForSAP({ onNavigate }: { onNavigate?: (id: string) => void }) {
   const [openId, setOpenId] = useState<string>("why-linux");
 
   return (
+    <NavCtx.Provider value={onNavigate}>
     <div className="space-y-5 max-w-4xl">
       {/* Header */}
       <div className="bg-gradient-to-r from-gray-900 to-gray-700 rounded-2xl p-5 text-white">
@@ -689,5 +745,6 @@ export default function LinuxForSAP() {
         })}
       </div>
     </div>
+    </NavCtx.Provider>
   );
 }

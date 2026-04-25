@@ -952,8 +952,8 @@ export default function Dashboard() {
           {activeId === "certifications" && <CloudCertifications />}
           {activeId === "interviewPrep" && <InterviewPrep key={interviewPrepKey} />}
           {activeId === "ai" && <DashboardAIAssistant />}
-          {activeId === "linux" && <LinuxForSAP />}
-          {activeId === "windows" && <WindowsForSAP />}
+          {activeId === "linux" && <LinuxForSAP onNavigate={handleNav} />}
+          {activeId === "windows" && <WindowsForSAP onNavigate={handleNav} />}
 
           {/* ── Module content ─────────────────────────── */}
           {!["tcodes","roadmap","certifications","interviewPrep","overview","ai","linux","windows"].includes(activeId) && (

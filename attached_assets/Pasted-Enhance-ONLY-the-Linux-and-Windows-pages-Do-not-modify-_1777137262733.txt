@@ -1,0 +1,99 @@
+Enhance ONLY the Linux and Windows pages.
+
+Do not modify:
+- Sidebar
+- Navigation IDs
+- Theme/colors/layout
+- Roadmap
+- Certifications
+- TCode Library
+- AI Assistant
+- Auth/session logic
+
+GOAL:
+Connect OS learning pages to existing BasisPro operational modules.
+
+On Linux page:
+For each Real SAP Incident card, add small action buttons:
+- Open Troubleshoot Tree
+- Open Related Guide
+- View Key TCodes
+
+Use existing navigation functions only.
+Do not create new routing logic.
+
+Map examples:
+1. HANA Database Not Starting
+→ Troubleshoot Tree: HANA Performance Issue or System Down
+→ Guide: HANA Startup / HANA Troubleshooting if available
+→ TCodes/tools: DBACOCKPIT, ST04, sapcontrol
+
+2. High CPU / Work Process Stuck
+→ Troubleshoot Tree: System Performance / Work Process Issue
+→ Guide: Work Process Monitoring
+→ TCodes/tools: SM50, SM66, ST03N, STAD
+
+3. Disk Full Issue
+→ Troubleshoot Tree: System Down or Application Server Issue
+→ Guide: OS File System / Log Cleanup if available
+→ TCodes/tools: AL11, SM21, ST22
+
+4. Network Connectivity Issue
+→ Troubleshoot Tree: RFC / Interface Issue
+→ Guide: RFC Connectivity Troubleshooting
+→ TCodes/tools: SM59, SMICM, STRUST
+
+5. SAP Application Not Responding
+→ Troubleshoot Tree: System Down
+→ Guide: SAP Instance Restart / Application Server Troubleshooting
+→ TCodes/tools: SM51, SM50, SM21, ST22, sapcontrol
+
+On Windows page:
+For each Common SAP Basis Issue card, add the same action buttons:
+- Open Troubleshoot Tree
+- Open Related Guide
+- View Key TCodes
+
+Map examples:
+1. SAP Service Not Starting
+→ Troubleshoot Tree: System Down
+→ Guide: SAP Instance Restart
+→ TCodes/tools: SM51, SM21, ST22, sapcontrol
+
+2. SAP GUI Connection Issues
+→ Troubleshoot Tree: RFC / Network Issue
+→ Guide: Connectivity Troubleshooting
+→ TCodes/tools: SM59, SMICM, ST11
+
+3. SQL Server Connectivity Issues
+→ Troubleshoot Tree: Database Connection Issue
+→ Guide: Database Connectivity
+→ TCodes/tools: DBACOCKPIT, ST04, SM21
+
+4. Performance Issues
+→ Troubleshoot Tree: Performance Issue
+→ Guide: Performance Analysis
+→ TCodes/tools: SM50, SM66, ST03N, STAD
+
+5. Permission Issues
+→ Troubleshoot Tree: Authorization / OS Permission Issue
+→ Guide: User and Permission Checks
+→ TCodes/tools: SU01, PFCG, ST01, SM21
+
+IMPORTANT:
+If a mapped troubleshoot tree or guide does not exist, show the button disabled with label:
+“Coming soon”
+
+Do not create duplicate guides or duplicate troubleshoot trees.
+
+Use existing BasisPro visual style:
+- Small buttons
+- Existing badges
+- Existing card layout
+
+ACCEPTANCE:
+- Linux incident cards have operational action buttons
+- Windows issue cards have operational action buttons
+- Existing guides/trees open correctly if available
+- Missing mappings show “Coming soon”
+- No other pages affected
