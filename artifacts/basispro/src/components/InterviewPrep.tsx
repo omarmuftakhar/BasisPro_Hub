@@ -1713,7 +1713,7 @@ export default function InterviewPrep() {
   }
 
   function truncateForMC(text: string): string {
-    return text;
+    return text.length > 120 ? text.slice(0, 120) + "…" : text;
   }
 
   // Highlight matching search term in text
@@ -1803,20 +1803,20 @@ export default function InterviewPrep() {
     <>
     <div className="space-y-5 max-w-5xl">
       {/* Mode Tabs */}
-      <div className="flex gap-0 rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden self-start w-fit">
+      <div className="flex gap-1 self-start w-fit" style={{ background: "#F3F4F6", border: "1px solid #E5E7EB", borderRadius: "14px", padding: "4px" }}>
         <button
-          className="flex items-center gap-2.5 text-white font-medium border-r border-gray-200 transition-all"
-          style={{ fontSize: "15px", padding: "12px 24px", background: "#2563eb", fontWeight: 500 }}
+          className="flex items-center gap-2 text-white font-medium transition-all"
+          style={{ fontSize: "15px", padding: "10px 22px", fontWeight: 500, background: "#2563EB", borderRadius: "11px", boxShadow: "0 1px 6px rgba(37,99,235,0.35)" }}
         >
           <BookOpen className="w-4 h-4" />
           Study Mode
         </button>
         <button
           onClick={() => { setSelectedCats([]); setMode("config"); }}
-          className="flex items-center gap-2.5 text-gray-700 bg-white hover:bg-gray-50 font-medium transition-all"
-          style={{ fontSize: "15px", padding: "12px 24px", fontWeight: 500 }}
+          className="flex items-center gap-2 font-medium transition-all hover:bg-white"
+          style={{ fontSize: "15px", padding: "10px 22px", fontWeight: 500, color: "#6B7280", background: "transparent", borderRadius: "11px" }}
         >
-          <Play className="w-4 h-4 text-gray-500" />
+          <Play className="w-4 h-4" />
           Exam Mode
         </button>
       </div>
@@ -2101,18 +2101,18 @@ export default function InterviewPrep() {
   if (mode === "config") return (
     <div className="max-w-2xl mx-auto space-y-5">
       {/* Mode Tabs */}
-      <div className="flex gap-0 rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden self-start w-fit">
+      <div className="flex gap-1 self-start w-fit" style={{ background: "#F3F4F6", border: "1px solid #E5E7EB", borderRadius: "14px", padding: "4px" }}>
         <button
           onClick={() => setMode("study")}
-          className="flex items-center gap-2.5 text-gray-700 bg-white hover:bg-gray-50 font-medium border-r border-gray-200 transition-all"
-          style={{ fontSize: "15px", padding: "12px 24px", fontWeight: 500 }}
+          className="flex items-center gap-2 font-medium transition-all hover:bg-white"
+          style={{ fontSize: "15px", padding: "10px 22px", fontWeight: 500, color: "#6B7280", background: "transparent", borderRadius: "11px" }}
         >
-          <BookOpen className="w-4 h-4 text-gray-500" />
+          <BookOpen className="w-4 h-4" />
           Study Mode
         </button>
         <button
-          className="flex items-center gap-2.5 text-white font-medium transition-all"
-          style={{ fontSize: "15px", padding: "12px 24px", background: "#2563eb", fontWeight: 500 }}
+          className="flex items-center gap-2 text-white font-medium transition-all"
+          style={{ fontSize: "15px", padding: "10px 22px", fontWeight: 500, background: "#2563EB", borderRadius: "11px", boxShadow: "0 1px 6px rgba(37,99,235,0.35)" }}
         >
           <Play className="w-4 h-4" />
           Exam Mode
@@ -2238,15 +2238,24 @@ export default function InterviewPrep() {
 
     return (
       <div className="max-w-2xl mx-auto space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-500 font-medium">Question <span className="font-extrabold text-gray-900">{examIdx + 1}</span> / {examQuestions.length}</div>
+        <div
+          className="flex items-center justify-between"
+          style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: "12px", padding: "14px 20px" }}
+        >
+          <div className="text-sm font-medium" style={{ color: "#6B7280" }}>
+            Question <span className="font-extrabold" style={{ color: "#111827" }}>{examIdx + 1}</span> / {examQuestions.length}
+          </div>
           <div className="flex items-center gap-3">
             {timedExam && (
               <div
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-sm"
+                className="flex items-center gap-1.5 font-semibold text-sm"
                 style={{
-                  background: timeLeft <= 60 ? "#fef2f2" : timeLeft <= 300 ? "#fff7ed" : "#f0f9ff",
-                  color: timeLeft <= 60 ? "#dc2626" : timeLeft <= 300 ? "#ea580c" : "#2563eb",
+                  background: timeLeft <= 60 ? "#fef2f2" : timeLeft <= 300 ? "#fff7ed" : "#EFF6FF",
+                  border: `1px solid ${timeLeft <= 60 ? "#fca5a5" : timeLeft <= 300 ? "#fdba74" : "#BFDBFE"}`,
+                  borderRadius: "8px",
+                  padding: "7px 14px",
+                  color: timeLeft <= 60 ? "#DC2626" : timeLeft <= 300 ? "#ea580c" : "#2563EB",
+                  fontWeight: 600,
                   animation: timeLeft <= 60 ? "pulse 1s infinite" : undefined,
                 }}
               >
@@ -2254,7 +2263,16 @@ export default function InterviewPrep() {
                 {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
               </div>
             )}
-            <button onClick={() => { if (timerRef.current) clearInterval(timerRef.current); setMode("study"); }} className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1"><X className="w-3.5 h-3.5" />Exit</button>
+            {timedExam && <div style={{ width: "1px", height: "20px", background: "#E5E7EB", flexShrink: 0 }} />}
+            <button
+              onClick={() => { if (timerRef.current) clearInterval(timerRef.current); setMode("study"); }}
+              className="flex items-center gap-1.5 font-medium transition-all"
+              style={{ border: "1px solid #E5E7EB", borderRadius: "8px", padding: "8px 18px", fontSize: "13px", fontWeight: 500, color: "#374151", background: "white" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#FEF2F2"; (e.currentTarget as HTMLButtonElement).style.borderColor = "#FCA5A5"; (e.currentTarget as HTMLButtonElement).style.color = "#DC2626"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "white"; (e.currentTarget as HTMLButtonElement).style.borderColor = "#E5E7EB"; (e.currentTarget as HTMLButtonElement).style.color = "#374151"; }}
+            >
+              <X className="w-3.5 h-3.5" /> Exit Exam
+            </button>
           </div>
         </div>
 
