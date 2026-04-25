@@ -1,0 +1,57 @@
+Please implement all these enhancements to the Interview Prep page:
+STUDY MODE ENHANCEMENTS:
+1. Bookmarks/Favorites:
+
+Add a bookmark icon (star or ribbon) on the right side of each question row in the list
+When clicked, the icon fills/highlights to show it's bookmarked
+Add a 'Bookmarked' filter option in the filter bar at the top
+Store bookmarks in localStorage so they persist between sessions
+
+2. Personal Notes:
+
+Add a small notepad icon on each question row next to the bookmark icon
+Clicking it opens a notes text area inside the slide-out panel at the bottom
+User can type their own notes for that question
+Notes are saved automatically to localStorage
+If a question has notes, show a small indicator dot on the notepad icon
+
+3. Filter by Completion:
+
+Add a filter row below the level tabs showing: 'All' 'Not Started' 'Completed' 'Bookmarked'
+These filter the question list accordingly
+'Completed' shows only questions marked as complete via the Mark as Complete button
+'Bookmarked' shows only bookmarked questions
+
+4. Enhanced Search:
+
+Improve the search to search not just question titles but also answer content, TCode tags, and category names
+Show the matching term highlighted in yellow in the results
+Show result count: 'X questions match your search'
+
+EXAM MODE ENHANCEMENTS:
+5. Score Summary Screen:
+After finishing all exam questions show a full results screen with:
+
+Large score display: 'X / Y Correct' with percentage and pass/fail indicator (pass = 70%+)
+Color coded: green if passed, red if failed
+Time taken to complete the exam
+Breakdown table showing performance per category: category name, questions attempted, correct, percentage
+List of incorrectly answered questions with the correct answer shown in green
+Two buttons at bottom: 'Retry Wrong Answers Only' and 'Start New Exam'
+
+6. Exam History:
+
+Add an 'Exam History' section accessible from the Exam Mode tab
+Show a table of past exam attempts with: Date, Score, Percentage, Categories tested, Difficulty, Time taken
+Store history in localStorage
+Add a 'Clear History' button
+Show a mini trend chart if there are 3 or more attempts showing score improvement over time
+
+7. Timed Exam Mode:
+
+In the Prepare Your Exam configuration, add an optional 'Timed Exam' toggle
+When enabled, show a total exam timer options: 15 min, 30 min, 45 min, 60 min
+Show a countdown timer in the top right during the exam showing remaining time
+When time runs out, automatically submit the exam and show the score summary
+Show a warning when 5 minutes remaining: timer turns orange
+Show urgent warning when 1 minute remaining: timer turns red and pulses

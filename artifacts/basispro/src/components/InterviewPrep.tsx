@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react";
-import { ChevronRight, MessageSquare, Zap, Shield, Database, Cloud, Settings, Star, Copy, Check, Activity, Server, Layers, BookOpen, Code, Search, X, Target, Brain, Trophy, RotateCcw, ChevronDown, Play, CheckCircle2, XCircle, BookOpen as BookOpenIcon, GraduationCap, ListChecks, Shuffle } from "lucide-react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { ChevronRight, MessageSquare, Zap, Shield, Database, Cloud, Settings, Star, Copy, Check, Activity, Server, Layers, BookOpen, Code, Search, X, Target, Brain, Trophy, RotateCcw, ChevronDown, Play, CheckCircle2, XCircle, GraduationCap, ListChecks, Shuffle, Bookmark, FileText, Clock, TrendingUp, Trash2, AlertTriangle, PenLine, History } from "lucide-react";
 import { EXAM_PACK_2026 } from "@/data/examPack2026";
 
 interface QA {
@@ -1563,7 +1563,18 @@ const LEVEL_BORDER: Record<string, string> = {
 
 const ALL_CATEGORIES = [...CATEGORIES, ...EXAM_PACK_2026];
 
-type Mode = "study" | "config" | "quiz" | "results";
+type Mode = "study" | "config" | "quiz" | "results" | "history";
+
+interface ExamHistoryEntry {
+  id: string;
+  date: number;
+  score: number;
+  total: number;
+  categories: string[];
+  difficulty: string;
+  timeTaken: number;
+  passed: boolean;
+}
 
 export default function InterviewPrep() {
   const [mode, setMode] = useState<Mode>("study");
@@ -1573,12 +1584,26 @@ export default function InterviewPrep() {
   const [panelQ, setPanelQ] = useState<{ qa: QA; catTitle: string } | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [levelFilter, setLevelFilter] = useState<string>("all");
+  const [completionFilter, setCompletionFilter] = useState<"all" | "not-started" | "completed" | "bookmarked">("all");
   const [search, setSearch] = useState("");
+
+  // bookmarks (persisted)
+  const [bookmarks, setBookmarks] = useState<Set<string>>(() => {
+    try { return new Set<string>(JSON.parse(localStorage.getItem("bp_bookmarks") || "[]")); } catch { return new Set<string>(); }
+  });
+
+  // notes (persisted)
+  const [notes, setNotes] = useState<Record<string, string>>(() => {
+    try { return JSON.parse(localStorage.getItem("bp_notes") || "{}"); } catch { return {}; }
+  });
+  const [panelNoteText, setPanelNoteText] = useState("");
 
   // exam config
   const [selectedCats, setSelectedCats] = useState<string[]>([]);
   const [examCount, setExamCount] = useState<number>(20);
   const [examDiff, setExamDiff] = useState<string>("all");
+  const [timedExam, setTimedExam] = useState(false);
+  const [examDuration, setExamDuration] = useState(30);
 
   // exam state
   const [examQuestions, setExamQuestions] = useState<QA[]>([]);
@@ -1587,6 +1612,14 @@ export default function InterviewPrep() {
   const [grades, setGrades] = useState<Record<string, "got" | "review">>({});
   const [mcOpts, setMcOpts] = useState<Record<string, Array<{ text: string; correct: boolean }>>>({});
   const [mcSelected, setMcSelected] = useState<Record<string, number>>({});
+  const [examStartTime, setExamStartTime] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<number>(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // exam history (persisted)
+  const [examHistory, setExamHistory] = useState<ExamHistoryEntry[]>(() => {
+    try { return JSON.parse(localStorage.getItem("bp_exam_history") || "[]"); } catch { return []; }
+  });
 
   // progress tracking (persisted)
   const [completed, setCompleted] = useState<Set<string>>(() => {
@@ -1602,12 +1635,20 @@ export default function InterviewPrep() {
   const studyQuestions = useMemo(() => {
     let qs = studyCat.questions;
     if (levelFilter !== "all") qs = qs.filter((q) => q.level === levelFilter);
+    if (completionFilter === "not-started") qs = qs.filter((q) => !completed.has(q.id));
+    if (completionFilter === "completed") qs = qs.filter((q) => completed.has(q.id));
+    if (completionFilter === "bookmarked") qs = qs.filter((q) => bookmarks.has(q.id));
     if (search.trim()) {
       const s = search.toLowerCase();
-      qs = qs.filter((item) => item.q.toLowerCase().includes(s) || item.a.toLowerCase().includes(s) || item.tags.some((t) => t.includes(s)));
+      qs = qs.filter((item) =>
+        item.q.toLowerCase().includes(s) ||
+        item.a.toLowerCase().includes(s) ||
+        item.tags.some((t) => t.toLowerCase().includes(s)) ||
+        studyCat.title.toLowerCase().includes(s)
+      );
     }
     return qs;
-  }, [activeCat, studyCat, levelFilter, search]);
+  }, [activeCat, studyCat, levelFilter, completionFilter, completed, bookmarks, search]);
 
   function toggleCompleted(id: string) {
     setCompleted((prev) => {
@@ -1622,12 +1663,65 @@ export default function InterviewPrep() {
     navigator.clipboard.writeText(text).then(() => { setCopied(id); setTimeout(() => setCopied(null), 2000); });
   }
 
+  function toggleBookmark(id: string) {
+    setBookmarks((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      try { localStorage.setItem("bp_bookmarks", JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  }
+
+  function saveNote(id: string, text: string) {
+    setNotes((prev) => {
+      const next = { ...prev, [id]: text };
+      try { localStorage.setItem("bp_notes", JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }
+
+  function addExamHistory(entry: Omit<ExamHistoryEntry, "id">) {
+    const newEntry = { ...entry, id: Date.now().toString() };
+    setExamHistory((prev) => {
+      const next = [newEntry, ...prev].slice(0, 50);
+      try { localStorage.setItem("bp_exam_history", JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }
+
+  // Timer effect for timed exams
+  useEffect(() => {
+    if (mode === "quiz" && timedExam && timeLeft > 0) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft((t) => {
+          if (t <= 1) {
+            clearInterval(timerRef.current!);
+            setMode("results");
+            return 0;
+          }
+          return t - 1;
+        });
+      }, 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [mode, timedExam, timeLeft > 0 && mode === "quiz"]);
+
   function toggleCat(id: string) {
     setSelectedCats((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   }
 
   function truncateForMC(text: string): string {
     return text;
+  }
+
+  // Highlight matching search term in text
+  function highlight(text: string, term: string): React.ReactNode {
+    if (!term.trim()) return text;
+    const idx = text.toLowerCase().indexOf(term.toLowerCase());
+    if (idx === -1) return text;
+    return <>{text.slice(0, idx)}<mark className="bg-yellow-200 text-gray-900 rounded px-0.5">{text.slice(idx, idx + term.length)}</mark>{text.slice(idx + term.length)}</>;
   }
 
   function startExam() {
@@ -1646,12 +1740,15 @@ export default function InterviewPrep() {
       ].sort(() => Math.random() - 0.5);
     });
 
+    const now = Date.now();
     setExamQuestions(selected);
     setMcOpts(optionsMap);
     setMcSelected({});
     setExamIdx(0);
     setRevealed(false);
     setGrades({});
+    setExamStartTime(now);
+    if (timedExam) setTimeLeft(examDuration * 60);
     setMode("quiz");
   }
 
@@ -1664,9 +1761,22 @@ export default function InterviewPrep() {
     setGrades((prev) => ({ ...prev, [q.id]: opt.correct ? "got" : "review" }));
   }
 
+  function finishExam(finalGrades: Record<string, "got" | "review">) {
+    const timeTaken = Math.round((Date.now() - examStartTime) / 1000);
+    const correct = Object.values(finalGrades).filter((v) => v === "got").length;
+    const total = examQuestions.length;
+    const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+    const cats = [...new Set(examQuestions.map((q) => {
+      const cat = ALL_CATEGORIES.find((c) => c.questions.some((x) => x.id === q.id));
+      return cat?.title ?? "Unknown";
+    }))];
+    addExamHistory({ date: Date.now(), score: correct, total, categories: cats, difficulty: examDiff, timeTaken, passed: pct >= 70 });
+    setMode("results");
+  }
+
   function advanceQuestion() {
     const next = examIdx + 1;
-    if (next >= examQuestions.length) { setMode("results"); return; }
+    if (next >= examQuestions.length) { finishExam(grades); return; }
     setExamIdx(next);
     setRevealed(false);
   }
@@ -1693,16 +1803,20 @@ export default function InterviewPrep() {
     <>
     <div className="space-y-5 max-w-5xl">
       {/* Mode Tabs */}
-      <div className="flex gap-1 p-1 rounded-xl bg-gray-100 self-start w-fit">
-        <button className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold bg-white shadow-sm text-gray-900 transition-all">
-          <BookOpen className="w-4 h-4 text-blue-600" />
+      <div className="flex gap-0 rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden self-start w-fit">
+        <button
+          className="flex items-center gap-2.5 text-white font-medium border-r border-gray-200 transition-all"
+          style={{ fontSize: "15px", padding: "12px 24px", background: "#2563eb", fontWeight: 500 }}
+        >
+          <BookOpen className="w-4 h-4" />
           Study Mode
         </button>
         <button
           onClick={() => { setSelectedCats([]); setMode("config"); }}
-          className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-all"
+          className="flex items-center gap-2.5 text-gray-700 bg-white hover:bg-gray-50 font-medium transition-all"
+          style={{ fontSize: "15px", padding: "12px 24px", fontWeight: 500 }}
         >
-          <Play className="w-4 h-4" />
+          <Play className="w-4 h-4 text-gray-500" />
           Exam Mode
         </button>
       </div>
@@ -1752,19 +1866,38 @@ export default function InterviewPrep() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Level:</span>
-        {(["all", "junior", "mid", "senior"] as const).map((l) => (
-          <button key={l} onClick={() => setLevelFilter(l)}
-            className={`text-sm font-medium px-3 py-1 rounded-full border transition-all ${levelFilter === l ? (l === "all" ? "bg-gray-800 text-white border-gray-800" : LEVEL_COLORS[l] + " border-current") : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"}`}>
-            {l === "all" ? "All Levels" : l.charAt(0).toUpperCase() + l.slice(1)}
-          </button>
-        ))}
-        <div className="relative ml-auto w-60">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search questions..."
-            className="w-full pl-8 pr-7 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/30" />
-          {search && <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"><X className="w-3.5 h-3.5" /></button>}
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Level:</span>
+          {(["all", "junior", "mid", "senior"] as const).map((l) => (
+            <button key={l} onClick={() => setLevelFilter(l)}
+              className={`text-sm font-medium px-3 py-1 rounded-full border transition-all ${levelFilter === l ? (l === "all" ? "bg-gray-800 text-white border-gray-800" : LEVEL_COLORS[l] + " border-current") : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"}`}>
+              {l === "all" ? "All Levels" : l.charAt(0).toUpperCase() + l.slice(1)}
+            </button>
+          ))}
+          <div className="relative ml-auto w-60">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search questions, answers, tags..."
+              className="w-full pl-8 pr-7 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/30" />
+            {search && <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"><X className="w-3.5 h-3.5" /></button>}
+          </div>
+        </div>
+        <div className="flex gap-2 items-center">
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Filter:</span>
+          {([
+            { key: "all", label: "All" },
+            { key: "not-started", label: "Not Started" },
+            { key: "completed", label: "Completed" },
+            { key: "bookmarked", label: "Bookmarked" },
+          ] as const).map(({ key, label }) => (
+            <button key={key} onClick={() => setCompletionFilter(key)}
+              className={`text-xs font-semibold px-3 py-1 rounded-full border transition-all ${completionFilter === key ? "bg-[#2563eb] text-white border-[#2563eb]" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"}`}>
+              {label}
+            </button>
+          ))}
+          {search.trim() && (
+            <span className="ml-auto text-xs text-gray-500 font-medium">{studyQuestions.length} question{studyQuestions.length !== 1 ? "s" : ""} match</span>
+          )}
         </div>
       </div>
 
@@ -1796,11 +1929,13 @@ export default function InterviewPrep() {
             <div className="text-center py-12 text-gray-400 text-sm">No questions match your filters</div>
           ) : studyQuestions.map((qa) => {
             const isDone = completed.has(qa.id);
+            const isBookmarked = bookmarks.has(qa.id);
+            const hasNote = !!(notes[qa.id]?.trim());
             return (
               <div
                 key={qa.id}
                 className="border border-gray-200 rounded-2xl overflow-hidden transition-colors"
-                style={{ borderLeft: `4px solid ${LEVEL_BORDER[qa.level] || "#e5e7eb"}`, background: isDone ? "#f0fdf4" : undefined, cursor: "pointer" }}
+                style={{ borderLeft: `4px solid ${LEVEL_BORDER[qa.level] || "#e5e7eb"}`, background: isDone ? "#f0fdf4" : undefined }}
                 onMouseEnter={(e) => { if (!isDone) (e.currentTarget as HTMLDivElement).style.background = "#eff6ff"; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = isDone ? "#f0fdf4" : ""; }}
               >
@@ -1813,21 +1948,39 @@ export default function InterviewPrep() {
                     className="mt-0.5 w-4 h-4 flex-shrink-0 cursor-pointer accent-blue-600"
                     title={isDone ? "Mark as incomplete" : "Mark as completed"}
                   />
-                  <button className="flex-1 flex items-start gap-3 text-left" onClick={() => setPanelQ({ qa, catTitle: studyCat.title })}>
+                  <button className="flex-1 flex items-start gap-3 text-left" onClick={() => { setPanelQ({ qa, catTitle: studyCat.title }); setPanelNoteText(notes[qa.id] || ""); }}>
                     <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
-                      <div className={`text-sm font-semibold leading-snug ${isDone ? "text-gray-400 line-through" : "text-gray-900"}`}>{qa.q}</div>
+                      <div className={`text-sm font-semibold leading-snug ${isDone ? "text-gray-400 line-through" : "text-gray-900"}`}>{highlight(qa.q, search)}</div>
                       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${LEVEL_COLORS[qa.level] || "bg-gray-100 text-gray-600"}`}>
                           {qa.level.charAt(0).toUpperCase() + qa.level.slice(1)}
                         </span>
                         {qa.tags.slice(0, 3).map((tag) => (
-                          <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">{tag}</span>
+                          <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">{highlight(tag, search)}</span>
                         ))}
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   </button>
+                  {/* Bookmark + Note icons */}
+                  <div className="flex items-center gap-1 flex-shrink-0 mt-0.5">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleBookmark(qa.id); }}
+                      className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                      title={isBookmarked ? "Remove bookmark" : "Bookmark"}
+                    >
+                      <Bookmark className={`w-4 h-4 ${isBookmarked ? "fill-amber-400 text-amber-400" : "text-gray-300 hover:text-amber-400"}`} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setPanelQ({ qa, catTitle: studyCat.title }); setPanelNoteText(notes[qa.id] || ""); }}
+                      className="p-1 rounded-lg hover:bg-gray-100 transition-colors relative"
+                      title="Add note"
+                    >
+                      <PenLine className={`w-4 h-4 ${hasNote ? "text-blue-500" : "text-gray-300 hover:text-blue-400"}`} />
+                      {hasNote && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full" />}
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -1897,11 +2050,37 @@ export default function InterviewPrep() {
             )}
           </div>
 
+          {/* Notes */}
+          <div className="px-5 pb-3 border-t border-gray-100 pt-4">
+            <div className="flex items-center gap-1.5 mb-2">
+              <PenLine className="w-3.5 h-3.5 text-blue-500" />
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">My Notes</span>
+            </div>
+            <textarea
+              value={panelNoteText}
+              onChange={(e) => { setPanelNoteText(e.target.value); saveNote(panelQ.qa.id, e.target.value); }}
+              placeholder="Type your personal notes here... (auto-saved)"
+              rows={3}
+              className="w-full text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/30 leading-relaxed"
+            />
+          </div>
           {/* Footer */}
-          <div className="p-5 border-t border-gray-100">
+          <div className="px-5 pb-5 flex gap-2">
+            <button
+              onClick={() => { toggleBookmark(panelQ.qa.id); }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all"
+              style={{
+                background: bookmarks.has(panelQ.qa.id) ? "#fef9c3" : "#f9fafb",
+                color: bookmarks.has(panelQ.qa.id) ? "#b45309" : "#6b7280",
+                border: bookmarks.has(panelQ.qa.id) ? "1.5px solid #fcd34d" : "1.5px solid #e5e7eb",
+              }}
+            >
+              <Bookmark className={`w-3.5 h-3.5 ${bookmarks.has(panelQ.qa.id) ? "fill-amber-400 text-amber-400" : ""}`} />
+              {bookmarks.has(panelQ.qa.id) ? "Bookmarked" : "Bookmark"}
+            </button>
             <button
               onClick={() => { toggleCompleted(panelQ.qa.id); setPanelQ(null); }}
-              className="w-full py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all"
+              className="flex-1 py-2 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all"
               style={{
                 background: completed.has(panelQ.qa.id) ? "#f0fdf4" : "#059669",
                 color: completed.has(panelQ.qa.id) ? "#047857" : "#ffffff",
@@ -1922,23 +2101,36 @@ export default function InterviewPrep() {
   if (mode === "config") return (
     <div className="max-w-2xl mx-auto space-y-5">
       {/* Mode Tabs */}
-      <div className="flex gap-1 p-1 rounded-xl bg-gray-100 self-start w-fit">
+      <div className="flex gap-0 rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden self-start w-fit">
         <button
           onClick={() => setMode("study")}
-          className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-all"
+          className="flex items-center gap-2.5 text-gray-700 bg-white hover:bg-gray-50 font-medium border-r border-gray-200 transition-all"
+          style={{ fontSize: "15px", padding: "12px 24px", fontWeight: 500 }}
         >
-          <BookOpen className="w-4 h-4" />
+          <BookOpen className="w-4 h-4 text-gray-500" />
           Study Mode
         </button>
-        <button className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold bg-white shadow-sm text-gray-900 transition-all">
-          <Play className="w-4 h-4 text-rose-600" />
+        <button
+          className="flex items-center gap-2.5 text-white font-medium transition-all"
+          style={{ fontSize: "15px", padding: "12px 24px", background: "#2563eb", fontWeight: 500 }}
+        >
+          <Play className="w-4 h-4" />
           Exam Mode
         </button>
       </div>
 
-      <div>
-        <h2 className="font-extrabold text-xl text-gray-900">Configure Your Exam</h2>
-        <p className="text-sm text-gray-500">Select categories, question count, and difficulty</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="font-extrabold text-xl text-gray-900">Prepare Your Exam</h2>
+          <p className="text-sm text-gray-500">Select categories, question count, and difficulty</p>
+        </div>
+        <button
+          onClick={() => setMode("history")}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all"
+        >
+          <History className="w-4 h-4" />
+          Exam History
+        </button>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
@@ -1995,6 +2187,37 @@ export default function InterviewPrep() {
         </div>
       </div>
 
+      {/* Timed Exam Toggle */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-blue-500" />
+            <span className="font-semibold text-sm text-gray-700">Timed Exam</span>
+            <span className="text-xs text-gray-400">(optional)</span>
+          </div>
+          <button
+            onClick={() => setTimedExam((p) => !p)}
+            className="relative w-11 h-6 rounded-full transition-colors"
+            style={{ background: timedExam ? "#2563eb" : "#e5e7eb" }}
+          >
+            <span className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" style={{ transform: timedExam ? "translateX(20px)" : "translateX(0)" }} />
+          </button>
+        </div>
+        {timedExam && (
+          <div className="mt-3">
+            <div className="text-xs text-gray-500 mb-2">Select duration:</div>
+            <div className="flex gap-2 flex-wrap">
+              {[15, 30, 45, 60].map((m) => (
+                <button key={m} onClick={() => setExamDuration(m)}
+                  className={`px-3 py-1.5 rounded-xl text-sm font-semibold border transition-all ${examDuration === m ? "bg-blue-600 text-white border-blue-600" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
+                  {m} min
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       <button onClick={startExam} disabled={selectedCats.length === 0}
         className="w-full py-3.5 rounded-2xl font-bold text-white text-base flex items-center justify-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         style={{ background: selectedCats.length === 0 ? "#d1d5db" : "linear-gradient(135deg, #DC2626 0%, #EA580C 100%)" }}>
@@ -2017,7 +2240,22 @@ export default function InterviewPrep() {
       <div className="max-w-2xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-500 font-medium">Question <span className="font-extrabold text-gray-900">{examIdx + 1}</span> / {examQuestions.length}</div>
-          <button onClick={() => setMode("study")} className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1"><X className="w-3.5 h-3.5" />Exit</button>
+          <div className="flex items-center gap-3">
+            {timedExam && (
+              <div
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-sm"
+                style={{
+                  background: timeLeft <= 60 ? "#fef2f2" : timeLeft <= 300 ? "#fff7ed" : "#f0f9ff",
+                  color: timeLeft <= 60 ? "#dc2626" : timeLeft <= 300 ? "#ea580c" : "#2563eb",
+                  animation: timeLeft <= 60 ? "pulse 1s infinite" : undefined,
+                }}
+              >
+                <Clock className="w-3.5 h-3.5" />
+                {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
+              </div>
+            )}
+            <button onClick={() => { if (timerRef.current) clearInterval(timerRef.current); setMode("study"); }} className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1"><X className="w-3.5 h-3.5" />Exit</button>
+          </div>
         </div>
 
         <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -2127,31 +2365,78 @@ export default function InterviewPrep() {
   // RESULTS
   if (mode === "results") {
     const missed = examQuestions.filter((q) => grades[q.id] === "review");
-    const gradeBg = score >= 80 ? "from-emerald-500 to-teal-500" : score >= 60 ? "from-amber-500 to-orange-500" : "from-rose-500 to-red-600";
-    const gradeLabel = score >= 80 ? "Excellent Work!" : score >= 60 ? "Good Progress" : "Keep Practicing";
-    const gradeColor = score >= 80 ? "text-emerald-600" : score >= 60 ? "text-amber-500" : "text-rose-600";
+    const passed = score >= 70;
+    const gradeBg = score >= 80 ? "from-emerald-500 to-teal-500" : score >= 70 ? "from-blue-500 to-cyan-500" : score >= 50 ? "from-amber-500 to-orange-500" : "from-rose-500 to-red-600";
+    const gradeLabel = score >= 80 ? "Excellent Work!" : score >= 70 ? "Passed!" : score >= 50 ? "Keep Practicing" : "Needs Improvement";
+    const gradeColor = score >= 80 ? "text-emerald-600" : score >= 70 ? "text-blue-600" : score >= 50 ? "text-amber-500" : "text-rose-600";
+    const timeTaken = Math.round((Date.now() - examStartTime) / 1000);
+    const mins = Math.floor(timeTaken / 60), secs = timeTaken % 60;
+
+    // Category breakdown
+    const catStats: Record<string, { correct: number; total: number; title: string }> = {};
+    for (const q of examQuestions) {
+      const cat = ALL_CATEGORIES.find((c) => c.questions.some((x) => x.id === q.id));
+      const key = cat?.id || "unknown";
+      if (!catStats[key]) catStats[key] = { correct: 0, total: 0, title: cat?.title || "Unknown" };
+      catStats[key].total++;
+      if (grades[q.id] === "got") catStats[key].correct++;
+    }
+
     return (
       <div className="max-w-2xl mx-auto space-y-5">
+        {/* Hero score card */}
         <div className={`bg-gradient-to-r ${gradeBg} rounded-2xl p-6 text-white text-center`}>
           <Trophy className="w-12 h-12 mx-auto mb-3 opacity-90" />
           <div className="text-5xl font-extrabold">{score}%</div>
           <div className="text-lg font-bold mt-1 opacity-90">{gradeLabel}</div>
           <p className="text-sm opacity-75 mt-1">{gotCount} correct out of {examQuestions.length} questions</p>
+          <div className={`inline-flex items-center gap-1.5 mt-3 px-4 py-1.5 rounded-full text-sm font-bold ${passed ? "bg-white/20" : "bg-white/20"}`}>
+            {passed ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+            {passed ? "PASSED" : "FAILED"} (Pass threshold: 70%)
+          </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        {/* Stats row */}
+        <div className="grid grid-cols-4 gap-3">
           {[
             { label: "Correct", value: String(gotCount), color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
-            { label: "Review", value: String(reviewCount), color: "text-rose-600", bg: "bg-rose-50", border: "border-rose-100" },
+            { label: "Incorrect", value: String(reviewCount), color: "text-rose-600", bg: "bg-rose-50", border: "border-rose-100" },
             { label: "Score", value: score + "%", color: gradeColor, bg: "bg-gray-50", border: "border-gray-200" },
+            { label: "Time", value: `${mins}m ${secs}s`, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
           ].map((s) => (
-            <div key={s.label} className={`${s.bg} border ${s.border} rounded-2xl p-4 text-center`}>
-              <div className={`text-2xl font-extrabold ${s.color}`}>{s.value}</div>
+            <div key={s.label} className={`${s.bg} border ${s.border} rounded-2xl p-3 text-center`}>
+              <div className={`text-xl font-extrabold ${s.color}`}>{s.value}</div>
               <div className="text-xs text-gray-500 font-medium mt-0.5">{s.label}</div>
             </div>
           ))}
         </div>
 
+        {/* Category breakdown */}
+        {Object.keys(catStats).length > 1 && (
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+            <div className="font-bold text-gray-900 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-blue-500" /> Category Breakdown
+            </div>
+            <div className="space-y-2">
+              {Object.values(catStats).map((cs) => {
+                const pct = cs.total > 0 ? Math.round((cs.correct / cs.total) * 100) : 0;
+                return (
+                  <div key={cs.title} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium text-gray-700 truncate">{cs.title}</span>
+                      <span className={`font-bold ${pct >= 70 ? "text-emerald-600" : "text-rose-600"}`}>{cs.correct}/{cs.total} ({pct}%)</span>
+                    </div>
+                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: pct >= 70 ? "#10b981" : "#f43f5e" }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Questions to review */}
         {missed.length > 0 && (
           <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
             <div className="font-bold text-gray-900 flex items-center gap-2">
@@ -2183,6 +2468,91 @@ export default function InterviewPrep() {
             <BookOpen className="w-4 h-4" /> Study Mode
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // HISTORY MODE
+  if (mode === "history") {
+    return (
+      <div className="max-w-2xl mx-auto space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-extrabold text-xl text-gray-900">Exam History</h2>
+            <p className="text-sm text-gray-500">{examHistory.length} exam{examHistory.length !== 1 ? "s" : ""} taken</p>
+          </div>
+          <div className="flex gap-2">
+            {examHistory.length > 0 && (
+              <button
+                onClick={() => {
+                  if (window.confirm("Delete all exam history?")) {
+                    setExamHistory([]);
+                    try { localStorage.removeItem("bp_exam_history"); } catch {}
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 border border-rose-200 hover:bg-rose-50 transition-all"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Clear All
+              </button>
+            )}
+            <button
+              onClick={() => setMode("config")}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all"
+            >
+              <X className="w-4 h-4" /> Close
+            </button>
+          </div>
+        </div>
+
+        {examHistory.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+            <FileText className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+            <div className="text-gray-500 font-semibold">No exam history yet</div>
+            <p className="text-xs text-gray-400 mt-1">Complete an exam to see your history here</p>
+            <button onClick={() => setMode("config")} className="mt-4 px-4 py-2 rounded-xl text-sm font-semibold text-white" style={{ background: "#2563eb" }}>
+              Take an Exam
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {examHistory.map((entry) => {
+              const pct = entry.total > 0 ? Math.round((entry.score / entry.total) * 100) : 0;
+              const mins = Math.floor(entry.timeTaken / 60), secs = entry.timeTaken % 60;
+              const d = new Date(entry.date);
+              return (
+                <div key={entry.id} className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-lg font-extrabold ${pct >= 70 ? "text-emerald-600" : "text-rose-600"}`}>{pct}%</span>
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${entry.passed ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>
+                          {entry.passed ? "PASSED" : "FAILED"}
+                        </span>
+                        <span className="text-xs text-gray-500">{entry.score}/{entry.total} correct</span>
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        {d.toLocaleDateString()} {d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · {mins}m {secs}s · {entry.difficulty === "all" ? "All levels" : entry.difficulty}
+                      </div>
+                    </div>
+                    <div className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: entry.passed ? "#f0fdf4" : "#fff1f2" }}>
+                      {entry.passed ? <CheckCircle2 className="w-5 h-5 text-emerald-500" /> : <AlertTriangle className="w-5 h-5 text-rose-500" />}
+                    </div>
+                  </div>
+                  <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-1.5 rounded-full" style={{ width: `${pct}%`, background: pct >= 70 ? "#10b981" : "#f43f5e" }} />
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {entry.categories.slice(0, 4).map((cat) => (
+                      <span key={cat} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{cat}</span>
+                    ))}
+                    {entry.categories.length > 4 && <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">+{entry.categories.length - 4} more</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   }
