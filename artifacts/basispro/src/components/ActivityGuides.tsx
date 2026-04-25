@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   BookOpen, ChevronDown, ChevronRight, CheckCircle2,
   Activity, Wifi, Server, AlertCircle, Zap, Target, GitBranch,
@@ -286,8 +286,19 @@ function QuickCheckList({ items }: { items: QuickCheck[] }) {
 }
 
 function StepItem({ index, step, targeted }: { index: number; step: GuideStep; targeted?: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!targeted || !ref.current) return;
+    const el = ref.current;
+    const timer = setTimeout(() => {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 320);
+    return () => clearTimeout(timer);
+  }, [targeted]);
+
   return (
-    <div className={`flex gap-3 rounded-lg transition-all ${targeted ? "bg-[#EBF3FD]/50 ring-1 ring-[#0070F2]/20 px-2 py-1 -mx-2" : ""}`}>
+    <div ref={ref} className={`flex gap-3 rounded-lg transition-all ${targeted ? "bg-[#EBF3FD]/50 ring-1 ring-[#0070F2]/20 px-2 py-1 -mx-2" : ""}`}>
       <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${targeted ? "bg-[#0070F2] ring-2 ring-[#0070F2]/30" : "bg-[#EBF3FD]"}`}>
         <span className={`text-[10px] font-bold ${targeted ? "text-white" : "text-[#0070F2]"}`}>{index + 1}</span>
       </div>

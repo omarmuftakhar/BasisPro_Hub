@@ -1,0 +1,143 @@
+Enhance Smart Linking Phase 2 with stable step targeting and improved UX.
+
+Scope:
+- ActivityGuides.tsx
+- TroubleshootTrees.tsx
+- LinuxForSAP.tsx
+- WindowsForSAP.tsx
+
+Do not modify:
+- Sidebar
+- Theme/colors/layout
+- Navigation structure
+- Roadmap
+- Certifications
+- TCode Library
+
+----------------------------------
+GOAL
+----------------------------------
+1. Make step targeting stable using IDs
+2. Improve UX when a step is targeted
+3. Keep system safe and future-proof
+
+----------------------------------
+PART 1 — STABLE STEP IDS (CRITICAL)
+----------------------------------
+
+Problem:
+Step targeting is unreliable if based on text.
+
+Fix:
+
+1. In Activity Guides:
+Add explicit step IDs:
+
+Example:
+steps: [
+  { id: "check-services", title: "Check SAP services" },
+  { id: "check-logs", title: "Check logs" },
+  { id: "check-dumps", title: "Check ST22 dumps" }
+]
+
+2. In Troubleshoot Trees:
+Add IDs for questions/nodes:
+
+Example:
+{
+  id: "check-gui-access",
+  question: "Can you access SAP GUI?"
+}
+
+3. Update targeting logic:
+
+Use:
+step.id === targetStep
+
+Do NOT match by text.
+
+----------------------------------
+PART 2 — STEP TARGETING LOGIC
+----------------------------------
+
+1. Read localStorage keys:
+- basisproTargetGuide
+- basisproTargetGuideStep
+- basisproTargetTree
+- basisproTargetTreeStep
+
+2. On page load:
+- Open matching guide/tree
+- Highlight matching step
+
+3. AFTER applying:
+- Remove keys from localStorage
+
+----------------------------------
+PART 3 — UX IMPROVEMENT (IMPORTANT)
+----------------------------------
+
+When a step is targeted:
+
+1. Auto-scroll:
+- Scroll step into view (smooth)
+
+2. Highlight:
+- Add subtle highlight using existing styles
+  (border, background, or ring)
+
+Example:
+- ring-2 ring-[#0070F2]/20
+OR existing active style
+
+3. Optional micro animation:
+- Short fade or pulse (no heavy animation)
+
+----------------------------------
+PART 4 — FALLBACK SAFETY
+----------------------------------
+
+If:
+- Guide not found
+- Step ID not found
+
+Then:
+- Open page normally
+- Do NOT highlight wrong item
+- Do NOT throw errors
+
+----------------------------------
+PART 5 — OS PAGE INTEGRATION
+----------------------------------
+
+In LinuxForSAP.tsx and WindowsForSAP.tsx:
+
+When user clicks:
+
+- Set correct IDs in localStorage
+- Navigate to:
+  - "actGuides"
+  - "troubleshoot"
+
+Do NOT change mapping logic (already implemented)
+
+----------------------------------
+UI RULES
+----------------------------------
+- No redesign
+- No new components
+- Use existing styles only
+- Keep clean and professional
+
+----------------------------------
+ACCEPTANCE
+----------------------------------
+
+✔ Step highlighting works consistently  
+✔ No text-based matching  
+✔ Scrolls to correct step  
+✔ Highlight visible and subtle  
+✔ localStorage cleared after use  
+✔ No broken navigation  
+✔ No UI/theme changes  
+✔ Safe fallback behavior  

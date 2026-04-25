@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   GitBranch, ChevronRight, RotateCcw, CheckCircle2,
   AlertTriangle, Activity, Wifi,
@@ -292,6 +292,16 @@ function TreeRunner({ tree, startNodeId }: { tree: Tree; startNodeId?: string })
   const [currentId, setCurrentId] = useState<string>(startNodeId ?? tree.rootId);
   const [history, setHistory] = useState<{ nodeId: string; choice: string }[]>([]);
   const [isTargeted, setIsTargeted] = useState<boolean>(!!startNodeId);
+  const questionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isTargeted || !questionRef.current) return;
+    const el = questionRef.current;
+    const timer = setTimeout(() => {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 320);
+    return () => clearTimeout(timer);
+  }, []);
 
   const node = tree.nodes[currentId] ?? tree.nodes[tree.rootId];
   const isResolution = !node.question;
@@ -347,7 +357,7 @@ function TreeRunner({ tree, startNodeId }: { tree: Tree; startNodeId?: string })
         </div>
       ) : (
         <div className="space-y-3">
-          <div className={`rounded-xl p-4 space-y-2 transition-all ${isTargeted ? "border-2 border-[#0070F2]/30 bg-[#EBF3FD]/60 ring-1 ring-[#0070F2]/20" : "border border-blue-100 bg-[#F5F9FF]"}`}>
+          <div ref={questionRef} className={`rounded-xl p-4 space-y-2 transition-all ${isTargeted ? "border-2 border-[#0070F2]/30 bg-[#EBF3FD]/60 ring-1 ring-[#0070F2]/20" : "border border-blue-100 bg-[#F5F9FF]"}`}>
             {isTargeted && (
               <div className="flex items-center gap-1 text-[10px] font-semibold text-[#0070F2] uppercase tracking-wider mb-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#0070F2] inline-block" />
