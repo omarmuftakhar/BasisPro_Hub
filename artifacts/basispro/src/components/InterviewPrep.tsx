@@ -1713,7 +1713,7 @@ export default function InterviewPrep() {
   }
 
   function truncateForMC(text: string): string {
-    return text.length > 120 ? text.slice(0, 120) + "…" : text;
+    return text;
   }
 
   // Highlight matching search term in text
