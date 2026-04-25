@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Award, ExternalLink, ChevronDown, ChevronRight, Star, Clock, BookOpen, CheckCircle2, Layers, Cloud, Database, Shield } from "lucide-react";
+import { Award, ExternalLink, ChevronDown, ChevronRight, Star, Clock, BookOpen, CheckCircle2, Layers, Cloud, Database, Shield, Bookmark, Trophy, Zap } from "lucide-react";
 
 interface Cert {
   id: string;
@@ -654,6 +654,19 @@ export default function CloudCertifications() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("all");
   const [levelFilter, setLevelFilter] = useState<string>("all");
+  const [savedCerts, setSavedCerts] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem("bp_saved_certs") || "[]")); } catch { return new Set(); }
+  });
+
+  function toggleSaved(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    setSavedCerts((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      try { localStorage.setItem("bp_saved_certs", JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  }
 
   const levels = ["all", "Foundational", "Associate", "Professional", "Specialty", "Expert"];
 
@@ -699,6 +712,13 @@ export default function CloudCertifications() {
               <span>Valid: {cert.validity}</span>
             </div>
           </div>
+          <button
+            onClick={(e) => toggleSaved(cert.id, e)}
+            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
+            title={savedCerts.has(cert.id) ? "Remove bookmark" : "Bookmark this certification"}
+          >
+            <Bookmark className={`w-4 h-4 transition-colors ${savedCerts.has(cert.id) ? "fill-amber-400 text-amber-400" : "text-gray-400"}`} />
+          </button>
           <ChevronRight className={`w-4 h-4 text-gray-400 flex-shrink-0 mt-1 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
         </div>
 
@@ -756,18 +776,38 @@ export default function CloudCertifications() {
           <span className="text-sm font-medium opacity-80">Career Development</span>
         </div>
         <h1 className="text-2xl font-extrabold mb-1">Cloud & SAP Certifications</h1>
-        <p className="text-sm opacity-80 max-w-lg">
+        <p className="text-sm opacity-80 max-w-lg mb-5">
           Complete certification guide for SAP Basis professionals — {CERTS.length} certifications across SAP, AWS, Azure, and GCP with exam details, study tips, and salary impact at each level.
         </p>
+        {/* Stat cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { icon: <Trophy className="w-4 h-4" />, value: CERTS.length, label: "Certifications" },
+            { icon: <Cloud className="w-4 h-4" />, value: 4, label: "Cloud Platforms" },
+            { icon: <Layers className="w-4 h-4" />, value: 5, label: "Exam Levels" },
+            { icon: <Zap className="w-4 h-4" />, value: CERTS.reduce((a, c) => a + c.tips.length, 0), label: "Study Tips" },
+          ].map((stat) => (
+            <div key={stat.label} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "10px", padding: "12px 16px" }}>
+              <div className="opacity-70 mb-1">{stat.icon}</div>
+              <div style={{ fontSize: "22px", fontWeight: 700, color: "white", lineHeight: 1.1 }}>{stat.value}</div>
+              <div style={{ fontSize: "11px", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", letterSpacing: "0.04em", marginTop: "2px" }}>{stat.label}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Vendor quick links */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {Object.entries(VENDOR_LINKS).map(([vendor, link]) => (
           <a key={vendor} href={link.url} target="_blank" rel="noopener noreferrer"
-            className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all hover:shadow-sm ${VENDOR_COLORS[vendor]}`}>
-            <ExternalLink className="w-3 h-3" />
-            {link.label}
+            className={`flex items-center gap-2 rounded-xl border text-xs font-semibold transition-all hover:shadow-sm ${VENDOR_COLORS[vendor]}`}
+            style={{ padding: "8px 16px", transition: "all 0.15s" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.15)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = ""; }}
+          >
+            <ExternalLink className="w-3 h-3 flex-shrink-0" />
+            <span className="flex-1">{link.label}</span>
+            <span className="opacity-60 text-[11px] flex-shrink-0">↗</span>
           </a>
         ))}
       </div>
