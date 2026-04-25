@@ -1,0 +1,97 @@
+Enhance only the Operating Systems pages:
+- Linux
+- Windows
+
+Do not modify sidebar, navigation, theme, colors, auth, search, Roadmap, Cloud Certifications, TCode Library, or any unrelated page.
+
+Goal:
+Make Linux and Windows pages educational for SAP Basis consultants, not generic OS pages.
+
+For Linux page:
+Position it as:
+“Linux for SAP Basis & SAP HANA Operations”
+
+Use these learning sections:
+1. Why Linux matters for SAP
+2. Linux role in SAP HANA and S/4HANA
+3. RHEL for SAP Solutions overview
+4. Core Linux skills for Basis consultants
+5. SAP HANA migration and Linux readiness
+6. HA/DR and clustering basics
+7. Automation with Ansible / system roles
+8. Daily Basis Linux commands
+9. Troubleshooting checklist
+10. Reference links
+
+Use these reference links:
+- https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux/sap
+- https://www.redhat.com/en/topics/linux/what-is-erp
+- https://www.redhat.com/en/topics/linux/what-is-sap-hana-migration
+
+Content direction:
+Explain that RHEL for SAP Solutions provides an enterprise Linux foundation for SAP workloads, including SAP HANA, SAP NetWeaver, and SAP S/4HANA. Mention SAP-specific repositories, high availability add-on, proactive monitoring, automation, lifecycle support, and hybrid cloud support on AWS, Azure, and Google Cloud.
+
+For SAP HANA migration:
+Explain that SAP HANA runs on Linux and SAP S/4HANA runs on SAP HANA, so Linux knowledge is essential for modern SAP Basis work.
+
+Add practical Linux command examples:
+- top
+- free -g
+- df -h
+- uptime
+- ps -ef
+- systemctl status
+- journalctl -xe
+- ip addr
+- ping
+- nslookup
+- ssh
+- saptune
+- tuned-adm
+
+For Windows page:
+Position it as:
+“Windows for SAP Basis Operations”
+
+Keep Windows SAP-relevant, not generic.
+
+Use these learning sections:
+1. When Windows is used in SAP landscapes
+2. SAP application servers on Windows
+3. Windows services for SAP
+4. File systems, permissions, and shared folders
+5. SAP GUI / frontend administration
+6. SQL Server-based SAP landscapes
+7. Monitoring and troubleshooting basics
+8. Windows commands useful for Basis
+9. Limitations compared to Linux for HANA
+10. Reference links placeholder
+
+Add practical Windows command examples:
+- services.msc
+- eventvwr
+- taskmgr
+- perfmon
+- netstat -ano
+- ipconfig /all
+- nslookup
+- ping
+- tracert
+- gpupdate /force
+- whoami
+- hostname
+
+Important:
+Do not make Linux or Windows pages look like a certification course.
+Make them look like practical SAP Basis operating system guides.
+
+Use existing card design, badges, sections, and spacing.
+If new CSS is needed, prefix classes with:
+bp-os-
+
+Acceptance:
+- Linux page becomes SAP-focused and educational
+- Windows page becomes SAP-focused and educational
+- Existing theme unchanged
+- Sidebar unchanged
+- Other categories unaffected

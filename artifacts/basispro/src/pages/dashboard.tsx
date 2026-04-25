@@ -20,6 +20,8 @@ import TCodeLibrary from "@/components/TCodeLibrary";
 import CareerRoadmap from "@/components/CareerRoadmap";
 import CloudCertifications from "@/components/CloudCertifications";
 import InterviewPrep from "@/components/InterviewPrep";
+import LinuxForSAP from "@/components/LinuxForSAP";
+import WindowsForSAP from "@/components/WindowsForSAP";
 
 // ─── Data ──────────────────────────────────────────────────────────────
 const activityData = [
@@ -933,9 +935,11 @@ export default function Dashboard() {
           {activeId === "certifications" && <CloudCertifications />}
           {activeId === "interviewPrep" && <InterviewPrep key={interviewPrepKey} />}
           {activeId === "ai" && <DashboardAIAssistant />}
+          {activeId === "linux" && <LinuxForSAP />}
+          {activeId === "windows" && <WindowsForSAP />}
 
           {/* ── Module content ─────────────────────────── */}
-          {!["tcodes","roadmap","certifications","interviewPrep","overview","ai"].includes(activeId) && (
+          {!["tcodes","roadmap","certifications","interviewPrep","overview","ai","linux","windows"].includes(activeId) && (
             moduleRegistry[activeId] ? (
               <ModuleView module={moduleRegistry[activeId]} />
             ) : (
