@@ -1,0 +1,85 @@
+Do not modify sidebar, navigation, theme, layout, auth/session, search, or any other pages.
+
+----------------------------------
+GOAL
+----------------------------------
+1. Keep Roadmap as SAP Career Intelligence System
+2. Fix Cloud Certifications to be hyperscaler-only
+3. Ensure SAP certifications appear ONLY inside Roadmap
+
+----------------------------------
+CLOUD CERTIFICATIONS FIX (IMPORTANT)
+----------------------------------
+
+Problem:
+Cloud Certifications page is showing SAP certifications and SAP filters.
+
+Apply these changes ONLY to Cloud Certifications page:
+
+1. Remove SAP completely:
+- Remove “SAP” filter chip
+- Remove SAP certification cards
+- Remove “SAP Training Catalog” button
+- Remove any SAP-related labels or tags
+
+2. Rename content:
+- Page title → Cloud Certifications
+- Hero title → Cloud Certifications
+- Subtitle → 
+  "Certification guide for AWS, Azure, GCP, and cloud platforms relevant to SAP Basis and cloud architecture roles"
+
+3. Allowed vendors ONLY:
+- AWS
+- Azure
+- GCP
+- Alibaba Cloud (optional placeholder)
+
+4. Update filters:
+Keep only:
+- AWS
+- Azure
+- GCP
+
+Remove:
+- SAP filter
+
+5. Update metrics dynamically:
+- Total certifications → cloud-only count
+- Cloud platforms → AWS, Azure, GCP
+- Critical path → cloud-only certifications
+- Showing X of Y → cloud-only
+
+6. IMPORTANT:
+Do NOT delete SAP certification data globally.
+Only exclude SAP certifications from rendering on this page.
+
+----------------------------------
+ROADMAP RULES (DO NOT BREAK)
+----------------------------------
+
+1. SAP certifications must remain ONLY inside Roadmap:
+Section name:
+- SAP Career Certifications
+or
+- SAP Basis / S/4HANA Certifications
+
+2. Roadmap must continue to show:
+- SAP certifications mapped to stages
+- Cloud certifications only as recommendations (not mixed)
+
+3. Do NOT move SAP certifications into Cloud Certifications.
+
+----------------------------------
+DESIGN GUARDRAILS
+----------------------------------
+
+Do NOT change:
+- Color scheme
+- Theme
+- Typography
+- Spacing system
+- Sidebar
+- Header
+- Layout structure
+
+Use existing UI components only.

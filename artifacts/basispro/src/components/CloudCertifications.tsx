@@ -625,19 +625,19 @@ const RELEVANCE_BADGE: Record<string, string> = {
 };
 
 const VENDOR_TABS = [
-  { id: "all", label: "All Certifications" },
-  { id: "SAP", label: "SAP" },
+  { id: "all", label: "All Cloud" },
   { id: "AWS", label: "AWS" },
   { id: "Azure", label: "Azure" },
   { id: "GCP", label: "GCP" },
 ];
 
 const VENDOR_LINKS: Record<string, { label: string; url: string }> = {
-  SAP: { label: "SAP Training Catalog", url: "https://training.sap.com/certification" },
   AWS: { label: "AWS Certification Portal", url: "https://aws.amazon.com/certification/" },
   Azure: { label: "Microsoft Learn Credentials", url: "https://learn.microsoft.com/en-us/credentials/browse/" },
   GCP: { label: "GCP Certification", url: "https://cloud.google.com/learn/certification" },
 };
+
+const CLOUD_CERTS = CERTS.filter((c) => c.vendor !== "SAP");
 
 const VENDOR_EXAM_URLS: Record<string, string> = {
   SAP: "https://learning.sap.com/certifications",
@@ -653,7 +653,7 @@ export default function CloudCertifications() {
 
   const levels = ["all", "Foundational", "Associate", "Professional", "Specialty", "Expert"];
 
-  const shown = CERTS.filter((c) => {
+  const shown = CLOUD_CERTS.filter((c) => {
     const vendorMatch = filter === "all" || c.vendor === filter;
     const levelMatch = levelFilter === "all" || c.level === levelFilter;
     return vendorMatch && levelMatch;
@@ -767,17 +767,17 @@ export default function CloudCertifications() {
           <Award className="w-5 h-5 opacity-80" />
           <span className="text-sm font-medium opacity-80">Career Development</span>
         </div>
-        <h1 className="text-2xl font-extrabold mb-1">Cloud & SAP Certifications</h1>
+        <h1 className="text-2xl font-extrabold mb-1">Cloud Certifications</h1>
         <p className="text-sm opacity-80 max-w-lg mb-5">
-          Complete certification guide for SAP Basis professionals — {CERTS.length} certifications across SAP, AWS, Azure, and GCP with exam details, study tips, and salary impact at each level.
+          Certification guide for AWS, Azure, GCP, and cloud platforms relevant to SAP Basis and cloud architecture roles.
         </p>
         {/* Stat cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { icon: <Trophy className="w-4 h-4" />, value: CERTS.length, label: "Certifications" },
-            { icon: <Cloud className="w-4 h-4" />, value: 4, label: "Cloud Platforms" },
-            { icon: <Layers className="w-4 h-4" />, value: CERTS.filter((c) => c.relevance === "critical").length, label: "Critical Path" },
-            { icon: <Zap className="w-4 h-4" />, value: CERTS.reduce((a, c) => a + c.tips.length, 0), label: "Study Tips" },
+            { icon: <Trophy className="w-4 h-4" />, value: CLOUD_CERTS.length, label: "Certifications" },
+            { icon: <Cloud className="w-4 h-4" />, value: 3, label: "Cloud Platforms" },
+            { icon: <Layers className="w-4 h-4" />, value: CLOUD_CERTS.filter((c) => c.relevance === "critical").length, label: "Critical Path" },
+            { icon: <Zap className="w-4 h-4" />, value: CLOUD_CERTS.reduce((a, c) => a + c.tips.length, 0), label: "Study Tips" },
           ].map((stat) => (
             <div key={stat.label} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "10px", padding: "12px 16px" }}>
               <div className="opacity-70 mb-1">{stat.icon}</div>
@@ -836,7 +836,7 @@ export default function CloudCertifications() {
             {l === "all" ? "All Levels" : l}
           </button>
         ))}
-        <span className="ml-auto text-xs text-gray-400 self-center">Showing {shown.length} of {CERTS.length}</span>
+        <span className="ml-auto text-xs text-gray-400 self-center">Showing {shown.length} of {CLOUD_CERTS.length}</span>
       </div>
 
       {/* Grouped cert list */}
