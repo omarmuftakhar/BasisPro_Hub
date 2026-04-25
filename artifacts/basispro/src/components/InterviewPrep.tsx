@@ -1626,10 +1626,8 @@ export default function InterviewPrep() {
     setSelectedCats((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   }
 
-  function truncateForMC(text: string, maxLen = 140): string {
-    const dot = text.indexOf('. ');
-    const cut = dot > 30 && dot < maxLen ? dot + 1 : Math.min(text.length, maxLen);
-    return text.length <= cut ? text : text.slice(0, cut) + (cut < text.length ? "…" : "");
+  function truncateForMC(text: string): string {
+    return text;
   }
 
   function startExam() {
@@ -1694,6 +1692,21 @@ export default function InterviewPrep() {
   if (mode === "study") return (
     <>
     <div className="space-y-5 max-w-5xl">
+      {/* Mode Tabs */}
+      <div className="flex gap-1 p-1 rounded-xl bg-gray-100 self-start w-fit">
+        <button className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold bg-white shadow-sm text-gray-900 transition-all">
+          <BookOpen className="w-4 h-4 text-blue-600" />
+          Study Mode
+        </button>
+        <button
+          onClick={() => { setSelectedCats([]); setMode("config"); }}
+          className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-all"
+        >
+          <Play className="w-4 h-4" />
+          Exam Mode
+        </button>
+      </div>
+
       <div className="bg-gradient-to-r from-rose-600 via-orange-500 to-amber-500 rounded-2xl p-6 text-white">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
@@ -1704,12 +1717,9 @@ export default function InterviewPrep() {
             <h1 className="text-2xl font-extrabold">SAP Basis Interview Mastery</h1>
             <p className="text-sm opacity-80 mt-1">{totalQuestions}+ expert Q&As across {ALL_CATEGORIES.length} categories — including 2026 Scenario Pack and Killer Q&As</p>
           </div>
-          <button
-            onClick={() => { setSelectedCats([]); setMode("config"); }}
-            className="flex-shrink-0 flex items-center gap-2 bg-white text-rose-600 font-bold px-5 py-2.5 rounded-xl hover:bg-rose-50 transition-all shadow-lg text-sm">
-            <Play className="w-4 h-4" />
-            Start Exam Mode
-          </button>
+          <div className="flex flex-col items-end gap-2">
+            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/20 border border-white/30 text-white">Study Mode — Browse &amp; Learn</span>
+          </div>
         </div>
         <div className="grid grid-cols-3 gap-3 mt-5">
           {[
@@ -1911,12 +1921,24 @@ export default function InterviewPrep() {
   // EXAM CONFIG
   if (mode === "config") return (
     <div className="max-w-2xl mx-auto space-y-5">
-      <div className="flex items-center gap-3">
-        <button onClick={() => setMode("study")} className="p-2 rounded-xl hover:bg-gray-100 text-gray-500"><X className="w-5 h-5" /></button>
-        <div>
-          <h2 className="font-extrabold text-xl text-gray-900">Configure Your Exam</h2>
-          <p className="text-sm text-gray-500">Select categories, question count, and difficulty</p>
-        </div>
+      {/* Mode Tabs */}
+      <div className="flex gap-1 p-1 rounded-xl bg-gray-100 self-start w-fit">
+        <button
+          onClick={() => setMode("study")}
+          className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-all"
+        >
+          <BookOpen className="w-4 h-4" />
+          Study Mode
+        </button>
+        <button className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold bg-white shadow-sm text-gray-900 transition-all">
+          <Play className="w-4 h-4 text-rose-600" />
+          Exam Mode
+        </button>
+      </div>
+
+      <div>
+        <h2 className="font-extrabold text-xl text-gray-900">Configure Your Exam</h2>
+        <p className="text-sm text-gray-500">Select categories, question count, and difficulty</p>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
@@ -2077,16 +2099,6 @@ export default function InterviewPrep() {
                 </div>
               )}
 
-              {!hasAnsweredMC && (
-                <div className="text-center pt-1">
-                  <button
-                    onClick={() => setRevealed(true)}
-                    className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2"
-                  >
-                    Or, reveal the full expert answer instead
-                  </button>
-                </div>
-              )}
 
               {hasAnsweredMC && (
                 <button
@@ -2108,30 +2120,6 @@ export default function InterviewPrep() {
           })}
         </div>
 
-        <div className="flex gap-3">
-          <button
-            onClick={() => {
-              const prev = Math.max(0, examIdx - 1);
-              setExamIdx(prev);
-              setRevealed(!!grades[examQuestions[prev]?.id]);
-            }}
-            disabled={examIdx === 0}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold text-sm hover:border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-          >
-            ← Previous
-          </button>
-          <button
-            onClick={() => {
-              const next = Math.min(examQuestions.length - 1, examIdx + 1);
-              setExamIdx(next);
-              setRevealed(!!grades[examQuestions[next]?.id]);
-            }}
-            disabled={examIdx === examQuestions.length - 1}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold text-sm hover:border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-          >
-            Next →
-          </button>
-        </div>
       </div>
     );
   }

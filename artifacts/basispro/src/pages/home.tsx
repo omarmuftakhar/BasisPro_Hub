@@ -940,21 +940,21 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-border bg-white px-6 pt-[17px] pb-[17px] pl-[32px] pr-[32px]" style={{ margin: 0 }}>
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-6">
-          <div className="flex-1 flex justify-start justify-center">
+          <div className="flex-1 flex justify-center md:justify-start">
             <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-              <div className="w-7 h-7 bg-primary rounded-md flex items-center justify-center">
-                <span className="text-white font-bold text-xs">B</span>
+              <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                <span className="text-white font-bold text-sm">B</span>
               </div>
-              <span className="font-bold text-lg text-foreground tracking-tight">BasisPro</span>
+              <span className="font-bold text-xl text-foreground tracking-tight">BasisPro</span>
             </Link>
           </div>
-          <div className="flex gap-8 text-sm text-muted-foreground">
+          <div className="flex-1 flex justify-center gap-8 text-sm text-muted-foreground">
             <Link href="/status" className="hover:text-primary transition-colors">Status</Link>
             <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
             <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
             <Link href="/contact" className="hover:text-primary transition-colors">Contact Us</Link>
           </div>
-          <div className="flex-1 flex justify-end justify-center text-sm text-muted-foreground text-center md:text-right">
+          <div className="flex-1 flex justify-center md:justify-end text-sm text-muted-foreground">
             © {new Date().getFullYear()} BasisPro. All rights reserved.
           </div>
         </div>
