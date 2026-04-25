@@ -812,7 +812,7 @@ export default function Dashboard() {
                       className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-all ${
                         isActive
                           ? "bg-[#EBF3FD] text-primary font-semibold"
-                          : "text-muted-foreground hover:bg-[#F5F7FA] hover:text-foreground"
+                          : "text-muted-foreground hover:bg-[#eff6ff] hover:text-primary"
                       }`}
                     >
                       {item.icon}

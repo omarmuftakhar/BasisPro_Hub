@@ -10,13 +10,14 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     setTimeout(() => {
-      const ok = login(email, password);
+      const ok = login(email, password, rememberMe);
       if (ok) {
         navigate("/dashboard");
       } else {
@@ -121,11 +122,25 @@ export default function Login() {
             </div>
           </div>
 
+          {/* Remember Me */}
+          <label className="flex items-center gap-2.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-4 h-4 rounded accent-primary cursor-pointer"
+            />
+            <span className="text-sm text-muted-foreground">Remember me for 30 days</span>
+          </label>
+
           {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-white font-semibold py-2.5 rounded-lg text-sm hover:bg-primary/90 transition-colors disabled:opacity-70"
+            className="w-full bg-primary text-white font-semibold py-2.5 rounded-lg text-sm transition-all disabled:opacity-70"
+            style={{ cursor: "pointer" }}
+            onMouseEnter={(e) => { if (!loading) (e.currentTarget as HTMLButtonElement).style.background = "#1d4ed8"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = ""; }}
           >
             {loading ? "Signing in…" : "Sign In"}
           </button>

@@ -104,6 +104,8 @@ export default function Privacy() {
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           aria-label="Back to top"
+          onMouseEnter={(e) => (e.currentTarget.style.background = "#1d4ed8")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "#2563EB")}
           style={{
             position: "fixed",
             bottom: "28px",
@@ -120,7 +122,7 @@ export default function Privacy() {
             justifyContent: "center",
             boxShadow: "0 4px 16px rgba(37,99,235,0.35)",
             zIndex: 100,
-            transition: "opacity 0.2s",
+            transition: "background 0.2s, opacity 0.2s",
           }}
         >
           <ArrowUp style={{ width: "18px", height: "18px" }} />

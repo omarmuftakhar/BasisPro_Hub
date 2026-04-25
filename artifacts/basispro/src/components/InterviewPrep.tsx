@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
-import { ChevronRight, MessageSquare, Zap, Shield, Database, Cloud, Settings, Star, Copy, Check, Activity, Server, Layers, BookOpen, Code, Search, X, Target, Brain, Trophy, RotateCcw, ChevronDown, Timer, Play, CheckCircle2, XCircle, BookOpen as BookOpenIcon, GraduationCap, ListChecks, Shuffle, Clock } from "lucide-react";
+import { ChevronRight, MessageSquare, Zap, Shield, Database, Cloud, Settings, Star, Copy, Check, Activity, Server, Layers, BookOpen, Code, Search, X, Target, Brain, Trophy, RotateCcw, ChevronDown, Play, CheckCircle2, XCircle, BookOpen as BookOpenIcon, GraduationCap, ListChecks, Shuffle } from "lucide-react";
 import { EXAM_PACK_2026 } from "@/data/examPack2026";
 
 interface QA {
@@ -1579,15 +1579,14 @@ export default function InterviewPrep() {
   const [selectedCats, setSelectedCats] = useState<string[]>([]);
   const [examCount, setExamCount] = useState<number>(20);
   const [examDiff, setExamDiff] = useState<string>("all");
-  const [timerEnabled, setTimerEnabled] = useState(false);
-  const [timePerQ, setTimePerQ] = useState(60);
 
   // exam state
   const [examQuestions, setExamQuestions] = useState<QA[]>([]);
   const [examIdx, setExamIdx] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [grades, setGrades] = useState<Record<string, "got" | "review">>({});
-  const [timeLeft, setTimeLeft] = useState(0);
+  const [mcOpts, setMcOpts] = useState<Record<string, Array<{ text: string; correct: boolean }>>>({});
+  const [mcSelected, setMcSelected] = useState<Record<string, number>>({});
 
   // progress tracking (persisted)
   const [completed, setCompleted] = useState<Set<string>>(() => {
@@ -1627,17 +1626,51 @@ export default function InterviewPrep() {
     setSelectedCats((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   }
 
+  function truncateForMC(text: string, maxLen = 140): string {
+    const dot = text.indexOf('. ');
+    const cut = dot > 30 && dot < maxLen ? dot + 1 : Math.min(text.length, maxLen);
+    return text.length <= cut ? text : text.slice(0, cut) + (cut < text.length ? "…" : "");
+  }
+
   function startExam() {
     let pool = ALL_CATEGORIES.filter((c) => selectedCats.includes(c.id)).flatMap((c) => c.questions);
     if (examDiff !== "all") pool = pool.filter((q) => q.level === examDiff);
     const shuffled = [...pool].sort(() => Math.random() - 0.5);
     const selected = examCount === 0 ? shuffled : shuffled.slice(0, examCount);
+
+    const optionsMap: Record<string, Array<{ text: string; correct: boolean }>> = {};
+    selected.forEach((q, i) => {
+      const others = selected.filter((_, j) => j !== i);
+      const distractors = [...others].sort(() => Math.random() - 0.5).slice(0, 3);
+      optionsMap[q.id] = [
+        { text: truncateForMC(q.a), correct: true },
+        ...distractors.map((d) => ({ text: truncateForMC(d.a), correct: false })),
+      ].sort(() => Math.random() - 0.5);
+    });
+
     setExamQuestions(selected);
+    setMcOpts(optionsMap);
+    setMcSelected({});
     setExamIdx(0);
     setRevealed(false);
     setGrades({});
-    if (timerEnabled) setTimeLeft(timePerQ);
     setMode("quiz");
+  }
+
+  function selectMcOption(optionIdx: number) {
+    const q = examQuestions[examIdx];
+    if (!q || mcSelected[q.id] !== undefined) return;
+    const opt = (mcOpts[q.id] || [])[optionIdx];
+    if (!opt) return;
+    setMcSelected((prev) => ({ ...prev, [q.id]: optionIdx }));
+    setGrades((prev) => ({ ...prev, [q.id]: opt.correct ? "got" : "review" }));
+  }
+
+  function advanceQuestion() {
+    const next = examIdx + 1;
+    if (next >= examQuestions.length) { setMode("results"); return; }
+    setExamIdx(next);
+    setRevealed(false);
   }
 
   const gradeQuestion = useCallback((grade: "got" | "review") => {
@@ -1646,27 +1679,11 @@ export default function InterviewPrep() {
       return { ...prev, [qa.id]: grade };
     });
     setExamIdx((idx) => {
-      if (idx + 1 >= examQuestions.length) {
-        setMode("results");
-        return idx;
-      }
+      if (idx + 1 >= examQuestions.length) { setMode("results"); return idx; }
       setRevealed(false);
-      if (timerEnabled) setTimeLeft(timePerQ);
       return idx + 1;
     });
-  }, [examIdx, examQuestions, timerEnabled, timePerQ]);
-
-  useEffect(() => {
-    if (mode !== "quiz" || !timerEnabled || timeLeft <= 0) return;
-    const t = setTimeout(() => setTimeLeft((tl) => tl - 1), 1000);
-    return () => clearTimeout(t);
-  }, [mode, timerEnabled, timeLeft]);
-
-  useEffect(() => {
-    if (mode === "quiz" && timerEnabled && timeLeft === 0 && revealed) {
-      gradeQuestion("review");
-    }
-  }, [timeLeft]);
+  }, [examIdx, examQuestions]);
 
   const gotCount = Object.values(grades).filter((v) => v === "got").length;
   const reviewCount = Object.values(grades).filter((v) => v === "review").length;
@@ -1896,26 +1913,6 @@ export default function InterviewPrep() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="font-semibold text-sm text-gray-700 flex items-center gap-2"><Clock className="w-4 h-4 text-blue-500" /> Countdown Timer per Question</div>
-          <button onClick={() => setTimerEnabled(!timerEnabled)}
-            className={`relative w-11 h-6 rounded-full transition-colors ${timerEnabled ? "bg-blue-500" : "bg-gray-200"}`}>
-            <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${timerEnabled ? "translate-x-6" : "translate-x-1"}`} />
-          </button>
-        </div>
-        {timerEnabled && (
-          <div className="flex gap-2">
-            {[30, 60, 90, 120].map((s) => (
-              <button key={s} onClick={() => setTimePerQ(s)}
-                className={`px-3 py-1.5 rounded-xl text-sm font-medium border transition-all ${timePerQ === s ? "bg-blue-500 text-white border-blue-500" : "border-gray-200 text-gray-600"}`}>
-                {s}s
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
       <button onClick={startExam} disabled={selectedCats.length === 0}
         className="w-full py-3.5 rounded-2xl font-bold text-white text-base flex items-center justify-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         style={{ background: selectedCats.length === 0 ? "#d1d5db" : "linear-gradient(135deg, #DC2626 0%, #EA580C 100%)" }}>
@@ -1928,29 +1925,22 @@ export default function InterviewPrep() {
   // EXAM QUIZ
   if (mode === "quiz" && currentQ) {
     const progress = (examIdx / examQuestions.length) * 100;
-    const timerPct = timerEnabled && timePerQ > 0 ? (timeLeft / timePerQ) * 100 : 100;
     const qCat = ALL_CATEGORIES.find((c) => c.questions.some((q) => q.id === currentQ.id));
+    const opts = mcOpts[currentQ.id] || [];
+    const selIdx = mcSelected[currentQ.id] !== undefined ? mcSelected[currentQ.id] : -1;
+    const hasAnsweredMC = selIdx >= 0;
+    const LABELS = ["A", "B", "C", "D"];
+
     return (
       <div className="max-w-2xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-500 font-medium">Question <span className="font-extrabold text-gray-900">{examIdx + 1}</span> / {examQuestions.length}</div>
-          {timerEnabled && (
-            <div className={`flex items-center gap-1.5 text-sm font-bold px-3 py-1 rounded-full ${timeLeft <= 10 ? "bg-red-100 text-red-600" : "bg-blue-50 text-blue-600"}`}>
-              <Timer className="w-3.5 h-3.5" />{timeLeft}s
-            </div>
-          )}
           <button onClick={() => setMode("study")} className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1"><X className="w-3.5 h-3.5" />Exit</button>
         </div>
 
         <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
           <div className="h-2 bg-gradient-to-r from-rose-500 to-orange-400 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
         </div>
-
-        {timerEnabled && (
-          <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-            <div className={`h-1 rounded-full transition-all duration-1000 ${timeLeft <= 10 ? "bg-red-400" : "bg-blue-400"}`} style={{ width: `${timerPct}%` }} />
-          </div>
-        )}
 
         <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-2 flex-wrap">
@@ -1965,34 +1955,88 @@ export default function InterviewPrep() {
 
           <div className="text-base font-bold text-gray-900 leading-snug">{currentQ.q}</div>
 
-          {!revealed ? (
-            <div className="bg-gray-50 rounded-xl p-5 text-center border border-dashed border-gray-200">
-              <Brain className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-              <div className="text-gray-400 text-sm mb-3">Think through your answer first, then reveal</div>
-              <button onClick={() => setRevealed(true)}
-                className="bg-gradient-to-r from-rose-600 to-orange-500 text-white font-bold px-6 py-2.5 rounded-xl hover:opacity-90 transition-all shadow-md">
-                Reveal Answer
-              </button>
-            </div>
-          ) : (
+          {revealed ? (
+            /* Reveal path — full answer + manual grading */
             <div className="space-y-4">
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
                 <div className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2">Expert Answer</div>
                 <p className="text-sm text-gray-800 leading-relaxed">{currentQ.a}</p>
               </div>
-              <div>
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider text-center mb-3">How did you do?</div>
-                <div className="grid grid-cols-2 gap-3">
-                  <button onClick={() => gradeQuestion("got")}
-                    className="flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm transition-all shadow">
-                    <CheckCircle2 className="w-5 h-5" /> Got It!
-                  </button>
-                  <button onClick={() => gradeQuestion("review")}
-                    className="flex items-center justify-center gap-2 py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm transition-all shadow">
-                    <XCircle className="w-5 h-5" /> Need Review
+              {!grades[currentQ.id] ? (
+                <div>
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-wider text-center mb-3">How did you do?</div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button onClick={() => gradeQuestion("got")}
+                      className="flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm transition-all shadow">
+                      <CheckCircle2 className="w-5 h-5" /> Got It!
+                    </button>
+                    <button onClick={() => gradeQuestion("review")}
+                      className="flex items-center justify-center gap-2 py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm transition-all shadow">
+                      <XCircle className="w-5 h-5" /> Need Review
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            /* Multiple choice path */
+            <div className="space-y-3">
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Choose the best answer</div>
+              <div className="space-y-2">
+                {opts.map((opt, i) => {
+                  let bg = "bg-white border-gray-200 hover:border-gray-300 hover:bg-[#f8faff] text-gray-700";
+                  if (hasAnsweredMC) {
+                    if (opt.correct) bg = "bg-emerald-50 border-emerald-400 text-emerald-800";
+                    else if (i === selIdx) bg = "bg-rose-50 border-rose-400 text-rose-800";
+                    else bg = "bg-gray-50 border-gray-200 text-gray-400";
+                  }
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => selectMcOption(i)}
+                      disabled={hasAnsweredMC}
+                      className={`w-full flex items-start gap-3 px-4 py-3 rounded-xl border-2 text-sm text-left transition-all ${bg} disabled:cursor-default`}
+                    >
+                      <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                        hasAnsweredMC && opt.correct ? "bg-emerald-500 text-white" :
+                        hasAnsweredMC && i === selIdx && !opt.correct ? "bg-rose-500 text-white" :
+                        "bg-gray-100 text-gray-600"
+                      }`}>{LABELS[i]}</span>
+                      <span className="flex-1 leading-snug">{opt.text}</span>
+                      {hasAnsweredMC && opt.correct && <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />}
+                      {hasAnsweredMC && i === selIdx && !opt.correct && <XCircle className="w-4 h-4 text-rose-500 flex-shrink-0 mt-0.5" />}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {hasAnsweredMC && (
+                <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold ${opts[selIdx]?.correct ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-rose-50 text-rose-700 border border-rose-200"}`}>
+                  {opts[selIdx]?.correct ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                  {opts[selIdx]?.correct ? "Correct! Well done." : "Incorrect — the correct answer is highlighted in green above."}
+                </div>
+              )}
+
+              {!hasAnsweredMC && (
+                <div className="text-center pt-1">
+                  <button
+                    onClick={() => setRevealed(true)}
+                    className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2"
+                  >
+                    Or, reveal the full expert answer instead
                   </button>
                 </div>
-              </div>
+              )}
+
+              {hasAnsweredMC && (
+                <button
+                  onClick={advanceQuestion}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white transition-all shadow-md"
+                  style={{ background: "linear-gradient(135deg,#DC2626,#EA580C)" }}
+                >
+                  {examIdx + 1 >= examQuestions.length ? "View Results" : "Next Question →"}
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -2010,7 +2054,6 @@ export default function InterviewPrep() {
               const prev = Math.max(0, examIdx - 1);
               setExamIdx(prev);
               setRevealed(!!grades[examQuestions[prev]?.id]);
-              if (timerEnabled) setTimeLeft(timePerQ);
             }}
             disabled={examIdx === 0}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold text-sm hover:border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
@@ -2022,7 +2065,6 @@ export default function InterviewPrep() {
               const next = Math.min(examQuestions.length - 1, examIdx + 1);
               setExamIdx(next);
               setRevealed(!!grades[examQuestions[next]?.id]);
-              if (timerEnabled) setTimeLeft(timePerQ);
             }}
             disabled={examIdx === examQuestions.length - 1}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold text-sm hover:border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"

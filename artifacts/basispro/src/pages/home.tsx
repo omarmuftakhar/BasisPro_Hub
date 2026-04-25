@@ -205,8 +205,14 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-3">
             <Button variant="ghost" className="text-sm font-medium text-foreground hover:text-primary" onClick={() => navigate("/login")}>Sign In</Button>
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-semibold px-5" onClick={() => navigate("/login")}>
-              Subscribe
+            <Button
+              className="bg-primary text-primary-foreground text-sm font-semibold px-5 transition-all"
+              style={{ cursor: "pointer" }}
+              onClick={() => navigate("/login")}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#1d4ed8"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = ""; }}
+            >
+              Subscribe Now
             </Button>
           </div>
         </div>
@@ -221,23 +227,25 @@ export default function Home() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
 
               {/* Left column */}
-              <div>
+              <div className="text-left">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/15 border border-white/25 text-white text-xs font-semibold mb-8 rounded-full uppercase tracking-wide">
                   <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
                   The SAP Basis Professional Platform
                 </div>
-                <h1 className="text-5xl lg:text-6xl font-bold leading-[1.1] mb-6 text-white">
+                <h1 className="text-5xl lg:text-6xl font-bold leading-[1.1] mb-6 text-white text-left">
                   Master the Technical Backbone of Enterprise Systems.
                 </h1>
-                <p className="text-lg lg:text-xl text-white/80 mb-10 max-w-xl leading-relaxed">
+                <p className="text-lg lg:text-xl text-white/80 mb-10 max-w-xl leading-relaxed text-left">
                   The authoritative platform for SAP Basis engineers, consultants, and architects. Deep, precise, and built for professionals who run mission-critical landscapes.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col items-start gap-4">
                   {/* Primary CTA — solid white, blue text, no border */}
                   <button
-                    className="inline-flex items-center justify-center h-12 px-8 text-base font-semibold rounded-md group transition-opacity hover:opacity-90"
-                    style={{ background: "#ffffff", color: "#2563EB", border: "none" }}
+                    className="inline-flex items-center h-12 px-8 text-base font-semibold rounded-md group transition-all"
+                    style={{ background: "#ffffff", color: "#2563EB", border: "none", cursor: "pointer" }}
                     onClick={() => navigate("/dashboard")}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#eff6ff"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#ffffff"; }}
                   >
                     Subscribe Now
                     <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
