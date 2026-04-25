@@ -22,6 +22,8 @@ import CloudCertifications from "@/components/CloudCertifications";
 import InterviewPrep from "@/components/InterviewPrep";
 import LinuxForSAP from "@/components/LinuxForSAP";
 import WindowsForSAP from "@/components/WindowsForSAP";
+import ActivityGuides from "@/components/ActivityGuides";
+import TroubleshootTrees from "@/components/TroubleshootTrees";
 
 // ─── Data ──────────────────────────────────────────────────────────────
 const activityData = [
@@ -954,9 +956,11 @@ export default function Dashboard() {
           {activeId === "ai" && <DashboardAIAssistant />}
           {activeId === "linux" && <LinuxForSAP onNavigate={handleNav} />}
           {activeId === "windows" && <WindowsForSAP onNavigate={handleNav} />}
+          {activeId === "actGuides" && <ActivityGuides />}
+          {activeId === "troubleshoot" && <TroubleshootTrees />}
 
           {/* ── Module content ─────────────────────────── */}
-          {!["tcodes","roadmap","certifications","interviewPrep","overview","ai","linux","windows"].includes(activeId) && (
+          {!["tcodes","roadmap","certifications","interviewPrep","overview","ai","linux","windows","actGuides","troubleshoot"].includes(activeId) && (
             moduleRegistry[activeId] ? (
               <ModuleView module={moduleRegistry[activeId]} />
             ) : (
