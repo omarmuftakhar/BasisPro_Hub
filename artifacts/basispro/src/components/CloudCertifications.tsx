@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Award, ExternalLink, ChevronDown, ChevronRight, Star, Clock, BookOpen, CheckCircle2, Layers, Cloud, Database, Shield, Bookmark, Trophy, Zap } from "lucide-react";
+import { Award, ExternalLink, ChevronDown, ChevronRight, Star, Clock, BookOpen, CheckCircle2, Layers, Cloud, Database, Shield, Trophy, Zap, AlertCircle } from "lucide-react";
 
 interface Cert {
   id: string;
@@ -10,7 +10,6 @@ interface Cert {
   duration: string;
   questions: number;
   passMark: number;
-  price: string;
   validity: string;
   description: string;
   topics: string[];
@@ -19,6 +18,9 @@ interface Cert {
   studyUrl?: string;
   relevance: "critical" | "high" | "useful";
   gradient: string;
+  systemBased?: boolean;
+  maxAttempts?: number;
+  requiresScheduling?: boolean;
 }
 
 const CERTS: Cert[] = [
@@ -32,7 +34,6 @@ const CERTS: Cert[] = [
     duration: "180 min",
     questions: 80,
     passMark: 65,
-    price: "$575",
     validity: "2 years",
     description: "The primary SAP Basis certification for S/4HANA administrators. Covers system monitoring, client administration, transport management, profile parameters, background jobs, HANA integration, and Fiori basics.",
     topics: [
@@ -54,23 +55,22 @@ const CERTS: Cert[] = [
       "STMS domain controller concept and transport route configuration",
       "Use SAP Learning Hub trial systems for hands-on practice before exam",
     ],
-    examUrl: "https://training.sap.com/certification/c_s4adm_2404-sap-certified-associate---sap-s4hana-system-administration-g/",
+    examUrl: "https://learning.sap.com/certifications",
     studyUrl: "https://learning.sap.com/",
     relevance: "critical",
     gradient: "from-blue-600 to-indigo-600",
   },
   {
-    id: "c_hanatec",
-    code: "C_HANATEC_18",
-    title: "SAP Certified Technology Associate – SAP HANA 2.0 (SPS07)",
+    id: "c_dbadm",
+    code: "C_DBADM_2601",
+    title: "SAP Certified – Database Administrator – SAP HANA",
     vendor: "SAP",
     level: "Associate",
     duration: "180 min",
-    questions: 80,
-    passMark: 68,
-    price: "$575",
+    questions: 0,
+    passMark: 0,
     validity: "2 years",
-    description: "Deep dive into SAP HANA 2.0 database administration: installation, HANA System Replication, backup & recovery, security, multi-tenant containers, monitoring, and performance tuning.",
+    description: "System-Based Assessment validating hands-on SAP HANA database administration skills. Covers installation, HANA System Replication, backup & recovery, security, multi-tenant containers, monitoring, and performance tuning. Requires scheduling in advance — available slots are limited and each attempt counts against your annual quota.",
     topics: [
       "SAP HANA installation, configuration, and initial setup",
       "HANA System Replication — SYNC, SYNCMEM, ASYNC modes",
@@ -84,16 +84,21 @@ const CERTS: Cert[] = [
       "SAP HANA Cloud fundamentals",
     ],
     tips: [
+      "System-Based Assessment — you work in a live HANA system, not multiple choice",
+      "Schedule your slot well in advance — available seats are limited",
+      "Maximum 4 attempts within any 12-month window; plan your preparation carefully",
       "HSR — know all modes and exact configuration commands (hdbnsutil)",
       "Backup/recovery procedure in MDC: system DB first, then tenants",
       "MDC architecture is the most heavily tested area",
-      "Security: distinguish object, system, and analytic privileges",
-      "Use hdbsql CLI for hands-on practice — many exam questions are CLI-based",
+      "Use hdbsql CLI for hands-on practice — this exam is entirely CLI/tool-based",
     ],
-    examUrl: "https://training.sap.com/certification/c_hanatec_18-sap-certified-technology-associate---sap-hana-20-sps07-g/",
+    examUrl: "https://learning.sap.com/certifications",
     studyUrl: "https://learning.sap.com/",
     relevance: "critical",
     gradient: "from-indigo-600 to-violet-600",
+    systemBased: true,
+    maxAttempts: 4,
+    requiresScheduling: true,
   },
 
   // ── AWS ────────────────────────────────────────────────────────────────────
@@ -106,7 +111,6 @@ const CERTS: Cert[] = [
     duration: "90 min",
     questions: 65,
     passMark: 70,
-    price: "$100",
     validity: "3 years",
     description: "Entry-level AWS certification covering cloud concepts, AWS core services, security, pricing, and billing. Recommended first step for SAP professionals new to AWS cloud.",
     topics: [
@@ -135,7 +139,6 @@ const CERTS: Cert[] = [
     duration: "130 min",
     questions: 65,
     passMark: 72,
-    price: "$300",
     validity: "3 years",
     description: "Industry-standard cloud architect certification. Essential for SAP Basis deploying on AWS — covers EC2 sizing, EBS/EFS/FSx storage, VPC, IAM, HA with Multi-AZ, and disaster recovery.",
     topics: [
@@ -169,7 +172,6 @@ const CERTS: Cert[] = [
     duration: "180 min",
     questions: 65,
     passMark: 72,
-    price: "$300",
     validity: "3 years",
     description: "Validates ability to deploy, manage, and operate workloads on AWS — directly applicable to SAP operations: monitoring with CloudWatch, Systems Manager, Config, automation, patching, and incident management.",
     topics: [
@@ -202,7 +204,6 @@ const CERTS: Cert[] = [
     duration: "180 min",
     questions: 75,
     passMark: 75,
-    price: "$300",
     validity: "3 years",
     description: "Advanced AWS architecture certification. Covers complex multi-account architectures, migration strategies, enterprise networking, and advanced HA/DR patterns directly applicable to large-scale SAP on AWS landscapes.",
     topics: [
@@ -235,7 +236,6 @@ const CERTS: Cert[] = [
     duration: "170 min",
     questions: 65,
     passMark: 75,
-    price: "$300",
     validity: "3 years",
     description: "The only SAP-specific cloud certification from AWS. Validates expert-level knowledge of designing, deploying, and operating SAP workloads on AWS — the highest-value certification for SAP Basis professionals on AWS.",
     topics: [
@@ -271,7 +271,6 @@ const CERTS: Cert[] = [
     duration: "170 min",
     questions: 65,
     passMark: 75,
-    price: "$300",
     validity: "3 years",
     description: "Advanced AWS security expertise. Directly relevant for SAP Basis professionals responsible for securing SAP on AWS: KMS key management for HANA encryption, IAM policies, GuardDuty, and network security.",
     topics: [
@@ -304,7 +303,6 @@ const CERTS: Cert[] = [
     duration: "60 min",
     questions: 40,
     passMark: 70,
-    price: "$165",
     validity: "Permanent",
     description: "Entry-level Azure certification covering cloud concepts, Azure core services, security, compliance, privacy, pricing, and support. Ideal first step for SAP professionals new to Azure.",
     topics: [
@@ -333,7 +331,6 @@ const CERTS: Cert[] = [
     duration: "120 min",
     questions: 60,
     passMark: 70,
-    price: "$165",
     validity: "1 year (renewable)",
     description: "Core Azure administration certification. Covers VMs (M-series for HANA), storage (Premium SSD v2, Ultra Disk, ANF), networking, and Azure Monitor — directly applicable to SAP on Azure deployments.",
     topics: [
@@ -367,7 +364,6 @@ const CERTS: Cert[] = [
     duration: "150 min",
     questions: 60,
     passMark: 70,
-    price: "$165",
     validity: "1 year (renewable)",
     description: "Advanced Azure architecture certification. Validates ability to design full Azure landing zones, networking, governance, and HA architectures at enterprise scale — applicable to designing complex SAP on Azure landscapes.",
     topics: [
@@ -399,7 +395,6 @@ const CERTS: Cert[] = [
     duration: "120 min",
     questions: 60,
     passMark: 70,
-    price: "$165",
     validity: "1 year (renewable)",
     description: "The SAP-specific Azure certification. Validates expert design and deployment of SAP solutions on Azure — the highest-value certification for SAP Basis professionals in Microsoft environments.",
     topics: [
@@ -435,7 +430,6 @@ const CERTS: Cert[] = [
     duration: "120 min",
     questions: 60,
     passMark: 70,
-    price: "$165",
     validity: "1 year (renewable)",
     description: "Validates Azure security expertise — directly relevant for securing SAP on Azure: Azure Key Vault for SAP HANA encryption keys, Defender for Cloud, Azure Sentinel SIEM integration with SAP logs.",
     topics: [
@@ -467,7 +461,6 @@ const CERTS: Cert[] = [
     duration: "90 min",
     questions: 60,
     passMark: 70,
-    price: "$200",
     validity: "3 years",
     description: "Entry-level GCP certification covering Google Cloud fundamentals, digital transformation concepts, and core GCP services. Ideal for SAP professionals beginning their GCP journey.",
     topics: [
@@ -496,7 +489,6 @@ const CERTS: Cert[] = [
     duration: "120 min",
     questions: 50,
     passMark: 70,
-    price: "$200",
     validity: "3 years",
     description: "Foundational GCP certification covering Compute Engine (M-series VMs), Persistent Disk/Hyperdisk, VPC, IAM, and Cloud Operations — all directly applicable to SAP on GCP deployments.",
     topics: [
@@ -529,7 +521,6 @@ const CERTS: Cert[] = [
     duration: "120 min",
     questions: 60,
     passMark: 70,
-    price: "$200",
     validity: "2 years",
     description: "GCP's most recognized professional certification. Validates ability to design, manage, and govern Google Cloud solutions — directly applicable to architecting SAP landscapes on GCP.",
     topics: [
@@ -562,7 +553,6 @@ const CERTS: Cert[] = [
     duration: "120 min",
     questions: 60,
     passMark: 70,
-    price: "$200",
     validity: "2 years",
     description: "Validates expertise in GCP database technologies. Relevant for SAP Basis professionals managing HANA on GCP: Hyperdisk configuration, Cloud Spanner for SAP data tier, BigQuery for SAP analytics.",
     topics: [
@@ -592,7 +582,6 @@ const CERTS: Cert[] = [
     duration: "120 min",
     questions: 60,
     passMark: 70,
-    price: "$200",
     validity: "2 years",
     description: "Validates GCP security expertise. Relevant for SAP Basis in security-focused roles: Cloud KMS for HANA encryption, VPC Service Controls for SAP data isolation, Security Command Center, and IAM best practices.",
     topics: [
@@ -650,23 +639,17 @@ const VENDOR_LINKS: Record<string, { label: string; url: string }> = {
   GCP: { label: "GCP Certification", url: "https://cloud.google.com/learn/certification" },
 };
 
+const VENDOR_EXAM_URLS: Record<string, string> = {
+  SAP: "https://learning.sap.com/certifications",
+  AWS: "https://aws.amazon.com/certification/",
+  Azure: "https://learn.microsoft.com/en-us/credentials/",
+  GCP: "https://cloud.google.com/learn/certification",
+};
+
 export default function CloudCertifications() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("all");
   const [levelFilter, setLevelFilter] = useState<string>("all");
-  const [savedCerts, setSavedCerts] = useState<Set<string>>(() => {
-    try { return new Set(JSON.parse(localStorage.getItem("bp_saved_certs") || "[]")); } catch { return new Set(); }
-  });
-
-  function toggleSaved(id: string, e: React.MouseEvent) {
-    e.stopPropagation();
-    setSavedCerts((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      try { localStorage.setItem("bp_saved_certs", JSON.stringify([...next])); } catch {}
-      return next;
-    });
-  }
 
   const levels = ["all", "Foundational", "Associate", "Professional", "Specialty", "Expert"];
 
@@ -702,48 +685,37 @@ export default function CloudCertifications() {
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${RELEVANCE_BADGE[cert.relevance]}`}>
                 {cert.relevance === "critical" ? "★ Critical" : cert.relevance === "high" ? "High Value" : "Useful"}
               </span>
+              {cert.systemBased && (
+                <span className="flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200">
+                  <AlertCircle className="w-3 h-3" /> System-Based
+                </span>
+              )}
             </div>
             <div className="font-semibold text-sm text-gray-900 leading-snug">{cert.title}</div>
             <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
               <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{cert.duration}</span>
-              <span>{cert.questions} questions</span>
-              <span>Pass: {cert.passMark}%</span>
-              <span className="font-medium text-gray-600">{cert.price}</span>
+              {!cert.systemBased && cert.questions > 0 && <span>{cert.questions} questions</span>}
+              {!cert.systemBased && cert.passMark > 0 && <span>Pass: {cert.passMark}%</span>}
+              {cert.systemBased && cert.requiresScheduling && <span className="text-violet-600 font-medium">Requires scheduling</span>}
+              {cert.systemBased && cert.maxAttempts && <span className="text-violet-600 font-medium">Max {cert.maxAttempts} attempts / 12 months</span>}
               <span>Valid: {cert.validity}</span>
             </div>
           </div>
-          <button
-            onClick={(e) => toggleSaved(cert.id, e)}
-            title={savedCerts.has(cert.id) ? "Remove bookmark" : "Save this certification"}
-            style={{
-              flexShrink: 0,
-              width: "34px",
-              height: "34px",
-              borderRadius: "8px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: savedCerts.has(cert.id) ? "1.5px solid #FCD34D" : "1.5px solid #E5E7EB",
-              background: savedCerts.has(cert.id) ? "#FFFBEB" : "transparent",
-              transition: "all 0.15s",
-            }}
-          >
-            <Bookmark
-              style={{
-                width: "16px",
-                height: "16px",
-                fill: savedCerts.has(cert.id) ? "#F59E0B" : "none",
-                stroke: savedCerts.has(cert.id) ? "#F59E0B" : "#9CA3AF",
-                strokeWidth: 2,
-                transition: "all 0.15s",
-              }}
-            />
-          </button>
           <ChevronRight className={`w-4 h-4 text-gray-400 flex-shrink-0 mt-1 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
         </div>
 
         {isExpanded && (
           <div className="border-t border-gray-100 p-4 space-y-4 bg-gray-50/50">
+            {cert.systemBased && (
+              <div className="flex gap-2 items-start p-3 rounded-xl bg-violet-50 border border-violet-200 text-xs text-violet-800">
+                <AlertCircle className="w-4 h-4 text-violet-500 flex-shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <div className="font-bold">System-Based Assessment</div>
+                  <div>This exam requires scheduling a time slot — available spots are limited. You must reserve a spot before taking the exam, and your attempt counts from the confirmed start time.</div>
+                  {cert.maxAttempts && <div className="font-medium mt-1">Max {cert.maxAttempts} attempts within any 12-month period. After {cert.maxAttempts} failed attempts, retake is allowed 12 months later.</div>}
+                </div>
+              </div>
+            )}
             <p className="text-sm text-gray-600 leading-relaxed">{cert.description}</p>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
@@ -770,7 +742,7 @@ export default function CloudCertifications() {
               </div>
             </div>
             <div className="flex gap-2 flex-wrap">
-              <a href={cert.examUrl} target="_blank" rel="noopener noreferrer"
+              <a href={VENDOR_EXAM_URLS[cert.vendor]} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-[#0070F2] text-white rounded-xl hover:bg-[#0060D8] transition-colors">
                 <ExternalLink className="w-3.5 h-3.5" /> Register for Exam
               </a>
