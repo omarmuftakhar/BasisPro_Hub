@@ -681,7 +681,10 @@ export default function Dashboard() {
   const toggleGroup = (group: string) =>
     setExpandedGroups((prev) => ({ ...prev, [group]: !prev[group] }));
 
+  const [interviewPrepKey, setInterviewPrepKey] = useState(0);
+
   const handleNav = (id: string) => {
+    if (id === "interviewPrep") setInterviewPrepKey((k) => k + 1);
     setActiveId(id);
     setSidebarOpen(false);
   };
@@ -928,7 +931,7 @@ export default function Dashboard() {
           {activeId === "tcodes" && <TCodeLibrary />}
           {activeId === "roadmap" && <CareerRoadmap />}
           {activeId === "certifications" && <CloudCertifications />}
-          {activeId === "interviewPrep" && <InterviewPrep />}
+          {activeId === "interviewPrep" && <InterviewPrep key={interviewPrepKey} />}
           {activeId === "ai" && <DashboardAIAssistant />}
 
           {/* ── Module content ─────────────────────────── */}
